@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ArzChat – WhatsApp Style Real-Time Chat & Story</title>
+  <title>ArzChat 3D – Gen Z Chat, Story & Voice Call</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --wa-bg: #0b141a;
-      --wa-panel: #111b21;
-      --wa-header: #202c33;
-      --wa-input: #2a3942;
-      --wa-hover: #202c33;
-      --wa-active: #2a3942;
-      --wa-accent: #00a884;
-      --wa-out: #005c4b;
-      --wa-in: #202c33;
-      --wa-text: #e9edef;
-      --wa-muted: #8696a0;
-      --wa-border: rgba(134, 150, 160, 0.16);
+      --bg-deep: #0b0718;
+      --bg-mid: #160f2d;
+      --card-3d: rgba(28, 20, 58, 0.78);
+      --card-3d-light: rgba(42, 31, 82, 0.85);
+      --neon-purple: #a855f7;
+      --neon-cyan: #22d3ee;
+      --neon-pink: #f472b6;
+      --neon-lime: #a3e635;
+      --text-main: #f8fafc;
+      --text-sub: #b8b2d8;
     }
 
     * {
@@ -29,20 +27,114 @@
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--wa-bg);
-      color: var(--wa-text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background:
+        radial-gradient(circle at 12% 15%, rgba(168, 85, 247, 0.28), transparent 42%),
+        radial-gradient(circle at 88% 20%, rgba(34, 211, 238, 0.22), transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(244, 114, 182, 0.2), transparent 45%),
+        linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
+      color: var(--text-main);
       margin: 0;
       padding: 0;
     }
 
-    .wa-wallpaper {
-      background-color: #0b141a;
+    .glass-3d {
+      background: var(--card-3d);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1.5px solid rgba(255, 255, 255, 0.14);
+      box-shadow:
+        0 14px 34px rgba(3, 1, 12, 0.65),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .panel-3d {
+      background: rgba(20, 14, 44, 0.84);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-3d-primary {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 55%, #22d3ee 100%);
+      color: #ffffff;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow:
+        0 6px 0 #581c87,
+        0 12px 24px rgba(168, 85, 247, 0.42),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.15s ease;
+    }
+
+    .btn-3d-primary:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn-3d-primary:active {
+      transform: translateY(4px);
+      box-shadow:
+        0 2px 0 #581c87,
+        0 4px 10px rgba(168, 85, 247, 0.35);
+    }
+
+    .btn-3d-soft {
+      background: linear-gradient(180deg, rgba(67, 50, 122, 0.9) 0%, rgba(39, 28, 76, 0.95) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow:
+        0 4px 0 rgba(16, 10, 36, 0.95),
+        0 8px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .btn-3d-soft:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(16, 10, 36, 0.95);
+    }
+
+    .avatar-3d {
+      background: linear-gradient(135deg, #22d3ee 0%, #a855f7 60%, #f472b6 100%);
+      box-shadow:
+        0 5px 0 rgba(49, 16, 94, 0.85),
+        0 8px 16px rgba(34, 211, 238, 0.28),
+        inset 0 2px 3px rgba(255, 255, 255, 0.45);
+    }
+
+    .bubble-out-3d {
+      background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+      border-radius: 18px 18px 4px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow:
+        0 4px 0 rgba(74, 16, 96, 0.7),
+        0 8px 18px rgba(147, 51, 234, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .bubble-in-3d {
+      background: linear-gradient(135deg, rgba(44, 33, 86, 0.95) 0%, rgba(28, 21, 58, 0.95) 100%);
+      border-radius: 18px 18px 18px 4px;
+      border: 1px solid rgba(34, 211, 238, 0.22);
+      box-shadow:
+        0 4px 0 rgba(12, 8, 28, 0.85),
+        0 8px 16px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    .chat-grid-3d {
       background-image:
-        radial-gradient(rgba(233, 237, 239, 0.045) 1px, transparent 0),
-        radial-gradient(rgba(0, 168, 132, 0.04) 1px, transparent 0);
+        radial-gradient(rgba(34, 211, 238, 0.11) 1.2px, transparent 0),
+        radial-gradient(rgba(168, 85, 247, 0.1) 1.2px, transparent 0);
       background-size: 28px 28px;
       background-position: 0 0, 14px 14px;
+    }
+
+    .status-ring-3d {
+      background: linear-gradient(135deg, #22d3ee, #a855f7, #f472b6, #a3e635);
+      padding: 2.5px;
+      border-radius: 9999px;
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
     }
 
     ::-webkit-scrollbar {
@@ -53,363 +145,352 @@
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(134, 150, 160, 0.28);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(134, 150, 160, 0.45);
-    }
-
-    .bubble-out {
-      background-color: var(--wa-out);
-      border-radius: 10px;
-      border-top-right-radius: 2px;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-    }
-
-    .bubble-in {
-      background-color: var(--wa-in);
-      border-radius: 10px;
-      border-top-left-radius: 2px;
-      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-    }
-
-    .status-ring {
-      background: conic-gradient(#00a884 0deg 360deg);
-      padding: 2px;
-      border-radius: 9999px;
-    }
-
-    .status-ring-seen {
-      background: conic-gradient(#54656f 0deg 360deg);
-      padding: 2px;
+      background: rgba(168, 85, 247, 0.35);
       border-radius: 9999px;
     }
   </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col select-none sm:select-auto">
+<body class="h-screen w-screen overflow-hidden flex flex-col">
+
+  <!-- AUDIO REMOTE UNTUK TELEPON SUARA WEBRTC -->
+  <audio id="remoteAudio" autoplay playsinline class="hidden"></audio>
 
   <!-- TOAST NOTIFIKASI -->
-  <div id="toastBox" class="hidden fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#233138] border border-white/10 text-xs sm:text-sm text-[#e9edef] px-4 py-2.5 rounded-full shadow-2xl max-w-[90vw] text-center"></div>
+  <div id="toastBox" class="hidden fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 glass-3d text-xs sm:text-sm text-white px-5 py-2.5 rounded-full max-w-[90vw] text-center"></div>
 
   <!-- LIGHTBOX PRATINJAU FOTO CHAT -->
-  <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4" onclick="closeLightbox()">
-    <button class="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center text-lg transition">✕</button>
-    <img id="lightboxImg" src="" alt="Preview" class="max-h-[90vh] max-w-[95vw] rounded-xl object-contain shadow-2xl" />
+  <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onclick="closeLightbox()">
+    <button class="btn-3d-soft absolute top-4 right-4 text-white rounded-full w-10 h-10 flex items-center justify-center text-base">✕</button>
+    <img id="lightboxImg" src="" alt="Preview" class="max-h-[90vh] max-w-[95vw] rounded-2xl object-contain shadow-2xl border border-white/15" />
   </div>
 
-  <!-- MODAL BUAT STORY / STATUS -->
-  <div id="createStoryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-[#111b21] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-      <div class="px-5 py-4 bg-[#202c33] flex items-center justify-between border-b border-white/10">
-        <h3 class="font-semibold text-white text-base">Buat Status / Story Baru</h3>
-        <button onclick="closeCreateStoryModal()" class="text-[#8696a0] hover:text-white text-lg">✕</button>
+  <!-- MODAL PANGGILAN SUARA (INCOMING & ACTIVE CALL) -->
+  <div id="callModal" class="hidden fixed inset-0 z-50 bg-[#090514]/90 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="glass-3d w-full max-w-sm rounded-3xl p-7 text-center flex flex-col items-center">
+      <div class="avatar-3d w-24 h-24 rounded-3xl flex items-center justify-center text-3xl font-extrabold text-white mb-4 animate-pulse">
+        <span id="callPeerAvatar">U</span>
+      </div>
+      <span class="text-[11px] uppercase tracking-widest px-3 py-1 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-300/25 mb-2">
+        WebRTC Voice Call
+      </span>
+      <h3 id="callPeerName" class="text-xl font-bold text-white">Nama Kontak</h3>
+      <p id="callStatusText" class="text-xs text-[#b8b2d8] mt-1">Menghubungkan...</p>
+      <p id="callTimerText" class="text-sm font-semibold text-cyan-300 mt-2 hidden">00:00</p>
+
+      <!-- Tombol Panggilan Masuk -->
+      <div id="incomingCallActions" class="hidden flex items-center justify-center gap-6 mt-7 w-full">
+        <button onclick="rejectIncomingCall()" class="w-14 h-14 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-bold shadow-lg shadow-rose-500/30 flex items-center justify-center text-xl transition cursor-pointer">
+          ✕
+        </button>
+        <button onclick="acceptIncomingCall()" class="w-14 h-14 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-[#090514] font-extrabold shadow-lg shadow-emerald-400/35 flex items-center justify-center text-xl transition cursor-pointer">
+          📞
+        </button>
+      </div>
+
+      <!-- Tombol Saat Panggilan Aktif / Keluar -->
+      <div id="activeCallActions" class="flex items-center justify-center gap-4 mt-7 w-full">
+        <button id="btnToggleMute" onclick="toggleMuteCall()" class="btn-3d-soft px-4 py-3 rounded-2xl text-xs font-semibold text-white cursor-pointer">
+          🎙️ Mic On
+        </button>
+        <button onclick="hangupCall(true)" class="px-5 py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold shadow-lg shadow-rose-500/30 cursor-pointer">
+          Tutup Telepon
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL BUAT STORY / STATUS 3D -->
+  <div id="createStoryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-3d w-full max-w-md rounded-3xl overflow-hidden">
+      <div class="px-5 py-4 bg-white/5 flex items-center justify-between border-b border-white/10">
+        <h3 class="font-bold text-white text-base">✨ Buat Story 3D Baru</h3>
+        <button onclick="closeCreateStoryModal()" class="text-[#b8b2d8] hover:text-white text-lg">✕</button>
       </div>
 
       <div class="p-5 space-y-4">
-        <!-- Pratinjau Story -->
-        <div id="storyPreviewBox" class="w-full h-56 rounded-2xl flex flex-col items-center justify-center p-5 text-center relative overflow-hidden border border-white/10 transition-colors" style="background: linear-gradient(135deg, #005c4b 0%, #0b141a 100%);">
+        <div id="storyPreviewBox" class="w-full h-52 rounded-2xl flex flex-col items-center justify-center p-5 text-center relative overflow-hidden border border-white/15" style="background: linear-gradient(135deg, #9333ea 0%, #06b6d4 100%);">
           <img id="storyPreviewImg" src="" alt="" class="hidden w-full h-full object-cover absolute inset-0" />
-          <div id="storyPreviewOverlay" class="hidden absolute inset-0 bg-black/35"></div>
-          <p id="storyPreviewText" class="relative z-10 text-white font-semibold text-lg break-words max-w-full drop-shadow">Tulis status kamu di sini...</p>
+          <div id="storyPreviewOverlay" class="hidden absolute inset-0 bg-black/40"></div>
+          <p id="storyPreviewText" class="relative z-10 text-white font-bold text-lg break-words max-w-full drop-shadow">Drop vibe kamu hari ini...</p>
         </div>
 
-        <!-- Pilihan Warna Latar Story -->
         <div class="flex items-center justify-between gap-2">
-          <span class="text-xs text-[#8696a0]">Warna Latar:</span>
+          <span class="text-xs text-[#b8b2d8]">Vibe Gradient:</span>
           <div class="flex items-center gap-2">
-            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #005c4b 0%, #0b141a 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#00a884"></button>
-            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#2563eb"></button>
-            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #7e22ce 0%, #1e1b4b 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#9333ea"></button>
-            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #be123c 0%, #1c1917 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#e11d48"></button>
-            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #b45309 0%, #1c1917 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#d97706"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #9333ea 0%, #06b6d4 100%)')" class="w-6 h-6 rounded-full border border-white/40" style="background:linear-gradient(135deg,#9333ea,#06b6d4)"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)')" class="w-6 h-6 rounded-full border border-white/40" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #06b6d4 0%, #10b981 100%)')" class="w-6 h-6 rounded-full border border-white/40" style="background:linear-gradient(135deg,#06b6d4,#10b981)"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #f97316 0%, #ec4899 100%)')" class="w-6 h-6 rounded-full border border-white/40" style="background:linear-gradient(135deg,#f97316,#ec4899)"></button>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs text-[#8696a0] mb-1.5">Teks / Keterangan Status</label>
-          <textarea id="storyTextInput" rows="2" maxlength="180" oninput="updateStoryPreview()" placeholder="Apa yang sedang kamu lakukan?"
-            class="w-full bg-[#202c33] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-[#8696a0] focus:outline-none focus:border-[#00a884] resize-none"></textarea>
+          <label class="block text-xs text-[#b8b2d8] mb-1.5">Teks Story</label>
+          <textarea id="storyTextInput" rows="2" maxlength="180" oninput="updateStoryPreview()" placeholder="Tulis caption atau status kamu..."
+            class="w-full bg-white/5 border border-white/15 rounded-2xl px-3.5 py-2.5 text-sm text-white placeholder-[#b8b2d8]/60 focus:outline-none focus:border-cyan-400 resize-none"></textarea>
         </div>
 
         <div class="flex items-center justify-between gap-3">
-          <label class="flex-1 cursor-pointer bg-[#202c33] hover:bg-[#2a3942] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-[#e9edef] flex items-center justify-center gap-2 transition">
+          <label class="btn-3d-soft flex-1 cursor-pointer rounded-2xl px-3.5 py-2.5 text-xs text-white flex items-center justify-center gap-2">
             <input id="storyPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleStoryPhotoSelect(event)" />
-            <span>📷 Pilih Foto Story</span>
+            <span>📷 Upload Foto</span>
           </label>
           <button id="btnClearStoryPhoto" type="button" onclick="clearStoryPhoto()" class="hidden text-xs text-rose-400 hover:underline px-2">Hapus Foto</button>
         </div>
 
-        <button id="btnPublishStory" onclick="publishStory()"
-          class="w-full bg-[#00a884] hover:bg-[#029676] text-[#111b21] font-semibold py-2.5 rounded-xl text-sm transition cursor-pointer">
-          Bagikan Status Sekarang
+        <button id="btnPublishStory" onclick="publishStory()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
+          Posting Story Sekarang
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL PENONTON STORY / STATUS -->
-  <div id="storyViewerModal" class="hidden fixed inset-0 z-50 bg-[#0b141a] flex flex-col justify-between p-4 sm:p-6">
-    <!-- Progress Bar -->
-    <div class="w-full max-w-lg mx-auto flex gap-1.5 pt-1">
-      <div class="h-1 flex-1 bg-white/25 rounded-full overflow-hidden">
-        <div id="storyProgressFill" class="h-full bg-[#00a884] w-full transition-all duration-300"></div>
-      </div>
-    </div>
-
-    <!-- Header Story Viewer -->
-    <div class="w-full max-w-lg mx-auto flex items-center justify-between mt-3">
+  <!-- MODAL PENONTON STORY -->
+  <div id="storyViewerModal" class="hidden fixed inset-0 z-50 bg-[#090514]/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-6">
+    <div class="w-full max-w-lg mx-auto flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div id="viewerAvatar" class="w-10 h-10 rounded-full bg-[#00a884] text-[#111b21] font-bold flex items-center justify-center">U</div>
+        <div id="viewerAvatar" class="avatar-3d w-10 h-10 rounded-2xl font-extrabold flex items-center justify-center">U</div>
         <div>
-          <p id="viewerName" class="text-sm font-semibold text-white">Pengguna</p>
-          <p id="viewerTime" class="text-xs text-[#8696a0]">Baru saja</p>
+          <p id="viewerName" class="text-sm font-bold text-white">Pengguna</p>
+          <p id="viewerTime" class="text-xs text-[#b8b2d8]">Baru saja</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button id="btnDeleteMyStory" onclick="deleteCurrentStory()" class="hidden text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 px-3 py-1.5 rounded-lg">
+        <button id="btnDeleteMyStory" onclick="deleteCurrentStory()" class="hidden text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 px-3 py-1.5 rounded-xl">
           Hapus
         </button>
-        <button onclick="closeStoryViewer()" class="text-white/80 hover:text-white bg-white/10 rounded-full w-9 h-9 flex items-center justify-center">✕</button>
+        <button onclick="closeStoryViewer()" class="btn-3d-soft text-white rounded-full w-9 h-9 flex items-center justify-center">✕</button>
       </div>
     </div>
 
-    <!-- Konten Utama Story -->
-    <div id="storyViewerCanvas" class="w-full max-w-lg mx-auto my-auto h-[65vh] max-h-[540px] rounded-2xl flex flex-col items-center justify-center p-6 text-center relative overflow-hidden border border-white/10 shadow-2xl">
+    <div id="storyViewerCanvas" class="w-full max-w-lg mx-auto my-auto h-[62vh] max-h-[520px] rounded-3xl flex flex-col items-center justify-center p-6 text-center relative overflow-hidden border border-white/15 shadow-2xl">
       <img id="storyViewerImg" src="" alt="Story" class="hidden w-full h-full object-contain bg-black" />
-      <div id="storyViewerCaptionWrap" class="px-4 py-3 rounded-xl max-w-md">
-        <p id="storyViewerText" class="text-white text-xl sm:text-2xl font-semibold break-words leading-snug"></p>
+      <div id="storyViewerCaptionWrap" class="px-4 py-3 rounded-2xl max-w-md">
+        <p id="storyViewerText" class="text-white text-xl sm:text-2xl font-bold break-words leading-snug"></p>
       </div>
     </div>
 
-    <!-- Navigasi Prev / Next -->
-    <div class="w-full max-w-lg mx-auto flex items-center justify-between gap-4 pt-2">
-      <button onclick="prevStory()" class="flex-1 py-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] text-xs font-medium text-[#e9edef] transition">
-        ← Sebelumnya
-      </button>
-      <button onclick="nextStory()" class="flex-1 py-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] text-xs font-medium text-[#e9edef] transition">
-        Berikutnya →
-      </button>
+    <div class="w-full max-w-lg mx-auto flex items-center justify-between gap-4">
+      <button onclick="prevStory()" class="btn-3d-soft flex-1 py-2.5 rounded-2xl text-xs font-semibold text-white">← Sebelumnya</button>
+      <button onclick="nextStory()" class="btn-3d-soft flex-1 py-2.5 rounded-2xl text-xs font-semibold text-white">Berikutnya →</button>
     </div>
   </div>
 
   <!-- HALAMAN LOGIN / DAFTAR NOMOR HP + SMS OTP -->
-  <div id="authScreen" class="flex-1 flex items-center justify-center p-4 bg-[#0b141a] overflow-y-auto">
-    <div class="w-full max-w-md bg-[#111b21] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
+  <div id="authScreen" class="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-3d w-full max-w-md rounded-3xl p-6 sm:p-8">
       <div class="flex flex-col items-center text-center mb-6">
-        <div class="w-16 h-16 rounded-2xl bg-[#00a884] flex items-center justify-center shadow-lg mb-3">
-          <svg class="w-9 h-9 text-[#111b21]" fill="currentColor" viewBox="0 0 24 24">
+        <div class="avatar-3d w-16 h-16 rounded-3xl flex items-center justify-center mb-3">
+          <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.03 2 11c0 2.39 1.05 4.56 2.76 6.16L3.6 21.4a.75.75 0 0 0 .97.92l4.52-1.5A10.7 10.7 0 0 0 12 20c5.52 0 10-4.03 10-9s-4.48-9-10-9Z"/>
           </svg>
         </div>
-        <h1 class="text-2xl font-bold tracking-tight text-white">ArzChat</h1>
-        <p class="text-xs text-[#8696a0] mt-1">Pesan Real-Time, Kirim Foto & Status ala WhatsApp</p>
+        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30 mb-2">
+          Gen Z 3D Edition
+        </span>
+        <h1 class="text-2xl font-extrabold tracking-tight text-white">ArzChat</h1>
+        <p class="text-xs text-[#b8b2d8] mt-1">Chatting, Story & Telepon Suara Real-Time</p>
       </div>
 
-      <!-- STEP 1: INPUT NAMA & NOMOR HP -->
+      <!-- STEP 1 -->
       <div id="stepPhone" class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-[#8696a0] mb-1.5">Nama Tampilan</label>
+          <label class="block text-xs font-semibold text-[#b8b2d8] mb-1.5">Nama Tampilan</label>
           <input id="inputName" type="text" maxlength="30" placeholder="Contoh: Arizki"
-            class="w-full bg-[#202c33] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-[#8696a0] focus:outline-none focus:border-[#00a884]" />
+            class="w-full bg-white/5 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder-[#b8b2d8]/50 focus:outline-none focus:border-cyan-400" />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-[#8696a0] mb-1.5">Nomor HP Indonesia Aktif</label>
-          <div class="flex items-center bg-[#202c33] border border-white/10 rounded-xl overflow-hidden focus-within:border-[#00a884]">
-            <span class="px-3.5 py-3 text-sm font-semibold text-[#00a884] border-r border-white/10 select-none">+62</span>
+          <label class="block text-xs font-semibold text-[#b8b2d8] mb-1.5">Nomor HP Indonesia Aktif</label>
+          <div class="flex items-center bg-white/5 border border-white/15 rounded-2xl overflow-hidden focus-within:border-cyan-400">
+            <span class="px-3.5 py-3 text-sm font-bold text-cyan-300 border-r border-white/10 select-none">+62</span>
             <input id="inputPhone" type="tel" inputmode="numeric" maxlength="13" placeholder="81234567890"
-              class="w-full bg-transparent px-3.5 py-3 text-sm text-white placeholder-[#8696a0] focus:outline-none" />
+              class="w-full bg-transparent px-3.5 py-3 text-sm text-white placeholder-[#b8b2d8]/50 focus:outline-none" />
           </div>
           <p id="phoneError" class="hidden text-xs text-rose-400 mt-1.5"></p>
         </div>
 
         <div id="recaptcha-container" class="flex justify-center"></div>
 
-        <button id="btnSendOtp" onclick="sendRealOtp()"
-          class="w-full bg-[#00a884] hover:bg-[#029676] text-[#111b21] font-semibold py-3 rounded-xl text-sm transition cursor-pointer">
+        <button id="btnSendOtp" onclick="sendRealOtp()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
           Kirim Kode OTP via SMS
         </button>
       </div>
 
-      <!-- STEP 2: VERIFIKASI 6 DIGIT KODE OTP -->
+      <!-- STEP 2 -->
       <div id="stepOtp" class="hidden space-y-4">
-        <div class="bg-[#202c33]/80 border border-white/10 rounded-xl p-3.5 text-center">
-          <p class="text-xs text-[#8696a0]">Kode OTP SMS telah dikirim ke</p>
-          <p id="displayPhone" class="text-sm font-semibold text-[#00a884] mt-0.5">+62 812-3456-7890</p>
-          <button onclick="resetToPhoneStep()" class="text-xs text-[#8696a0] underline hover:text-white mt-1.5">Ganti nomor HP</button>
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center">
+          <p class="text-xs text-[#b8b2d8]">Kode OTP SMS telah dikirim ke</p>
+          <p id="displayPhone" class="text-sm font-bold text-cyan-300 mt-0.5">+62 812-3456-7890</p>
+          <button onclick="resetToPhoneStep()" class="text-xs text-[#b8b2d8] underline hover:text-white mt-1.5">Ganti nomor HP</button>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-[#8696a0] mb-1.5 text-center">Masukkan 6 Digit Kode SMS</label>
+          <label class="block text-xs font-semibold text-[#b8b2d8] mb-1.5 text-center">Masukkan 6 Digit Kode SMS</label>
           <input id="inputOtp" type="text" inputmode="numeric" maxlength="6" placeholder="• • • • • •"
-            class="w-full bg-[#202c33] border border-white/10 rounded-xl px-4 py-3.5 text-center text-xl font-bold tracking-[0.4em] text-white focus:outline-none focus:border-[#00a884]" />
+            class="w-full bg-white/5 border border-white/15 rounded-2xl px-4 py-3.5 text-center text-xl font-extrabold tracking-[0.4em] text-white focus:outline-none focus:border-cyan-400" />
         </div>
 
-        <button id="btnVerifyOtp" onclick="verifyRealOtp()"
-          class="w-full bg-[#00a884] hover:bg-[#029676] text-[#111b21] font-semibold py-3 rounded-xl text-sm transition cursor-pointer">
+        <button id="btnVerifyOtp" onclick="verifyRealOtp()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
           Verifikasi & Masuk ArzChat
         </button>
       </div>
     </div>
   </div>
 
-  <!-- HALAMAN UTAMA APLIKASI CHAT ALA WHATSAPP -->
+  <!-- HALAMAN UTAMA APLIKASI -->
   <div id="appScreen" class="hidden flex-1 flex h-full w-full overflow-hidden">
 
-    <!-- SIDEBAR KIRI (WHATSAPP STYLE) -->
-    <aside id="sidebarPanel" class="w-full md:w-[380px] lg:w-[420px] bg-[#111b21] border-r border-white/10 flex flex-col h-full shrink-0">
+    <!-- SIDEBAR KIRI -->
+    <aside id="sidebarPanel" class="panel-3d w-full md:w-[380px] lg:w-[420px] border-r flex flex-col h-full shrink-0">
 
       <!-- Header Profil -->
-      <div class="px-4 py-3 bg-[#202c33] flex items-center justify-between border-b border-white/5">
+      <div class="px-4 py-3 bg-white/[0.04] flex items-center justify-between border-b border-white/10">
         <div class="flex items-center gap-3 min-w-0">
-          <div id="myAvatar" class="w-10 h-10 rounded-full bg-[#00a884] text-[#111b21] font-bold flex items-center justify-center shrink-0 text-base">A</div>
+          <div id="myAvatar" class="avatar-3d w-11 h-11 rounded-2xl font-extrabold flex items-center justify-center shrink-0 text-base text-white">A</div>
           <div class="min-w-0">
-            <h2 id="myNameDisplay" class="text-sm font-semibold text-white truncate">Pengguna</h2>
-            <p id="myPhoneDisplay" class="text-[11px] text-[#8696a0] truncate">+62...</p>
+            <h2 id="myNameDisplay" class="text-sm font-bold text-white truncate">Pengguna</h2>
+            <p id="myPhoneDisplay" class="text-[11px] text-[#b8b2d8] truncate">+62...</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openCreateStoryModal()" title="Buat Status / Story"
-            class="text-xs bg-[#00a884]/15 hover:bg-[#00a884]/25 text-[#00a884] font-medium px-2.5 py-1.5 rounded-lg transition cursor-pointer">
+          <button onclick="openCreateStoryModal()" class="btn-3d-soft text-xs text-cyan-300 font-semibold px-3 py-1.5 rounded-xl cursor-pointer">
             + Story
           </button>
-          <button onclick="logoutUser()" title="Keluar"
-            class="text-xs bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 px-2.5 py-1.5 rounded-lg transition cursor-pointer">
+          <button onclick="logoutUser()" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-3 py-1.5 rounded-xl transition cursor-pointer">
             Keluar
           </button>
         </div>
       </div>
 
-      <!-- Tab Navigasi WhatsApp (Chats & Status/Story) -->
-      <div class="grid grid-cols-2 bg-[#111b21] border-b border-white/10 text-xs font-semibold">
+      <!-- Tab Chats & Story -->
+      <div class="grid grid-cols-2 p-2 gap-2 border-b border-white/10 bg-black/20">
         <button id="tabChatsBtn" onclick="switchSidebarTab('chats')"
-          class="py-3 text-[#00a884] border-b-2 border-[#00a884] flex items-center justify-center gap-2 transition cursor-pointer">
-          <span>Chats</span>
-          <span id="userCountBadge" class="bg-[#202c33] text-[#8696a0] px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+          class="btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer">
+          <span>💬 Chats</span>
+          <span id="userCountBadge" class="bg-black/30 text-white px-1.5 py-0.5 rounded-full text-[10px]">0</span>
         </button>
         <button id="tabStatusBtn" onclick="switchSidebarTab('status')"
-          class="py-3 text-[#8696a0] hover:text-white border-b-2 border-transparent flex items-center justify-center gap-2 transition cursor-pointer">
-          <span>Status</span>
-          <span id="storyCountBadge" class="bg-[#00a884]/20 text-[#00a884] px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+          class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-2 cursor-pointer">
+          <span>✨ Story</span>
+          <span id="storyCountBadge" class="bg-cyan-400/20 text-cyan-300 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
         </button>
       </div>
 
-      <!-- KONTEN TAB 1: CHATS & KONTAK -->
+      <!-- TAB 1: CHATS -->
       <div id="sidebarChatsView" class="flex-1 flex flex-col min-h-0">
-        <div class="p-2.5 border-b border-white/5 bg-[#111b21]">
-          <div class="bg-[#202c33] rounded-xl px-3.5 py-2 flex items-center gap-2">
-            <span class="text-[#8696a0] text-xs">🔍</span>
-            <input id="searchUserInput" oninput="renderUserList()" type="text" placeholder="Cari nama atau nomor HP terdaftar..."
-              class="w-full bg-transparent text-xs text-white placeholder-[#8696a0] focus:outline-none" />
+        <div class="p-3 border-b border-white/10">
+          <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-2 flex items-center gap-2 focus-within:border-cyan-400">
+            <span class="text-xs">🔍</span>
+            <input id="searchUserInput" oninput="renderUserList()" type="text" placeholder="Cari nama atau nomor HP..."
+              class="w-full bg-transparent text-xs text-white placeholder-[#b8b2d8]/60 focus:outline-none" />
           </div>
         </div>
 
-        <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#00a884] bg-[#111b21]/80">
+        <div class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-cyan-300/90">
           Kontak Terdaftar
         </div>
 
-        <div id="userListContainer" class="flex-1 overflow-y-auto divide-y divide-white/[0.04]"></div>
+        <div id="userListContainer" class="flex-1 overflow-y-auto px-2 pb-2 space-y-1.5"></div>
       </div>
 
-      <!-- KONTEN TAB 2: STATUS / STORY -->
-      <div id="sidebarStatusView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto">
-        <!-- Status Saya -->
-        <div onclick="handleMyStatusClick()" class="px-4 py-3.5 flex items-center justify-between hover:bg-[#202c33]/70 cursor-pointer border-b border-white/10 transition">
+      <!-- TAB 2: STORY -->
+      <div id="sidebarStatusView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-2 space-y-2">
+        <div onclick="handleMyStatusClick()" class="glass-3d px-4 py-3 rounded-2xl flex items-center justify-between cursor-pointer hover:border-cyan-400/40 transition">
           <div class="flex items-center gap-3 min-w-0">
-            <div id="myStoryRing" class="rounded-full shrink-0">
-              <div class="w-12 h-12 rounded-full bg-[#2a3942] text-[#00a884] font-bold flex items-center justify-center text-base relative">
+            <div id="myStoryRing" class="rounded-2xl shrink-0">
+              <div class="avatar-3d w-12 h-12 rounded-2xl font-extrabold flex items-center justify-center text-base relative">
                 <span id="myStoryAvatarLetter">A</span>
-                <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#00a884] text-[#111b21] text-xs font-bold flex items-center justify-center border-2 border-[#111b21]">+</span>
+                <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-lime-400 text-[#090514] text-xs font-extrabold flex items-center justify-center border-2 border-[#160f2d]">+</span>
               </div>
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-white truncate">Status Saya</p>
-              <p id="myStorySubtitle" class="text-xs text-[#8696a0] truncate">Ketuk untuk menambah pembaruan status</p>
+              <p class="text-sm font-bold text-white truncate">Story Saya</p>
+              <p id="myStorySubtitle" class="text-xs text-[#b8b2d8] truncate">Ketuk untuk upload story baru</p>
             </div>
           </div>
-          <button type="button" onclick="event.stopPropagation(); openCreateStoryModal();"
-            class="text-xs bg-[#202c33] hover:bg-[#2a3942] text-[#00a884] px-2.5 py-1.5 rounded-lg">
+          <button type="button" onclick="event.stopPropagation(); openCreateStoryModal();" class="btn-3d-soft text-xs text-cyan-300 font-semibold px-3 py-1.5 rounded-xl">
             Buat
           </button>
         </div>
 
-        <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#8696a0] bg-[#111b21]/70">
-          Pembaruan Terbaru Kontak
+        <div class="px-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-pink-300">
+          Story Kontak
         </div>
 
-        <div id="storyListContainer" class="flex-1 divide-y divide-white/[0.04]"></div>
+        <div id="storyListContainer" class="space-y-1.5"></div>
       </div>
     </aside>
 
     <!-- RUANG OBROLAN KANAN -->
-    <main id="chatPanel" class="hidden md:flex flex-1 flex-col h-full wa-wallpaper min-w-0">
+    <main id="chatPanel" class="hidden md:flex flex-1 flex-col h-full chat-grid-3d min-w-0">
 
-      <!-- Tampilan Kosong Sebelum Memilih Kontak -->
+      <!-- State Kosong -->
       <div id="emptyChatState" class="flex-1 flex flex-col items-center justify-center text-center p-6">
-        <div class="w-20 h-20 rounded-full bg-[#202c33] flex items-center justify-center mb-4 text-3xl shadow-lg">💬</div>
-        <h3 class="text-xl font-semibold text-white">ArzChat Web</h3>
-        <p class="text-xs sm:text-sm text-[#8696a0] max-w-sm mt-2 leading-relaxed">
-          Kirim dan terima pesan teks serta foto secara real-time, dan bagikan Status/Story kepada kontak terdaftar.
+        <div class="avatar-3d w-20 h-20 rounded-3xl flex items-center justify-center mb-4 text-3xl shadow-xl">⚡</div>
+        <h3 class="text-xl font-extrabold text-white">ArzChat Gen Z 3D</h3>
+        <p class="text-xs sm:text-sm text-[#b8b2d8] max-w-sm mt-2 leading-relaxed">
+          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, atau mulai <span class="text-cyan-300 font-semibold">telepon suara langsung</span>.
         </p>
-        <div class="mt-5 text-[11px] text-[#8696a0] flex items-center gap-1.5">
-          <span>🔒</span>
-          <span>Terhubung langsung ke Firebase Firestore</span>
-        </div>
       </div>
 
-      <!-- Ruang Chat Aktif -->
+      <!-- Chat Aktif -->
       <div id="activeChatBox" class="hidden flex-1 flex flex-col h-full min-h-0">
 
-        <!-- Header Kontak Aktif -->
-        <div class="px-4 py-2.5 bg-[#202c33] border-b border-white/10 flex items-center justify-between shrink-0">
+        <!-- Header Kontak + Tombol Telepon -->
+        <div class="panel-3d px-4 py-2.5 border-b flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3 min-w-0">
-            <button onclick="backToSidebar()" class="md:hidden text-[#8696a0] hover:text-white p-1.5 rounded-lg">←</button>
-            <div id="peerAvatar" class="w-10 h-10 rounded-full bg-[#00a884]/20 text-[#00a884] font-bold flex items-center justify-center text-sm shrink-0">U</div>
+            <button onclick="backToSidebar()" class="btn-3d-soft md:hidden text-white w-9 h-9 rounded-xl flex items-center justify-center">←</button>
+            <div id="peerAvatar" class="avatar-3d w-10 h-10 rounded-2xl font-extrabold flex items-center justify-center text-sm shrink-0">U</div>
             <div class="min-w-0">
-              <h3 id="peerName" class="text-sm font-semibold text-white truncate">Nama Kontak</h3>
-              <p id="peerPhone" class="text-[11px] text-[#8696a0] truncate">+62...</p>
+              <h3 id="peerName" class="text-sm font-bold text-white truncate">Nama Kontak</h3>
+              <p id="peerPhone" class="text-[11px] text-cyan-300 truncate">+62...</p>
             </div>
           </div>
+
+          <button onclick="startVoiceCall()" title="Telepon Suara"
+            class="btn-3d-primary px-3.5 py-2 rounded-2xl text-xs flex items-center gap-1.5 cursor-pointer shrink-0">
+            <span>📞</span>
+            <span class="hidden sm:inline">Telepon</span>
+          </button>
         </div>
 
         <!-- Daftar Pesan -->
-        <div id="messagesContainer" class="flex-1 overflow-y-auto px-4 sm:px-8 py-4 space-y-2"></div>
+        <div id="messagesContainer" class="flex-1 overflow-y-auto px-4 sm:px-7 py-4 space-y-2.5"></div>
 
-        <!-- Pratinjau Foto Sebelum Dikirim -->
-        <div id="imagePreviewBar" class="hidden px-4 py-2.5 bg-[#182229] border-t border-white/10 flex items-center justify-between shrink-0">
+        <!-- Pratinjau Foto -->
+        <div id="imagePreviewBar" class="hidden panel-3d px-4 py-2.5 border-t flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">
-            <img id="previewThumb" src="" alt="Thumb" class="w-12 h-12 rounded-lg object-cover border border-white/15" />
+            <img id="previewThumb" src="" alt="Thumb" class="w-12 h-12 rounded-xl object-cover border border-white/20" />
             <div>
-              <p class="text-xs font-medium text-white">Foto siap dikirim</p>
-              <p class="text-[11px] text-[#8696a0]">Tambahkan pesan atau langsung tekan kirim</p>
+              <p class="text-xs font-bold text-white">Foto siap dikirim</p>
+              <p class="text-[11px] text-[#b8b2d8]">Klik tombol kirim untuk memposting</p>
             </div>
           </div>
           <button onclick="clearSelectedImage()" class="text-xs text-rose-400 hover:underline px-2 py-1">Batal</button>
         </div>
 
-        <!-- Panel Emoji Cepat -->
-        <div id="emojiPickerBar" class="hidden px-4 py-2 bg-[#182229] border-t border-white/10 flex items-center gap-2 overflow-x-auto shrink-0">
-          <button type="button" onclick="insertEmoji('😀')" class="text-xl hover:scale-110 transition">😀</button>
-          <button type="button" onclick="insertEmoji('😂')" class="text-xl hover:scale-110 transition">😂</button>
-          <button type="button" onclick="insertEmoji('🥰')" class="text-xl hover:scale-110 transition">🥰</button>
-          <button type="button" onclick="insertEmoji('😎')" class="text-xl hover:scale-110 transition">😎</button>
-          <button type="button" onclick="insertEmoji('👍')" class="text-xl hover:scale-110 transition">👍</button>
-          <button type="button" onclick="insertEmoji('🙏')" class="text-xl hover:scale-110 transition">🙏</button>
-          <button type="button" onclick="insertEmoji('🔥')" class="text-xl hover:scale-110 transition">🔥</button>
-          <button type="button" onclick="insertEmoji('❤️')" class="text-xl hover:scale-110 transition">❤️</button>
-          <button type="button" onclick="insertEmoji('✅')" class="text-xl hover:scale-110 transition">✅</button>
-          <button type="button" onclick="insertEmoji('🚀')" class="text-xl hover:scale-110 transition">🚀</button>
+        <!-- Emoji Picker -->
+        <div id="emojiPickerBar" class="hidden panel-3d px-4 py-2 border-t flex items-center gap-2.5 overflow-x-auto shrink-0">
+          <button type="button" onclick="insertEmoji('🔥')" class="text-xl hover:scale-125 transition">🔥</button>
+          <button type="button" onclick="insertEmoji('✨')" class="text-xl hover:scale-125 transition">✨</button>
+          <button type="button" onclick="insertEmoji('💀')" class="text-xl hover:scale-125 transition">💀</button>
+          <button type="button" onclick="insertEmoji('🫶')" class="text-xl hover:scale-125 transition">🫶</button>
+          <button type="button" onclick="insertEmoji('🚀')" class="text-xl hover:scale-125 transition">🚀</button>
+          <button type="button" onclick="insertEmoji('😂')" class="text-xl hover:scale-125 transition">😂</button>
+          <button type="button" onclick="insertEmoji('😎')" class="text-xl hover:scale-125 transition">😎</button>
+          <button type="button" onclick="insertEmoji('💯')" class="text-xl hover:scale-125 transition">💯</button>
+          <button type="button" onclick="insertEmoji('❤️')" class="text-xl hover:scale-125 transition">❤️</button>
+          <button type="button" onclick="insertEmoji('👍')" class="text-xl hover:scale-125 transition">👍</button>
         </div>
 
-        <!-- Bar Input Pesan & Foto -->
-        <div class="px-3 py-2.5 bg-[#202c33] flex items-center gap-2 border-t border-white/5 shrink-0">
-          <button type="button" onclick="toggleEmojiPicker()" title="Emoji"
-            class="p-2 rounded-full hover:bg-white/10 text-[#8696a0] hover:text-white transition text-lg leading-none cursor-pointer">
-            😊
+        <!-- Input Kirim Pesan -->
+        <div class="panel-3d px-3 py-2.5 flex items-center gap-2 border-t shrink-0">
+          <button type="button" onclick="toggleEmojiPicker()" class="btn-3d-soft w-10 h-10 rounded-2xl flex items-center justify-center text-lg cursor-pointer shrink-0">
+            ✨
           </button>
 
-          <label class="cursor-pointer p-2 rounded-full hover:bg-white/10 text-[#8696a0] hover:text-white transition cursor-pointer" title="Kirim Foto">
+          <label class="btn-3d-soft cursor-pointer w-10 h-10 rounded-2xl flex items-center justify-center text-cyan-300 cursor-pointer shrink-0" title="Kirim Foto">
             <input id="photoInput" type="file" accept="image/*" class="hidden" onchange="handleImageSelect(event)" />
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -418,11 +499,10 @@
             </svg>
           </label>
 
-          <input id="messageInput" type="text" placeholder="Ketik pesan" onkeydown="if(event.key==='Enter') sendMessage()"
-            class="flex-1 bg-[#2a3942] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#8696a0] focus:outline-none" />
+          <input id="messageInput" type="text" placeholder="Ketik pesan seru..." onkeydown="if(event.key==='Enter') sendMessage()"
+            class="flex-1 bg-white/5 border border-white/15 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-[#b8b2d8]/60 focus:outline-none focus:border-cyan-400" />
 
-          <button onclick="sendMessage()" title="Kirim"
-            class="bg-[#00a884] hover:bg-[#029676] text-[#111b21] p-2.5 rounded-xl font-semibold transition cursor-pointer shrink-0">
+          <button onclick="sendMessage()" class="btn-3d-primary p-2.5 rounded-2xl cursor-pointer shrink-0">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>
@@ -437,7 +517,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      getFirestore, doc, setDoc, getDoc, collection, onSnapshot,
+      getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot,
       addDoc, deleteDoc, query, orderBy, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -455,6 +535,13 @@
     auth.languageCode = 'id';
     const db = getFirestore(app);
 
+    const rtcConfig = {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    };
+
     let confirmationResult = null;
     let currentUser = null;
     let allUsers = [];
@@ -465,9 +552,21 @@
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
     let unsubscribeStories = null;
+    let unsubscribeIncomingCalls = null;
+    let unsubscribeActiveCallDoc = null;
+    let unsubscribeCallCandidates = null;
     let pendingBase64Image = null;
     let pendingStoryImage = null;
-    let selectedStoryBg = "linear-gradient(135deg, #005c4b 0%, #0b141a 100%)";
+    let selectedStoryBg = "linear-gradient(135deg, #9333ea 0%, #06b6d4 100%)";
+
+    // State Telepon WebRTC
+    let peerConnection = null;
+    let localStream = null;
+    let activeCallId = null;
+    let incomingCallData = null;
+    let isMicMuted = false;
+    let callTimerInterval = null;
+    let callSeconds = 0;
 
     function showToast(msg) {
       const box = document.getElementById('toastBox');
@@ -516,9 +615,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       try {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'normal'
-        });
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
         window.recaptchaVerifier.render();
       } catch (e) {
         console.warn("reCAPTCHA init:", e);
@@ -556,7 +653,6 @@
         document.getElementById('stepOtp').classList.remove('hidden');
         showToast("Kode OTP SMS telah dikirim ke nomor HP kamu!");
       } catch (err) {
-        console.error(err);
         errEl.textContent = "Gagal mengirim SMS: " + (err.message || "Periksa pengaturan Firebase Phone Auth.");
         errEl.classList.remove('hidden');
       } finally {
@@ -587,7 +683,7 @@
           updatedAt: serverTimestamp()
         }, { merge: true });
 
-        showToast("Berhasil masuk ke ArzChat!");
+        showToast("Berhasil masuk ke ArzChat 3D!");
       } catch (err) {
         showToast("Kode OTP salah atau kedaluwarsa.");
       } finally {
@@ -621,11 +717,13 @@
 
         listenUsers();
         listenStories();
+        listenIncomingCalls();
       } else {
         currentUser = null;
         if (unsubscribeUsers) unsubscribeUsers();
         if (unsubscribeStories) unsubscribeStories();
         if (unsubscribeMessages) unsubscribeMessages();
+        if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
         document.getElementById('appScreen').classList.add('hidden');
         document.getElementById('authScreen').classList.remove('hidden');
       }
@@ -638,13 +736,13 @@
       const statusView = document.getElementById('sidebarStatusView');
 
       if (tab === 'chats') {
-        chatsBtn.className = "py-3 text-[#00a884] border-b-2 border-[#00a884] flex items-center justify-center gap-2 transition cursor-pointer";
-        statusBtn.className = "py-3 text-[#8696a0] hover:text-white border-b-2 border-transparent flex items-center justify-center gap-2 transition cursor-pointer";
+        chatsBtn.className = "btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer";
+        statusBtn.className = "btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-2 cursor-pointer";
         chatsView.classList.remove('hidden');
         statusView.classList.add('hidden');
       } else {
-        statusBtn.className = "py-3 text-[#00a884] border-b-2 border-[#00a884] flex items-center justify-center gap-2 transition cursor-pointer";
-        chatsBtn.className = "py-3 text-[#8696a0] hover:text-white border-b-2 border-transparent flex items-center justify-center gap-2 transition cursor-pointer";
+        statusBtn.className = "btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer";
+        chatsBtn.className = "btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-2 cursor-pointer";
         statusView.classList.remove('hidden');
         chatsView.classList.add('hidden');
       }
@@ -672,40 +770,38 @@
       container.innerHTML = '';
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-xs text-[#8696a0]">Belum ada pengguna lain yang terdaftar.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-xs text-[#b8b2d8]">Belum ada pengguna lain yang terdaftar.</div>`;
         return;
       }
 
       filtered.forEach((u) => {
         const isSelected = activePeer && activePeer.uid === u.uid;
         const item = document.createElement('div');
-        item.className = `px-4 py-3 flex items-center gap-3 ${isSelected ? 'bg-[#2a3942]' : 'hover:bg-[#202c33]'} cursor-pointer transition`;
+        item.className = `px-3.5 py-3 rounded-2xl flex items-center gap-3 ${isSelected ? 'glass-3d border-cyan-400/40' : 'hover:bg-white/[0.06]'} cursor-pointer transition`;
         item.onclick = () => openChatWith(u);
         item.innerHTML = `
-          <div class="w-11 h-11 rounded-full bg-[#2a3942] text-[#00a884] font-bold flex items-center justify-center shrink-0 text-base">
+          <div class="avatar-3d w-11 h-11 rounded-2xl font-extrabold flex items-center justify-center shrink-0 text-sm text-white">
             ${(u.name || 'U').charAt(0).toUpperCase()}
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-sm font-semibold text-white truncate">${u.name}</span>
-              <span class="text-[10px] text-[#00a884]">Online</span>
+              <span class="text-sm font-bold text-white truncate">${u.name}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-300">● Online</span>
             </div>
-            <div class="text-xs text-[#8696a0] truncate">${u.phone}</div>
+            <div class="text-xs text-[#b8b2d8] truncate">${u.phone}</div>
           </div>
         `;
         container.appendChild(item);
       });
     };
 
-    // ================= FITUR STATUS / STORY =================
+    // ================= STORY / STATUS =================
     function listenStories() {
       if (unsubscribeStories) unsubscribeStories();
       const q = query(collection(db, "stories"), orderBy("createdAt", "desc"));
       unsubscribeStories = onSnapshot(q, (snapshot) => {
         allStories = [];
-        snapshot.forEach((d) => {
-          allStories.push({ id: d.id, ...d.data() });
-        });
+        snapshot.forEach((d) => allStories.push({ id: d.id, ...d.data() }));
         renderStories();
       });
     }
@@ -720,35 +816,34 @@
       const myRing = document.getElementById('myStoryRing');
       const mySub = document.getElementById('myStorySubtitle');
       if (myStories.length > 0) {
-        myRing.className = "status-ring shrink-0";
-        const lastTime = formatTimeShort(myStories[0].createdAt);
-        mySub.textContent = `${myStories.length} status aktif • ${lastTime || 'Baru saja'}`;
+        myRing.className = "status-ring-3d shrink-0";
+        mySub.textContent = `${myStories.length} story aktif • ${formatTimeShort(myStories[0].createdAt) || 'Baru saja'}`;
       } else {
-        myRing.className = "rounded-full shrink-0";
-        mySub.textContent = "Ketuk untuk menambah pembaruan status";
+        myRing.className = "rounded-2xl shrink-0";
+        mySub.textContent = "Ketuk untuk upload story baru";
       }
 
       const container = document.getElementById('storyListContainer');
       container.innerHTML = '';
 
       if (otherStories.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-xs text-[#8696a0]">Belum ada status dari kontak lain.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-xs text-[#b8b2d8]">Belum ada story dari kontak lain.</div>`;
         return;
       }
 
       otherStories.forEach((st, idx) => {
         const row = document.createElement('div');
-        row.className = "px-4 py-3 flex items-center gap-3 hover:bg-[#202c33] cursor-pointer transition";
+        row.className = "px-3.5 py-2.5 rounded-2xl flex items-center gap-3 hover:bg-white/[0.06] cursor-pointer transition";
         row.onclick = () => openStoryViewer(otherStories, idx);
         row.innerHTML = `
-          <div class="status-ring shrink-0">
-            <div class="w-11 h-11 rounded-full bg-[#2a3942] text-white font-bold flex items-center justify-center text-sm">
+          <div class="status-ring-3d shrink-0">
+            <div class="avatar-3d w-11 h-11 rounded-2xl font-extrabold flex items-center justify-center text-sm text-white">
               ${(st.userName || 'U').charAt(0).toUpperCase()}
             </div>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-semibold text-white truncate">${st.userName || 'Pengguna'}</p>
-            <p class="text-xs text-[#8696a0] truncate">${st.text ? st.text : '📷 Foto Story'} • ${formatTimeShort(st.createdAt) || 'Baru saja'}</p>
+            <p class="text-sm font-bold text-white truncate">${st.userName || 'Pengguna'}</p>
+            <p class="text-xs text-[#b8b2d8] truncate">${st.text ? st.text : '📷 Foto Story'} • ${formatTimeShort(st.createdAt) || 'Baru saja'}</p>
           </div>
         `;
         container.appendChild(row);
@@ -758,23 +853,20 @@
     window.handleMyStatusClick = function () {
       if (!currentUser) return;
       const myStories = allStories.filter(s => s.userId === currentUser.uid);
-      if (myStories.length > 0) {
-        openStoryViewer(myStories, 0);
-      } else {
-        openCreateStoryModal();
-      }
+      if (myStories.length > 0) openStoryViewer(myStories, 0);
+      else openCreateStoryModal();
     };
 
     window.openCreateStoryModal = function () {
       pendingStoryImage = null;
-      selectedStoryBg = "linear-gradient(135deg, #005c4b 0%, #0b141a 100%)";
+      selectedStoryBg = "linear-gradient(135deg, #9333ea 0%, #06b6d4 100%)";
       document.getElementById('storyTextInput').value = '';
       document.getElementById('storyPhotoInput').value = '';
       document.getElementById('storyPreviewImg').classList.add('hidden');
       document.getElementById('storyPreviewOverlay').classList.add('hidden');
       document.getElementById('btnClearStoryPhoto').classList.add('hidden');
       document.getElementById('storyPreviewBox').style.background = selectedStoryBg;
-      document.getElementById('storyPreviewText').textContent = "Tulis status kamu di sini...";
+      document.getElementById('storyPreviewText').textContent = "Drop vibe kamu hari ini...";
       document.getElementById('createStoryModal').classList.remove('hidden');
     };
 
@@ -784,14 +876,12 @@
 
     window.setStoryBg = function (grad) {
       selectedStoryBg = grad;
-      if (!pendingStoryImage) {
-        document.getElementById('storyPreviewBox').style.background = grad;
-      }
+      if (!pendingStoryImage) document.getElementById('storyPreviewBox').style.background = grad;
     };
 
     window.updateStoryPreview = function () {
       const val = document.getElementById('storyTextInput').value.trim();
-      document.getElementById('storyPreviewText').textContent = val || (pendingStoryImage ? "" : "Tulis status kamu di sini...");
+      document.getElementById('storyPreviewText').textContent = val || (pendingStoryImage ? "" : "Drop vibe kamu hari ini...");
     };
 
     window.handleStoryPhotoSelect = function (e) {
@@ -824,32 +914,29 @@
       if (!currentUser) return;
       const text = document.getElementById('storyTextInput').value.trim();
       if (!text && !pendingStoryImage) {
-        showToast("Isi teks status atau pilih foto terlebih dahulu.");
+        showToast("Isi teks atau pilih foto terlebih dahulu.");
         return;
       }
-
       const btn = document.getElementById('btnPublishStory');
       btn.disabled = true;
-      btn.textContent = "Membagikan...";
-
+      btn.textContent = "Memposting...";
       try {
         await addDoc(collection(db, "stories"), {
           userId: currentUser.uid,
           userName: currentUser.name,
           userPhone: currentUser.phone,
-          text: text,
+          text,
           image: pendingStoryImage || null,
           bg: selectedStoryBg,
           createdAt: serverTimestamp()
         });
         closeCreateStoryModal();
-        showToast("Status berhasil dibagikan!");
-      } catch (err) {
-        console.error(err);
-        showToast("Gagal membagikan status.");
+        showToast("Story berhasil diposting!");
+      } catch (e) {
+        showToast("Gagal memposting story.");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Bagikan Status Sekarang";
+        btn.textContent = "Posting Story Sekarang";
       }
     };
 
@@ -862,11 +949,7 @@
 
     function renderStorySlide() {
       const item = viewerStoryList[viewerStoryIndex];
-      if (!item) {
-        closeStoryViewer();
-        return;
-      }
-
+      if (!item) return closeStoryViewer();
       document.getElementById('viewerAvatar').textContent = (item.userName || 'U').charAt(0).toUpperCase();
       document.getElementById('viewerName').textContent = item.userName || 'Pengguna';
       document.getElementById('viewerTime').textContent = formatTimeShort(item.createdAt) || 'Baru saja';
@@ -881,38 +964,26 @@
         imgEl.src = item.image;
         imgEl.classList.remove('hidden');
         txtEl.textContent = item.text || "";
-        capWrap.className = item.text ? "mt-3 px-4 py-2 rounded-xl bg-black/65 max-w-md" : "hidden";
+        capWrap.className = item.text ? "mt-3 px-4 py-2 rounded-2xl bg-black/70 max-w-md" : "hidden";
       } else {
         imgEl.classList.add('hidden');
-        canvas.style.background = item.bg || "linear-gradient(135deg, #005c4b 0%, #0b141a 100%)";
+        canvas.style.background = item.bg || "linear-gradient(135deg, #9333ea 0%, #06b6d4 100%)";
         txtEl.textContent = item.text || "";
-        capWrap.className = "px-4 py-3 rounded-xl max-w-md";
+        capWrap.className = "px-4 py-3 rounded-2xl max-w-md";
       }
 
       const delBtn = document.getElementById('btnDeleteMyStory');
-      if (currentUser && item.userId === currentUser.uid) {
-        delBtn.classList.remove('hidden');
-      } else {
-        delBtn.classList.add('hidden');
-      }
+      delBtn.classList.toggle('hidden', !(currentUser && item.userId === currentUser.uid));
     }
 
     window.prevStory = function () {
-      if (viewerStoryIndex > 0) {
-        viewerStoryIndex--;
-        renderStorySlide();
-      } else {
-        showToast("Ini status pertama.");
-      }
+      if (viewerStoryIndex > 0) { viewerStoryIndex--; renderStorySlide(); }
+      else showToast("Ini story pertama.");
     };
 
     window.nextStory = function () {
-      if (viewerStoryIndex < viewerStoryList.length - 1) {
-        viewerStoryIndex++;
-        renderStorySlide();
-      } else {
-        closeStoryViewer();
-      }
+      if (viewerStoryIndex < viewerStoryList.length - 1) { viewerStoryIndex++; renderStorySlide(); }
+      else closeStoryViewer();
     };
 
     window.closeStoryViewer = function () {
@@ -922,16 +993,221 @@
     window.deleteCurrentStory = async function () {
       const item = viewerStoryList[viewerStoryIndex];
       if (!item || !item.id) return;
+      await deleteDoc(doc(db, "stories", item.id));
+      closeStoryViewer();
+      showToast("Story dihapus.");
+    };
+
+    // ================= FITUR TELEPON SUARA (WEBRTC + FIRESTORE) =================
+    async function setupLocalAudioAndPeer(callId) {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      peerConnection = new RTCPeerConnection(rtcConfig);
+
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+      peerConnection.ontrack = (event) => {
+        const audioEl = document.getElementById('remoteAudio');
+        if (event.streams && event.streams[0]) {
+          audioEl.srcObject = event.streams[0];
+        }
+      };
+
+      const candidatesCol = collection(db, "calls", callId, "candidates");
+      peerConnection.onicecandidate = async (event) => {
+        if (event.candidate) {
+          await addDoc(candidatesCol, {
+            fromUid: currentUser.uid,
+            candidate: event.candidate.toJSON()
+          });
+        }
+      };
+
+      if (unsubscribeCallCandidates) unsubscribeCallCandidates();
+      unsubscribeCallCandidates = onSnapshot(candidatesCol, (snap) => {
+        snap.docChanges().forEach(async (change) => {
+          if (change.type === "added") {
+            const data = change.doc.data();
+            if (data.fromUid !== currentUser.uid && peerConnection && peerConnection.remoteDescription) {
+              try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+              } catch (e) {
+                console.warn("ICE add error:", e);
+              }
+            }
+          }
+        });
+      });
+    }
+
+    function startCallTimer() {
+      stopCallTimer();
+      callSeconds = 0;
+      const el = document.getElementById('callTimerText');
+      el.classList.remove('hidden');
+      el.textContent = "00:00";
+      callTimerInterval = setInterval(() => {
+        callSeconds++;
+        const mins = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+        const secs = String(callSeconds % 60).padStart(2, '0');
+        el.textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function stopCallTimer() {
+      if (callTimerInterval) clearInterval(callTimerInterval);
+      callTimerInterval = null;
+      document.getElementById('callTimerText').classList.add('hidden');
+    }
+
+    window.startVoiceCall = async function () {
+      if (!activePeer || !currentUser) return;
       try {
-        await deleteDoc(doc(db, "stories", item.id));
-        closeStoryViewer();
-        showToast("Status dihapus.");
-      } catch (e) {
-        showToast("Gagal menghapus status.");
+        const callDocRef = doc(collection(db, "calls"));
+        activeCallId = callDocRef.id;
+
+        document.getElementById('callPeerAvatar').textContent = (activePeer.name || 'U').charAt(0).toUpperCase();
+        document.getElementById('callPeerName').textContent = activePeer.name;
+        document.getElementById('callStatusText').textContent = "Memanggil...";
+        document.getElementById('incomingCallActions').classList.add('hidden');
+        document.getElementById('activeCallActions').classList.remove('hidden');
+        document.getElementById('callModal').classList.remove('hidden');
+
+        await setupLocalAudioAndPeer(activeCallId);
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        await setDoc(callDocRef, {
+          callerId: currentUser.uid,
+          callerName: currentUser.name,
+          calleeId: activePeer.uid,
+          calleeName: activePeer.name,
+          status: "ringing",
+          offer: { type: offer.type, sdp: offer.sdp },
+          createdAt: serverTimestamp()
+        });
+
+        if (unsubscribeActiveCallDoc) unsubscribeActiveCallDoc();
+        unsubscribeActiveCallDoc = onSnapshot(callDocRef, async (snap) => {
+          if (!snap.exists()) return;
+          const d = snap.data();
+          if (d.answer && !peerConnection.currentRemoteDescription) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
+          }
+          if (d.status === "connected") {
+            document.getElementById('callStatusText').textContent = "Terhubung";
+            startCallTimer();
+          } else if (d.status === "ended" || d.status === "rejected") {
+            showToast(d.status === "rejected" ? "Panggilan ditolak." : "Panggilan berakhir.");
+            cleanupCallUI();
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        showToast("Izinkan akses mikrofon terlebih dahulu untuk telepon suara.");
+        cleanupCallUI();
       }
     };
 
-    // ================= FITUR CHAT REAL-TIME =================
+    function listenIncomingCalls() {
+      if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
+      unsubscribeIncomingCalls = onSnapshot(collection(db, "calls"), (snap) => {
+        snap.docChanges().forEach((change) => {
+          if (change.type === "added" || change.type === "modified") {
+            const data = change.doc.data();
+            if (data.calleeId === currentUser.uid && data.status === "ringing" && !activeCallId) {
+              incomingCallData = { id: change.doc.id, ...data };
+              document.getElementById('callPeerAvatar').textContent = (data.callerName || 'U').charAt(0).toUpperCase();
+              document.getElementById('callPeerName').textContent = data.callerName || "Pengguna";
+              document.getElementById('callStatusText').textContent = "Panggilan suara masuk...";
+              document.getElementById('incomingCallActions').classList.remove('hidden');
+              document.getElementById('activeCallActions').classList.add('hidden');
+              document.getElementById('callModal').classList.remove('hidden');
+            }
+          }
+        });
+      });
+    }
+
+    window.acceptIncomingCall = async function () {
+      if (!incomingCallData) return;
+      try {
+        activeCallId = incomingCallData.id;
+        const callDocRef = doc(db, "calls", activeCallId);
+
+        document.getElementById('incomingCallActions').classList.add('hidden');
+        document.getElementById('activeCallActions').classList.remove('hidden');
+        document.getElementById('callStatusText').textContent = "Menghubungkan suara...";
+
+        await setupLocalAudioAndPeer(activeCallId);
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        await updateDoc(callDocRef, {
+          answer: { type: answer.type, sdp: answer.sdp },
+          status: "connected"
+        });
+
+        startCallTimer();
+
+        if (unsubscribeActiveCallDoc) unsubscribeActiveCallDoc();
+        unsubscribeActiveCallDoc = onSnapshot(callDocRef, (snap) => {
+          if (!snap.exists()) return;
+          const d = snap.data();
+          if (d.status === "ended") {
+            showToast("Panggilan berakhir.");
+            cleanupCallUI();
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        showToast("Gagal menjawab panggilan (cek izin mikrofon).");
+        rejectIncomingCall();
+      }
+    };
+
+    window.rejectIncomingCall = async function () {
+      if (incomingCallData?.id) {
+        await updateDoc(doc(db, "calls", incomingCallData.id), { status: "rejected" });
+      }
+      incomingCallData = null;
+      cleanupCallUI();
+    };
+
+    window.toggleMuteCall = function () {
+      if (!localStream) return;
+      isMicMuted = !isMicMuted;
+      localStream.getAudioTracks().forEach(t => { t.enabled = !isMicMuted; });
+      document.getElementById('btnToggleMute').textContent = isMicMuted ? "🔇 Mic Off" : "🎙️ Mic On";
+    };
+
+    window.hangupCall = async function (notifyRemote = true) {
+      if (notifyRemote && activeCallId) {
+        try {
+          await updateDoc(doc(db, "calls", activeCallId), { status: "ended" });
+        } catch (e) {}
+      }
+      cleanupCallUI();
+    };
+
+    function cleanupCallUI() {
+      stopCallTimer();
+      isMicMuted = false;
+      document.getElementById('btnToggleMute').textContent = "🎙️ Mic On";
+      document.getElementById('callModal').classList.add('hidden');
+
+      if (unsubscribeActiveCallDoc) { unsubscribeActiveCallDoc(); unsubscribeActiveCallDoc = null; }
+      if (unsubscribeCallCandidates) { unsubscribeCallCandidates(); unsubscribeCallCandidates = null; }
+      if (peerConnection) { peerConnection.close(); peerConnection = null; }
+      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+      const audioEl = document.getElementById('remoteAudio');
+      if (audioEl) audioEl.srcObject = null;
+
+      activeCallId = null;
+      incomingCallData = null;
+    }
+
+    // ================= CHAT REAL-TIME =================
     function getChatRoomId(uid1, uid2) {
       return [uid1, uid2].sort().join('_');
     }
@@ -966,20 +1242,20 @@
           wrap.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
 
           const imgHtml = msg.image
-            ? `<img src="${msg.image}" onclick="openLightbox('${msg.image}')" class="max-w-[230px] sm:max-w-[280px] rounded-lg mb-1.5 cursor-pointer hover:opacity-95 object-cover" />`
+            ? `<img src="${msg.image}" onclick="openLightbox('${msg.image}')" class="max-w-[230px] sm:max-w-[280px] rounded-xl mb-1.5 cursor-pointer hover:opacity-95 object-cover" />`
             : '';
           const textHtml = msg.text
-            ? `<span class="text-sm text-[#e9edef] break-words whitespace-pre-wrap mr-2">${msg.text}</span>`
+            ? `<span class="text-sm text-white break-words whitespace-pre-wrap mr-2">${msg.text}</span>`
             : '';
           const timeStr = formatTimeShort(msg.createdAt);
-          const checkHtml = isMe ? `<span class="text-[11px] text-[#53bdeb] ml-0.5">✓✓</span>` : '';
+          const checkHtml = isMe ? `<span class="text-[11px] text-cyan-200 ml-0.5">✓✓</span>` : '';
 
           wrap.innerHTML = `
-            <div class="${isMe ? 'bubble-out' : 'bubble-in'} max-w-[82%] sm:max-w-[68%] px-3 py-1.5">
+            <div class="${isMe ? 'bubble-out-3d' : 'bubble-in-3d'} max-w-[82%] sm:max-w-[68%] px-3.5 py-2">
               ${imgHtml}
               <div class="flex items-end justify-between gap-2 flex-wrap">
                 ${textHtml}
-                <span class="text-[10px] text-[#e9edef]/65 ml-auto shrink-0 select-none">${timeStr}${checkHtml}</span>
+                <span class="text-[10px] text-white/70 ml-auto shrink-0 select-none">${timeStr}${checkHtml}</span>
               </div>
             </div>
           `;
@@ -1032,7 +1308,7 @@
       const roomId = getChatRoomId(currentUser.uid, activePeer.uid);
       const payload = {
         senderId: currentUser.uid,
-        text: text,
+        text,
         image: pendingBase64Image || null,
         createdAt: serverTimestamp()
       };
@@ -1052,6 +1328,7 @@
       document.getElementById('lightboxModal').classList.add('hidden');
     };
     window.logoutUser = async function () {
+      await hangupCall(false);
       await signOut(auth);
     };
   </script>
