@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ArzChat 3D – Gen Z Chat, Story & Voice Call</title>
+
+  <!-- KONFIGURASI PWA (INSTALL SEBAGAI APLIKASI) -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#160f2d" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ArzChat" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -315,6 +325,10 @@
         <button id="btnSendOtp" onclick="sendRealOtp()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
           Kirim Kode OTP via SMS
         </button>
+
+        <button id="btnInstallAuth" onclick="triggerInstallApp()" class="hidden btn-3d-soft w-full py-2.5 rounded-2xl text-xs font-semibold text-cyan-300 cursor-pointer">
+          📲 Install ArzChat ke Layar Utama
+        </button>
       </div>
 
       <!-- STEP 2 -->
@@ -345,7 +359,7 @@
     <aside id="sidebarPanel" class="panel-3d w-full md:w-[380px] lg:w-[420px] border-r flex flex-col h-full shrink-0">
 
       <!-- Header Profil -->
-      <div class="px-4 py-3 bg-white/[0.04] flex items-center justify-between border-b border-white/10">
+      <div class="px-4 py-3 bg-white/[0.04] flex items-center justify-between border-b border-white/10 gap-2">
         <div class="flex items-center gap-3 min-w-0">
           <div id="myAvatar" class="avatar-3d w-11 h-11 rounded-2xl font-extrabold flex items-center justify-center shrink-0 text-base text-white">A</div>
           <div class="min-w-0">
@@ -353,11 +367,15 @@
             <p id="myPhoneDisplay" class="text-[11px] text-[#b8b2d8] truncate">+62...</p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="openCreateStoryModal()" class="btn-3d-soft text-xs text-cyan-300 font-semibold px-3 py-1.5 rounded-xl cursor-pointer">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btnInstallApp" onclick="triggerInstallApp()" title="Install Aplikasi"
+            class="hidden btn-3d-soft text-xs text-lime-300 font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer">
+            📲 Install
+          </button>
+          <button onclick="openCreateStoryModal()" class="btn-3d-soft text-xs text-cyan-300 font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer">
             + Story
           </button>
-          <button onclick="logoutUser()" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-3 py-1.5 rounded-xl transition cursor-pointer">
+          <button onclick="logoutUser()" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1.5 rounded-xl transition cursor-pointer">
             Keluar
           </button>
         </div>
@@ -512,7 +530,7 @@
     </main>
   </div>
 
-  <!-- FIREBASE SDK -->
+  <!-- FIREBASE & PWA SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -540,6 +558,41 @@
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" }
       ]
+    };
+
+    // ================= PWA INSTALL & SERVICE WORKER =================
+    let deferredInstallPrompt = null;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.warn("SW register skipped:", err);
+        });
+      });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      document.getElementById('btnInstallApp')?.classList.remove('hidden');
+      document.getElementById('btnInstallAuth')?.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      document.getElementById('btnInstallApp')?.classList.add('hidden');
+      document.getElementById('btnInstallAuth')?.classList.add('hidden');
+      showToast("ArzChat berhasil terpasang sebagai aplikasi!");
+    });
+
+    window.triggerInstallApp = async function () {
+      if (!deferredInstallPrompt) {
+        showToast("Buka menu browser lalu pilih 'Install app' / 'Add to Home Screen'.");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
     };
 
     let confirmationResult = null;
