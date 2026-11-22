@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArzChat — Chatting Real-Time & Kirim Foto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b141a;
+      color: #e9edef;
+    }
+
+    /* Pola latar belakang khas ruang obrolan */
+    .chat-wallpaper {
+      background-color: #0b141a;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(134, 150, 160, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(134, 150, 160, 0.5);
+    }
+
+    /* Animasi Notifikasi SMS OTP */
+    @keyframes slideDownBounce {
+      0% { transform: translate(-50%, -120%); opacity: 0; }
+      70% { transform: translate(-50%, 10%); opacity: 1; }
+      100% { transform: translate(-50%, 0); opacity: 1; }
+    }
+    .sms-toast {
+      animation: slideDownBounce 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Ekor gelembung pesan */
+    .bubble-out {
+      background-color: #005c4b;
+      border-top-right-radius: 2px;
+    }
+    .bubble-in {
+      background-color: #202c33;
+      border-top-left-radius: 2px;
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden select-none sm:select-auto">
+
+  <!-- ==================== NOTIFIKASI SMS OTP SIMULASI ==================== -->
+  <div id="smsNotification" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md bg-[#1f2c34] border border-emerald-500/40 shadow-2xl rounded-2xl p-4 sms-toast">
+    <div class="flex items-start gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-emerald-400">Pesan SMS • ArzChat Verify</span>
+          <span class="text-[11px] text-gray-400">Baru saja</span>
+        </div>
+        <p class="text-sm text-gray-200 mt-1">
+          Kode verifikasi ArzChat kamu adalah:
+          <strong id="smsOtpDisplay" class="text-lg font-bold tracking-widest text-white bg-emerald-600/30 px-2 py-0.5 rounded ml-1 select-all">123456</strong>
+        </p>
+        <div class="mt-2 flex items-center gap-2">
+          <button id="btnAutoFillOtp" type="button" class="text-xs font-medium bg-emerald-500 hover:bg-emerald-600 text-gray-950 px-3 py-1.5 rounded-lg transition">
+            Tempel Otomatis Kode
+          </button>
+          <button id="btnCloseSms" type="button" class="text-xs text-gray-400 hover:text-gray-200 px-2 py-1">
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST PESAN SISTEM ==================== -->
+  <div id="systemToast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#233138] text-gray-100 border border-gray-700 px-4 py-2.5 rounded-xl shadow-xl text-sm font-medium transition-opacity">
+    <span id="systemToastText">Pesan sistem</span>
+  </div>
+
+  <!-- ==================== LAYAR LOGIN / DAFTAR NOMOR + OTP ==================== -->
+  <div id="authScreen" class="h-full w-full flex flex-col items-center justify-center p-4 bg-[#0b141a] overflow-y-auto">
+    <!-- Header Hijau Khas -->
+    <div class="fixed top-0 left-0 right-0 h-52 bg-gradient-to-b from-emerald-600 to-teal-700 z-0"></div>
+
+    <div class="relative z-10 w-full max-w-md bg-[#111b21] border border-gray-800 rounded-3xl shadow-2xl p-6 sm:p-8">
+      <!-- Logo & Nama Aplikasi -->
+      <div class="flex flex-col items-center text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-3">
+          <svg class="w-9 h-9 text-gray-950" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.758.459 3.475 1.331 4.988L2 22l5.188-1.361a9.927 9.927 0 004.843 1.258h.004c5.515 0 9.968-4.453 9.968-9.969A9.93 9.93 0 0019.08 4.91 9.914 9.914 0 0012.031 2zm5.805 14.258c-.244.688-1.416 1.316-1.959 1.398-.502.076-1.137.108-1.834-.114-.424-.134-.967-.314-1.662-.614-2.922-1.262-4.83-4.205-4.976-4.4-.146-.195-1.188-1.58-1.188-3.014 0-1.434.752-2.139 1.019-2.431.267-.292.583-.365.777-.365.195 0 .389.002.559.01.179.009.419-.068.656.501.244.584.826 2.017.899 2.163.073.146.122.316.024.511-.097.195-.146.316-.292.487-.146.17-.307.38-.438.511-.146.146-.298.304-.128.596.17.292.756 1.247 1.623 2.02 1.115.994 2.055 1.302 2.347 1.448.292.146.462.122.632-.073.17-.195.73-.851.925-1.143.195-.292.389-.243.656-.146.268.097 1.702.803 1.994.949.292.146.486.219.559.341.073.122.073.705-.171 1.393z"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">ArzChat</h1>
+        <p class="text-sm text-gray-400 mt-1">Masuk atau daftar dengan nomor HP & kode OTP</p>
+      </div>
+
+      <!-- Langkah 1: Input Nomor HP & Nama -->
+      <form id="stepPhoneForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-300 mb-1.5">Nama Tampilan (Untuk Profilmu)</label>
+          <input
+            id="inputDisplayName"
+            type="text"
+            required
+            maxlength="30"
+            placeholder="Contoh: Budi Santoso"
+            class="w-full bg-[#202c33] border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-300 mb-1.5">Nomor Telepon</label>
+          <div class="flex items-center bg-[#202c33] border border-gray-700 focus-within:border-emerald-500 rounded-xl overflow-hidden transition">
+            <span class="px-3.5 py-3 text-sm font-semibold text-emerald-400 bg-[#182229] border-r border-gray-700 select-none">
+              +62
+            </span>
+            <input
+              id="inputPhone"
+              type="tel"
+              required
+              inputmode="numeric"
+              placeholder="812 3456 7890"
+              class="w-full bg-transparent px-3.5 py-3 text-sm text-white placeholder-gray-500 outline-none"
+            />
+          </div>
+          <p class="text-[11px] text-gray-400 mt-1.5">
+            Nomor ini digunakan agar teman yang juga mendaftar bisa menemukan dan mengirim chat kepadamu.
+          </p>
+        </div>
+
+        <button
+          id="btnSendOtp"
+          type="submit"
+          class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-gray-950 font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2"
+        >
+          <span>Kirim Kode OTP</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </button>
+      </form>
+
+      <!-- Langkah 2: Verifikasi OTP -->
+      <form id="stepOtpForm" class="hidden space-y-4">
+        <div class="bg-[#182229] border border-gray-800 rounded-2xl p-3.5 text-center">
+          <p class="text-xs text-gray-400">Kode OTP 6-digit telah dikirim ke</p>
+          <p id="otpTargetPhone" class="text-sm font-semibold text-emerald-400 mt-0.5">+62 812-3456-7890</p>
+          <button type="button" id="btnChangePhone" class="text-xs text-gray-400 hover:text-white underline mt-1">
+            Ganti nomor HP
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-gray-300 mb-1.5 text-center">Masukkan 6 Digit Kode OTP</label>
+          <input
+            id="inputOtp"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            required
+            placeholder="••••••"
+            class="w-full bg-[#202c33] border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3.5 text-center text-2xl font-bold tracking-[0.5em] text-white placeholder-gray-600 outline-none transition"
+          />
+        </div>
+
+        <button
+          id="btnVerifyOtp"
+          type="submit"
+          class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-gray-950 font-semibold py-3 rounded-xl shadow-lg shadow-emerald-500/20 transition"
+        >
+          Verifikasi & Masuk ArzChat
+        </button>
+
+        <div class="text-center">
+          <button type="button" id="btnResendOtp" class="text-xs text-emerald-400 hover:text-emerald-300 font-medium">
+            Kirim ulang kode OTP
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-gray-800/80 text-center">
+        <p class="text-[11px] text-gray-500">
+          Tips: Buka halaman ini di tab penyamaran (Incognito) dengan nomor berbeda untuk mencoba chatting antar 2 akun secara langsung!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LAYAR UTAMA APLIKASI ARZCHAT ==================== -->
+  <div id="appScreen" class="hidden h-full w-full flex bg-[#111b21] overflow-hidden">
+
+    <!-- PANEL KIRI: DAFTAR OBROLAN & KONTAK TERDAFTAR -->
+    <aside id="sidebarPanel" class="w-full md:w-[380px] lg:w-[410px] h-full flex flex-col border-r border-gray-800 bg-[#111b21] shrink-0">
+      <!-- Header Profil Pengguna -->
+      <header class="h-16 px-4 bg-[#202c33] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="myAvatar" class="w-10 h-10 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shrink-0">
+            U
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <h2 id="myDisplayName" class="text-sm font-semibold text-white truncate">Pengguna</h2>
+              <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Online"></span>
+            </div>
+            <p id="myPhoneDisplay" class="text-xs text-gray-400 truncate">+62 ...</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <!-- Tombol Kontak / Pengguna Terdaftar -->
+          <button
+            id="btnOpenContactsModal"
+            type="button"
+            title="Cari Pengguna Terdaftar"
+            class="p-2.5 rounded-full text-gray-300 hover:text-white hover:bg-white/10 transition relative"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </button>
+
+          <!-- Tombol Keluar / Logout -->
+          <button
+            id="btnLogout"
+            type="button"
+            title="Keluar Akun"
+            class="p-2.5 rounded-full text-gray-400 hover:text-red-400 hover:bg-white/10 transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Bar Pencarian & Tab Filter -->
+      <div class="p-3 border-b border-gray-800/80 space-y-2.5 bg-[#111b21]">
+        <div class="flex items-center bg-[#202c33] rounded-xl px-3 py-2">
+          <svg class="w-4 h-4 text-gray-400 mr-2.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            id="searchChatInput"
+            type="text"
+            placeholder="Cari nama atau nomor HP..."
+            class="w-full bg-transparent text-sm text-white placeholder-gray-400 outline-none"
+          />
+        </div>
+
+        <!-- Tab: Semua Obrolan vs Pengguna Terdaftar -->
+        <div class="flex gap-2">
+          <button
+            id="tabChats"
+            type="button"
+            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition"
+          >
+            Obrolan Aktif
+          </button>
+          <button
+            id="tabUsers"
+            type="button"
+            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium bg-[#202c33] text-gray-300 hover:text-white transition flex items-center justify-center gap-1.5"
+          >
+            <span>Pengguna Terdaftar</span>
+            <span id="registeredCountBadge" class="bg-emerald-500 text-gray-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Daftar Item (Obrolan / Pengguna) -->
+      <div id="sidebarList" class="flex-1 overflow-y-auto divide-y divide-gray-800/50">
+        <!-- Diisi via JavaScript -->
+        <div class="p-8 text-center text-gray-500 text-sm">
+          Memuat daftar pengguna & obrolan...
+        </div>
+      </div>
+    </aside>
+
+    <!-- PANEL KANAN: RUANG OBROLAN -->
+    <main id="chatPanel" class="hidden md:flex flex-1 h-full flex-col bg-[#0b141a] relative">
+
+      <!-- Tampilan Kosong Sebelum Memilih Chat -->
+      <div id="emptyChatPlaceholder" class="flex-1 flex flex-col items-center justify-center p-8 text-center chat-wallpaper">
+        <div class="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-white">Selamat Datang di ArzChat</h3>
+        <p class="text-sm text-gray-400 max-w-md mt-2 leading-relaxed">
+          Pilih teman dari tab <strong class="text-emerald-400">Pengguna Terdaftar</strong> di sebelah kiri untuk mulai mengirim pesan teks dan berbagi foto secara langsung.
+        </p>
+      </div>
+
+      <!-- Ruang Obrolan Aktif -->
+      <div id="activeChatContainer" class="hidden flex-1 flex flex-col h-full">
+        <!-- Header Lawan Bicara -->
+        <header class="h-16 px-3 sm:px-4 bg-[#202c33] border-b border-gray-800 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <!-- Tombol Kembali (Mobile) -->
+            <button
+              id="btnBackToSidebar"
+              type="button"
+              class="md:hidden p-2 -ml-1 rounded-full text-gray-300 hover:bg-white/10"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <div id="peerAvatar" class="w-10 h-10 rounded-full bg-teal-600 text-white font-bold flex items-center justify-center text-sm shrink-0">
+              A
+            </div>
+            <div class="min-w-0">
+              <h3 id="peerName" class="text-sm font-semibold text-white truncate">Nama Kontak</h3>
+              <p id="peerStatus" class="text-xs text-emerald-400 truncate">Online</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="peerPhoneTag" class="hidden sm:inline-block text-xs bg-[#111b21] text-gray-300 px-3 py-1 rounded-full border border-gray-700">
+              +62 ...
+            </span>
+          </div>
+        </header>
+
+        <!-- Area Daftar Pesan -->
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-2.5 chat-wallpaper">
+          <!-- Gelembung pesan dirender di sini -->
+        </div>
+
+        <!-- Preview Foto Sebelum Dikirim (Jika ada foto dipilih) -->
+        <div id="photoPreviewBar" class="hidden bg-[#182229] border-t border-gray-700 px-4 py-3 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3 min-w-0">
+            <img id="photoPreviewThumb" src="" alt="Preview" class="w-14 h-14 object-cover rounded-xl border border-gray-600 shrink-0" />
+            <div class="min-w-0">
+              <p class="text-xs font-semibold text-emerald-400">Foto siap dikirim</p>
+              <p id="photoPreviewInfo" class="text-xs text-gray-400 truncate">Tambahkan keterangan di bawah atau langsung kirim</p>
+            </div>
+          </div>
+          <button id="btnCancelPhoto" type="button" class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium shrink-0">
+            Batal
+          </button>
+        </div>
+
+        <!-- Bar Input Pesan & Kirim Foto -->
+        <footer class="px-3 sm:px-4 py-3 bg-[#202c33] flex items-center gap-2 sm:gap-3 shrink-0">
+          <!-- Input File Tersembunyi -->
+          <input type="file" id="photoFileInput" accept="image/*" class="hidden" />
+
+          <!-- Tombol Pilih Foto -->
+          <button
+            id="btnAttachPhoto"
+            type="button"
+            title="Kirim Foto"
+            class="p-2.5 rounded-full text-gray-300 hover:text-emerald-400 hover:bg-white/10 transition shrink-0"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </button>
+
+          <!-- Form Kirim Pesan -->
+          <form id="sendMessageForm" class="flex-1 flex items-center gap-2">
+            <input
+              id="messageInput"
+              type="text"
+              autocomplete="off"
+              placeholder="Ketik pesan di ArzChat..."
+              class="flex-1 bg-[#2a3942] text-sm text-white placeholder-gray-400 rounded-xl px-4 py-3 outline-none focus:ring-1 focus:ring-emerald-500/60"
+            />
+            <button
+              id="btnSendMessage"
+              type="submit"
+              title="Kirim Pesan"
+              class="p-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-gray-950 font-semibold transition shrink-0"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            </button>
+          </form>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== MODAL LIGHTBOX PREVIEW FOTO ==================== -->
+  <div id="imageLightbox" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-4xl flex items-center justify-between mb-3">
+      <span id="lightboxCaption" class="text-sm text-gray-200 font-medium truncate">Foto ArzChat</span>
+      <button id="btnCloseLightbox" type="button" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium">
+        Tutup ✕
+      </button>
+    </div>
+    <img id="lightboxImg" src="" alt="Foto Penuh" class="max-h-[82vh] max-w-full object-contain rounded-2xl shadow-2xl" />
+  </div>
+
+  <!-- ==================== MODAL PENGGUNA TERDAFTAR / MULAI CHAT BARU ==================== -->
+  <div id="contactsModal" class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-[#111b21] border border-gray-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-4 bg-[#202c33] flex items-center justify-between border-b border-gray-800">
+        <div>
+          <h3 class="text-base font-bold text-white">Pengguna Terdaftar ArzChat</h3>
+          <p class="text-xs text-gray-400">Pilih pengguna untuk langsung mulai chatting</p>
+        </div>
+        <button id="btnCloseContactsModal" type="button" class="p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/10">
+          ✕
+        </button>
+      </div>
+      <div class="p-3 border-b border-gray-800">
+        <input
+          id="modalSearchUserInput"
+          type="text"
+          placeholder="Cari nomor HP atau nama pengguna..."
+          class="w-full bg-[#202c33] text-sm text-white placeholder-gray-400 rounded-xl px-3.5 py-2.5 outline-none border border-gray-700 focus:border-emerald-500"
+        />
+      </div>
+      <div id="modalUsersList" class="flex-1 overflow-y-auto divide-y divide-gray-800/60">
+        <!-- Daftar seluruh user terdaftar -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPT FIREBASE & LOGIKA APLIKASI ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      addDoc,
+      collection,
+      onSnapshot,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Konfigurasi Firebase dari environment
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'arzchat-default-app';
+    const firebaseConfig = typeof __firebase_config !== 'undefined'
+      ? JSON.parse(__firebase_config)
+      : null;
+
+    let app, auth, db;
+    let firebaseReady = false;
+
+    // State Aplikasi
+    let currentUser = null; // { phone, name, color, uid }
+    let generatedOtp = null;
+    let pendingRegistration = null;
+    let allRegisteredUsers = [];
+    let allUserChats = [];
+    let activePeer = null; // Objek user lawan bicara
+    let activeChatId = null;
+    let unsubscribeMessages = null;
+    let currentSidebarTab = 'chats'; // 'chats' | 'users'
+    let pendingPhotoDataUrl = null;
+
+    // Warna avatar acak yang estetik
+    const AVATAR_COLORS = [
+      'bg-emerald-600', 'bg-teal-600', 'bg-cyan-600',
+      'bg-sky-600', 'bg-indigo-600', 'bg-violet-600',
+      'bg-amber-600', 'bg-rose-600'
+    ];
+
+    function pickColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+    }
+
+    function getInitials(name) {
+      if (!name) return '?';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+
+    // Normalisasi nomor HP ke format standar +628...
+    function normalizePhone(raw) {
+      let digits = raw.replace(/\D/g, '');
+      if (digits.startsWith('0')) {
+        digits = '62' + digits.substring(1);
+      } else if (!digits.startsWith('62')) {
+        digits = '62' + digits;
+      }
+      return '+' + digits;
+    }
+
+    function formatDisplayPhone(phone) {
+      // +6281234567890 -> +62 812-3456-7890
+      const clean = phone.replace('+', '');
+      if (clean.startsWith('62') && clean.length >= 10) {
+        const rest = clean.substring(2);
+        return `+62 ${rest.substring(0, 3)}-${rest.substring(3, 7)}-${rest.substring(7)}`;
+      }
+      return phone;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('systemToast');
+      const text = document.getElementById('systemToastText');
+      text.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3200);
+    }
+
+    function formatTime(ts) {
+      if (!ts) return 'Baru saja';
+      const date = ts.toDate ? ts.toDate() : new Date(ts);
+      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ==================== INISIALISASI FIREBASE ====================
+    async function initFirebase() {
+      try {
+        if (!firebaseConfig) {
+          throw new Error("Konfigurasi Firebase tidak tersedia.");
+        }
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        firebaseReady = true;
+        await ensureOfficialBotExists();
+        restoreSessionIfAny();
+      } catch (err) {
+        console.error("Firebase Init Error:", err);
+        showToast("Gagal terhubung ke server cloud. Periksa koneksi internet.");
+      }
+    }
+
+    // Pastikan ada akun resmi "ArzChat Official" agar user baru bisa langsung tes chat
+    async function ensureOfficialBotExists() {
+      if (!firebaseReady || !auth.currentUser) return;
+      const botPhone = '+628000000001';
+      const botRef = doc(db, 'artifacts', appId, 'public', 'data', 'arzchat_users', botPhone);
+      const snap = await getDoc(botRef);
+      if (!snap.exists()) {
+        await setDoc(botRef, {
+          phone: botPhone,
+          name: 'ArzChat Official (Bot)',
+          color: 'bg-emerald-600',
+          statusText: 'Selalu aktif • Siap bantu uji coba chat & foto',
+          online: true,
+          isBot: true,
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
+
+    // ==================== ALUR LOGIN & SIMULASI OTP ====================
+    const stepPhoneForm = document.getElementById('stepPhoneForm');
+    const stepOtpForm = document.getElementById('stepOtpForm');
+    const smsNotification = document.getElementById('smsNotification');
+    const smsOtpDisplay = document.getElementById('smsOtpDisplay');
+
+    function triggerOtpSimulation(phone, name) {
+      generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      pendingRegistration = { phone, name };
+
+      document.getElementById('otpTargetPhone').textContent = formatDisplayPhone(phone);
+      stepPhoneForm.classList.add('hidden');
+      stepOtpForm.classList.remove('hidden');
+      document.getElementById('inputOtp').value = '';
+      document.getElementById('inputOtp').focus();
+
+      // Tampilkan simulasi SMS OTP masuk di layar
+      smsOtpDisplay.textContent = generatedOtp;
+      smsNotification.classList.remove('hidden');
+    }
+
+    stepPhoneForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const rawName = document.getElementById('inputDisplayName').value.trim();
+      const rawPhone = document.getElementById('inputPhone').value.trim();
+
+      if (rawName.length < 2) {
+        showToast("Masukkan nama tampilan minimal 2 huruf.");
+        return;
+      }
+      const digitsOnly = rawPhone.replace(/\D/g, '');
+      if (digitsOnly.length < 8) {
+        showToast("Masukkan nomor HP yang valid (minimal 8 digit).");
+        return;
+      }
+
+      const normalized = normalizePhone(rawPhone);
+      triggerOtpSimulation(normalized, rawName);
+    });
+
+    document.getElementById('btnAutoFillOtp').addEventListener('click', () => {
+      if (generatedOtp) {
+        document.getElementById('inputOtp').value = generatedOtp;
+        showToast("Kode OTP ditempel otomatis!");
+      }
+    });
+
+    document.getElementById('btnCloseSms').addEventListener('click', () => {
+      smsNotification.classList.add('hidden');
+    });
+
+    document.getElementById('btnChangePhone').addEventListener('click', () => {
+      stepOtpForm.classList.add('hidden');
+      stepPhoneForm.classList.remove('hidden');
+      smsNotification.classList.add('hidden');
+    });
+
+    document.getElementById('btnResendOtp').addEventListener('click', () => {
+      if (pendingRegistration) {
+        triggerOtpSimulation(pendingRegistration.phone, pendingRegistration.name);
+        showToast("Kode OTP baru telah dikirim!");
+      }
+    });
+
+    stepOtpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const enteredOtp = document.getElementById('inputOtp').value.trim();
+      if (enteredOtp !== generatedOtp) {
+        showToast("Kode OTP salah! Periksa notifikasi SMS di atas.");
+        return;
+      }
+
+      if (!firebaseReady || !auth.currentUser) {
+        showToast("Sedang menghubungkan ke server, coba sebentar lagi...");
+        return;
+      }
+
+      const btnVerify = document.getElementById('btnVerifyOtp');
+      btnVerify.disabled = true;
+      btnVerify.textContent = "Memverifikasi...";
+
+      try {
+        const { phone, name } = pendingRegistration;
+        const color = pickColor(phone);
+        const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'arzchat_users', phone);
+
+        await setDoc(userRef, {
+          phone,
+          name,
+          color,
+          statusText: 'Ada di ArzChat',
+          online: true,
+          uid: auth.currentUser.uid,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        currentUser = { phone, name, color };
+        sessionStorage.setItem('arzchat_session', JSON.stringify(currentUser));
+        smsNotification.classList.add('hidden');
+
+        enterMainApp();
+        showToast(`Selamat datang di ArzChat, ${name}!`);
+      } catch (err) {
+        console.error("Login Save Error:", err);
+        showToast("Terjadi kesalahan saat menyimpan profil.");
+      } finally {
+        btnVerify.disabled = false;
+        btnVerify.textContent = "Verifikasi & Masuk ArzChat";
+      }
+    });
+
+    function restoreSessionIfAny() {
+      const saved = sessionStorage.getItem('arzchat_session');
+      if (saved) {
+        try {
+          currentUser = JSON.parse(saved);
+          if (currentUser && currentUser.phone) {
+            enterMainApp();
+          }
+        } catch (_) {}
+      }
+    }
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      if (currentUser && firebaseReady && auth.currentUser) {
+        try {
+          const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'arzchat_users', currentUser.phone);
+          await setDoc(userRef, { online: false, updatedAt: serverTimestamp() }, { merge: true });
+        } catch (_) {}
+      }
+      sessionStorage.removeItem('arzchat_session');
+      currentUser = null;
+      activePeer = null;
+      if (unsubscribeMessages) unsubscribeMessages();
+
+      document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+      stepOtpForm.classList.add('hidden');
+      stepPhoneForm.classList.remove('hidden');
+      showToast("Kamu telah keluar dari ArzChat.");
+    });
+
+    // ==================== MASUK KE APLIKASI UTAMA ====================
+    function enterMainApp() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+
+      // Set Profil Header Kiri
+      const myAvatar = document.getElementById('myAvatar');
+      myAvatar.className = `w-10 h-10 rounded-full ${currentUser.color} text-white font-bold flex items-center justify-center text-sm shrink-0`;
+      myAvatar.textContent = getInitials(currentUser.name);
+
+      document.getElementById('myDisplayName').textContent = currentUser.name;
+      document.getElementById('myPhoneDisplay').textContent = formatDisplayPhone(currentUser.phone);
+
+      listenToRegisteredUsers();
+      listenToUserChats();
+    }
+
+    // ==================== LISTENER PENGGUNA TERDAFTAR ====================
+    function listenToRegisteredUsers() {
+      if (!firebaseReady || !auth.currentUser) return;
+      const usersCol = collection(db, 'artifacts', appId, 'public', 'data', 'arzchat_users');
+
+      onSnapshot(usersCol, (snapshot) => {
+        const users = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.phone && data.phone !== currentUser.phone) {
+            users.push(data);
+          }
+        });
+
+        // Urutkan alfabetis
+        users.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        allRegisteredUsers = users;
+
+        document.getElementById('registeredCountBadge').textContent = users.length;
+        renderSidebarList();
+        renderContactsModalList();
+
+        // Update status header lawan bicara jika sedang membuka chat dengannya
+        if (activePeer) {
+          const updatedPeer = users.find(u => u.phone === activePeer.phone);
+          if (updatedPeer) {
+            activePeer = updatedPeer;
+            document.getElementById('peerStatus').textContent = updatedPeer.online ? 'Online' : 'Offline';
+          }
+        }
+      }, (err) => {
+        console.error("Error listen users:", err);
+      });
+    }
+
+    // ==================== LISTENER DAFTAR OBROLAN AKTIF ====================
+    function listenToUserChats() {
+      if (!firebaseReady || !auth.currentUser) return;
+      const chatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'arzchat_chats');
+
+      onSnapshot(chatsCol, (snapshot) => {
+        const chats = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (Array.isArray(data.participants) && data.participants.includes(currentUser.phone)) {
+            chats.push({ id: docSnap.id, ...data });
+          }
+        });
+
+        // Urutkan berdasarkan pesan terbaru di memori
+        chats.sort((a, b) => {
+          const tA = a.lastMessageAt?.toMillis ? a.lastMessageAt.toMillis() : 0;
+          const tB = b.lastMessageAt?.toMillis ? b.lastMessageAt.toMillis() : 0;
+          return tB - tA;
+        });
+
+        allUserChats = chats;
+        renderSidebarList();
+      }, (err) => {
+        console.error("Error listen chats:", err);
+      });
+    }
+
+    // ==================== RENDER SIDEBAR (OBROLAN & KONTAK) ====================
+    const sidebarList = document.getElementById('sidebarList');
+    const searchChatInput = document.getElementById('searchChatInput');
+    const tabChats = document.getElementById('tabChats');
+    const tabUsers = document.getElementById('tabUsers');
+
+    tabChats.addEventListener('click', () => {
+      currentSidebarTab = 'chats';
+      tabChats.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition';
+      tabUsers.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-medium bg-[#202c33] text-gray-300 hover:text-white transition flex items-center justify-center gap-1.5';
+      renderSidebarList();
+    });
+
+    tabUsers.addEventListener('click', () => {
+      currentSidebarTab = 'users';
+      tabUsers.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition flex items-center justify-center gap-1.5';
+      tabChats.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-medium bg-[#202c33] text-gray-300 hover:text-white transition';
+      renderSidebarList();
+    });
+
+    searchChatInput.addEventListener('input', () => {
+      renderSidebarList();
+    });
+
+    function renderSidebarList() {
+      const keyword = searchChatInput.value.trim().toLowerCase();
+      sidebarList.innerHTML = '';
+
+      if (currentSidebarTab === 'users') {
+        const filtered = allRegisteredUsers.filter(u =>
+          (u.name || '').toLowerCase().includes(keyword) ||
+          (u.phone || '').includes(keyword)
+        );
+
+        if (filtered.length === 0) {
+          sidebarList.innerHTML = `
+            <div class="p-8 text-center text-gray-400 text-sm">
+              Tidak ada pengguna terdaftar yang cocok dengan pencarianmu.
+            </div>`;
+          return;
+        }
+
+        filtered.forEach(user => {
+          const isSelected = activePeer && activePeer.phone === user.phone;
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = `w-full px-4 py-3.5 flex items-center gap-3.5 text-left transition ${isSelected ? 'bg-[#2a3942]' : 'hover:bg-[#202c33]'}`;
+          item.innerHTML = `
+            <div class="relative shrink-0">
+              <div class="w-12 h-12 rounded-full ${user.color || 'bg-teal-600'} text-white font-bold flex items-center justify-center text-base">
+                ${getInitials(user.name)}
+              </div>
+              ${user.online ? '<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#111b21]"></span>' : ''}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="text-sm font-semibold text-white truncate">${escapeHtml(user.name)}</h4>
+                <span class="text-[11px] text-emerald-400 font-medium shrink-0">Chat ➔</span>
+              </div>
+              <p class="text-xs text-gray-400 truncate mt-0.5">${formatDisplayPhone(user.phone)}</p>
+            </div>
+          `;
+          item.addEventListener('click', () => openChatWithUser(user));
+          sidebarList.appendChild(item);
+        });
+        return;
+      }
+
+      // Tab 'chats': Tampilkan obrolan yang sudah ada
+      const filteredChats = allUserChats.filter(chat => {
+        const peerPhone = chat.participants.find(p => p !== currentUser.phone);
+        const peerUser = allRegisteredUsers.find(u => u.phone === peerPhone) || { name: peerPhone, phone: peerPhone };
+        return (peerUser.name || '').toLowerCase().includes(keyword) || (peerPhone || '').includes(keyword);
+      });
+
+      if (filteredChats.length === 0) {
+        sidebarList.innerHTML = `
+          <div class="p-8 text-center space-y-3">
+            <p class="text-sm text-gray-400">Belum ada riwayat obrolan.</p>
+            <button id="btnEmptySwitchUsers" type="button" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-gray-950 text-xs font-semibold transition">
+              Lihat Pengguna Terdaftar (${allRegisteredUsers.length})
+            </button>
+          </div>`;
+        const switchBtn = document.getElementById('btnEmptySwitchUsers');
+        if (switchBtn) {
+          switchBtn.addEventListener('click', () => tabUsers.click());
+        }
+        return;
+      }
+
+      filteredChats.forEach(chat => {
+        const peerPhone = chat.participants.find(p => p !== currentUser.phone);
+        const peerUser = allRegisteredUsers.find(u => u.phone === peerPhone) || {
+          phone: peerPhone,
+          name: formatDisplayPhone(peerPhone),
+          color: pickColor(peerPhone),
+          online: false
+        };
+
+        const isSelected = activePeer && activePeer.phone === peerUser.phone;
+        const previewText = chat.lastMessageType === 'image'
+          ? `📷 ${chat.lastMessage || 'Mengirim foto'}`
+          : (chat.lastMessage || 'Mulai percakapan...');
+
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = `w-full px-4 py-3.5 flex items-center gap-3.5 text-left transition ${isSelected ? 'bg-[#2a3942]' : 'hover:bg-[#202c33]'}`;
+        item.innerHTML = `
+          <div class="relative shrink-0">
+            <div class="w-12 h-12 rounded-full ${peerUser.color || 'bg-teal-600'} text-white font-bold flex items-center justify-center text-base">
+              ${getInitials(peerUser.name)}
+            </div>
+            ${peerUser.online ? '<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#111b21]"></span>' : ''}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-semibold text-white truncate">${escapeHtml(peerUser.name)}</h4>
+              <span class="text-[11px] text-gray-400 shrink-0">${formatTime(chat.lastMessageAt)}</span>
+            </div>
+            <p class="text-xs text-gray-400 truncate mt-1">${escapeHtml(previewText)}</p>
+          </div>
+        `;
+        item.addEventListener('click', () => openChatWithUser(peerUser));
+        sidebarList.appendChild(item);
+      });
+    }
+
+    // ==================== MODAL KONTAK PENGGUNA TERDAFTAR ====================
+    const contactsModal = document.getElementById('contactsModal');
+    const modalSearchUserInput = document.getElementById('modalSearchUserInput');
+    const modalUsersList = document.getElementById('modalUsersList');
+
+    document.getElementById('btnOpenContactsModal').addEventListener('click', () => {
+      contactsModal.classList.remove('hidden');
+      modalSearchUserInput.value = '';
+      renderContactsModalList();
+    });
+
+    document.getElementById('btnCloseContactsModal').addEventListener('click', () => {
+      contactsModal.classList.add('hidden');
+    });
+
+    contactsModal.addEventListener('click', (e) => {
+      if (e.target === contactsModal) contactsModal.classList.add('hidden');
+    });
+
+    modalSearchUserInput.addEventListener('input', renderContactsModalList);
+
+    function renderContactsModalList() {
+      const q = modalSearchUserInput.value.trim().toLowerCase();
+      modalUsersList.innerHTML = '';
+
+      const matches = allRegisteredUsers.filter(u =>
+        (u.name || '').toLowerCase().includes(q) ||
+        (u.phone || '').includes(q)
+      );
+
+      if (matches.length === 0) {
+        modalUsersList.innerHTML = `<div class="p-6 text-center text-sm text-gray-400">Tidak ada pengguna ditemukan.</div>`;
+        return;
+      }
+
+      matches.forEach(user => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'w-full px-4 py-3 flex items-center gap-3 hover:bg-[#202c33] text-left transition';
+        row.innerHTML = `
+          <div class="w-11 h-11 rounded-full ${user.color || 'bg-emerald-600'} text-white font-bold flex items-center justify-center text-sm shrink-0">
+            ${getInitials(user.name)}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-sm font-semibold text-white truncate">${escapeHtml(user.name)}</h4>
+            <p class="text-xs text-gray-400 truncate">${formatDisplayPhone(user.phone)}</p>
+          </div>
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg font-medium">Chat</span>
+        `;
+        row.addEventListener('click', () => {
+          contactsModal.classList.add('hidden');
+          openChatWithUser(user);
+        });
+        modalUsersList.appendChild(row);
+      });
+    }
+
+    // ==================== MEMBUKA RUANG OBROLAN 1-ON-1 ====================
+    function getChatIdBetween(phoneA, phoneB) {
+      return [phoneA, phoneB].sort().join('_');
+    }
+
+    function openChatWithUser(peerUser) {
+      activePeer = peerUser;
+      activeChatId = getChatIdBetween(currentUser.phone, peerUser.phone);
+
+      // Responsif Mobile: Sembunyikan sidebar, tampilkan panel chat
+      document.getElementById('sidebarPanel').classList.add('hidden', 'md:flex');
+      document.getElementById('chatPanel').classList.remove('hidden');
+      document.getElementById('chatPanel').classList.add('flex');
+
+      document.getElementById('emptyChatPlaceholder').classList.add('hidden');
+      document.getElementById('activeChatContainer').classList.remove('hidden');
+
+      // Set Header Lawan Bicara
+      const peerAvatar = document.getElementById('peerAvatar');
+      peerAvatar.className = `w-10 h-10 rounded-full ${peerUser.color || 'bg-teal-600'} text-white font-bold flex items-center justify-center text-sm shrink-0`;
+      peerAvatar.textContent = getInitials(peerUser.name);
+
+      document.getElementById('peerName').textContent = peerUser.name;
+      document.getElementById('peerStatus').textContent = peerUser.online ? 'Online' : 'Offline';
+      document.getElementById('peerPhoneTag').textContent = formatDisplayPhone(peerUser.phone);
+
+      renderSidebarList();
+      listenToMessages(activeChatId);
+    }
+
+    document.getElementById('btnBackToSidebar').addEventListener('click', () => {
+      activePeer = null;
+      document.getElementById('chatPanel').classList.add('hidden');
+      document.getElementById('chatPanel').classList.remove('flex');
+      document.getElementById('sidebarPanel').classList.remove('hidden');
+      renderSidebarList();
+    });
+
+    // ==================== LISTENER PESAN REAL-TIME ====================
+    function listenToMessages(chatId) {
+      if (unsubscribeMessages) {
+        unsubscribeMessages();
+      }
+
+      const messagesContainer = document.getElementById('messagesContainer');
+      messagesContainer.innerHTML = `<div class="text-center text-xs text-gray-500 py-4">Memuat percakapan...</div>`;
+
+      const msgsCol = collection(db, 'artifacts', appId, 'public', 'data', 'arzchat_chats', chatId, 'messages');
+
+      unsubscribeMessages = onSnapshot(msgsCol, (snapshot) => {
+        const msgs = [];
+        snapshot.forEach((docSnap) => {
+          msgs.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        // Urutkan berdasarkan waktu kirim (clientTimestamp / createdAt)
+        msgs.sort((a, b) => {
+          const tA = a.clientTime || (a.createdAt?.toMillis ? a.createdAt.toMillis() : 0);
+          const tB = b.clientTime || (b.createdAt?.toMillis ? b.createdAt.toMillis() : 0);
+          return tA - tB;
+        });
+
+        renderMessages(msgs);
+      }, (err) => {
+        console.error("Error listen messages:", err);
+      });
+    }
+
+    function renderMessages(messages) {
+      const container = document.getElementById('messagesContainer');
+      container.innerHTML = '';
+
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div class="flex justify-center my-4">
+            <span class="bg-[#182229] text-gray-300 text-xs px-4 py-2 rounded-xl border border-gray-800 text-center max-w-sm">
+              🔒 Mulai obrolan dengan <strong>${escapeHtml(activePeer.name)}</strong>. Kamu bisa mengirim pesan teks maupun foto!
+            </span>
+          </div>`;
+        return;
+      }
+
+      messages.forEach((msg) => {
+        const isMine = msg.senderPhone === currentUser.phone;
+        const wrapper = document.createElement('div');
+        wrapper.className = `flex ${isMine ? 'justify-end' : 'justify-start'}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = `max-w-[82%] sm:max-w-[68%] rounded-2xl px-3.5 py-2 shadow-md ${isMine ? 'bubble-out text-white' : 'bubble-in text-gray-100'}`;
+
+        let contentHtml = '';
+
+        // Jika pesan mengandung foto
+        if (msg.imageUrl) {
+          contentHtml += `
+            <div class="mb-1.5 overflow-hidden rounded-xl bg-black/30">
+              <img
+                src="${msg.imageUrl}"
+                alt="Foto terkirim"
+                class="max-h-72 w-auto object-contain rounded-xl cursor-pointer hover:opacity-95 transition"
+                onclick="window.openImageLightbox('${msg.imageUrl}', '${escapeHtml(msg.text || 'Foto dari ' + (msg.senderName || 'Pengguna'))}')"
+              />
+            </div>
+          `;
+        }
+
+        // Jika ada teks / caption
+        if (msg.text) {
+          contentHtml += `<p class="text-sm whitespace-pre-wrap break-words leading-relaxed">${escapeHtml(msg.text)}</p>`;
+        }
+
+        // Timestamp + Centang
+        const timeStr = formatTime(msg.createdAt || msg.clientTime);
+        const checkMark = isMine
+          ? `<svg class="w-4 h-4 text-sky-400 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7m-7 6l4 4L22 7" /></svg>`
+          : '';
+
+        contentHtml += `
+          <div class="flex items-center justify-end gap-1 mt-1 -mb-0.5">
+            <span class="text-[10px] text-gray-300/80">${timeStr}</span>
+            ${checkMark}
+          </div>
+        `;
+
+        bubble.innerHTML = contentHtml;
+        wrapper.appendChild(bubble);
+        container.appendChild(wrapper);
+      });
+
+      // Auto scroll ke bawah
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ==================== FITUR PILIH & KOMPRES FOTO ====================
+    const photoFileInput = document.getElementById('photoFileInput');
+    const photoPreviewBar = document.getElementById('photoPreviewBar');
+    const photoPreviewThumb = document.getElementById('photoPreviewThumb');
+
+    document.getElementById('btnAttachPhoto').addEventListener('click', () => {
+      photoFileInput.click();
+    });
+
+    photoFileInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast("Pilih file gambar (JPG, PNG, WEBP).");
+        return;
+      }
+
+      // Kompres gambar menggunakan Canvas agar ringan & aman disimpan di Firestore (< 1MB)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 850;
+          const MAX_HEIGHT = 850;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          } else if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          pendingPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.72);
+          photoPreviewThumb.src = pendingPhotoDataUrl;
+          photoPreviewBar.classList.remove('hidden');
+          document.getElementById('messageInput').focus();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('btnCancelPhoto').addEventListener('click', clearPendingPhoto);
+
+    function clearPendingPhoto() {
+      pendingPhotoDataUrl = null;
+      photoFileInput.value = '';
+      photoPreviewBar.classList.add('hidden');
+      photoPreviewThumb.src = '';
+    }
+
+    // ==================== MENGIRIM PESAN TEKS / FOTO ====================
+    document.getElementById('sendMessageForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!activePeer || !activeChatId || !firebaseReady || !auth.currentUser) return;
+
+      const inputEl = document.getElementById('messageInput');
+      const text = inputEl.value.trim();
+      const imageUrl = pendingPhotoDataUrl;
+
+      if (!text && !imageUrl) return;
+
+      // Reset UI segera agar terasa responsif
+      inputEl.value = '';
+      clearPendingPhoto();
+
+      const now = Date.now();
+      const chatDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'arzchat_chats', activeChatId);
+      const msgsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'arzchat_chats', activeChatId, 'messages');
+
+      try {
+        await addDoc(msgsColRef, {
+          senderPhone: currentUser.phone,
+          senderName: currentUser.name,
+          text: text || '',
+          imageUrl: imageUrl || null,
+          clientTime: now,
+          createdAt: serverTimestamp()
+        });
+
+        await setDoc(chatDocRef, {
+          participants: [currentUser.phone, activePeer.phone],
+          lastMessage: text || 'Mengirim foto',
+          lastMessageType: imageUrl ? 'image' : 'text',
+          lastMessageAt: serverTimestamp()
+        }, { merge: true });
+
+        // Jika lawan bicara adalah Bot Official, kirim balasan otomatis
+        if (activePeer.isBot) {
+          setTimeout(() => sendBotAutoReply(activeChatId, text, Boolean(imageUrl)), 900);
+        }
+      } catch (err) {
+        console.error("Send Message Error:", err);
+        showToast("Gagal mengirim pesan. Ukuran foto mungkin terlalu besar.");
+      }
+    });
+
+    async function sendBotAutoReply(chatId, userText, hasImage) {
+      if (!firebaseReady || !auth.currentUser) return;
+      const msgsColRef = collection(db, 'artifacts', appId, 'public', 'data', 'arzchat_chats', chatId, 'messages');
+      const chatDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'arzchat_chats', chatId);
+
+      const replyText = hasImage
+        ? "Keren! Foto kamu berhasil terkirim dan diterima dengan jelas di ArzChat 📸✨"
+        : `Halo ${currentUser.name}! Pesan "${userText}" sudah masuk. Kamu juga bisa coba tekan tombol ikon gambar di kiri bawah untuk kirim foto ya!`;
+
+      await addDoc(msgsColRef, {
+        senderPhone: '+628000000001',
+        senderName: 'ArzChat Official (Bot)',
+        text: replyText,
+        imageUrl: null,
+        clientTime: Date.now(),
+        createdAt: serverTimestamp()
+      });
+
+      await setDoc(chatDocRef, {
+        participants: [currentUser.phone, '+628000000001'],
+        lastMessage: replyText,
+        lastMessageType: 'text',
+        lastMessageAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    // ==================== LIGHTBOX PREVIEW FOTO ====================
+    window.openImageLightbox = (src, caption) => {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxCaption').textContent = caption || 'Foto ArzChat';
+      document.getElementById('imageLightbox').classList.remove('hidden');
+    };
+
+    document.getElementById('btnCloseLightbox').addEventListener('click', () => {
+      document.getElementById('imageLightbox').classList.add('hidden');
+    });
+
+    document.getElementById('imageLightbox').addEventListener('click', (e) => {
+      if (e.target.id === 'imageLightbox') {
+        document.getElementById('imageLightbox').classList.add('hidden');
+      }
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Jalankan inisialisasi saat halaman dimuat
+    window.addEventListener('DOMContentLoaded', initFirebase);
+  </script>
+</body>
+</html>
