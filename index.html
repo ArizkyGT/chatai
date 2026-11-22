@@ -595,6 +595,57 @@
       deferredInstallPrompt = null;
     };
 
+    // ================= NADA DERING PANGGILAN (WEB AUDIO API) =================
+    let audioCtx = null;
+    let ringInterval = null;
+
+    function playRingTonePulse(mode = 'incoming') {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const notes = mode === 'incoming' ? [880, 1174.66] : [659.25];
+
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+
+          gain.gain.setValueAtTime(0.0001, now + idx * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.08, now + idx * 0.16 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.16 + 0.14);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.16);
+          osc.stop(now + idx * 0.16 + 0.15);
+        });
+      } catch (e) {
+        console.warn("Ring tone audio skipped:", e);
+      }
+    }
+
+    function startRingSound(mode = 'incoming') {
+      stopRingSound();
+      playRingTonePulse(mode);
+      ringInterval = setInterval(() => {
+        playRingTonePulse(mode);
+      }, mode === 'incoming' ? 1400 : 2200);
+    }
+
+    function stopRingSound() {
+      if (ringInterval) {
+        clearInterval(ringInterval);
+        ringInterval = null;
+      }
+    }
+
     let confirmationResult = null;
     let currentUser = null;
     let allUsers = [];
@@ -1124,6 +1175,7 @@
         document.getElementById('incomingCallActions').classList.add('hidden');
         document.getElementById('activeCallActions').classList.remove('hidden');
         document.getElementById('callModal').classList.remove('hidden');
+        startRingSound('outgoing');
 
         await setupLocalAudioAndPeer(activeCallId);
         const offer = await peerConnection.createOffer();
@@ -1147,15 +1199,18 @@
             await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
           }
           if (d.status === "connected") {
+            stopRingSound();
             document.getElementById('callStatusText').textContent = "Terhubung";
             startCallTimer();
           } else if (d.status === "ended" || d.status === "rejected") {
+            stopRingSound();
             showToast(d.status === "rejected" ? "Panggilan ditolak." : "Panggilan berakhir.");
             cleanupCallUI();
           }
         });
       } catch (err) {
         console.error(err);
+        stopRingSound();
         showToast("Izinkan akses mikrofon terlebih dahulu untuk telepon suara.");
         cleanupCallUI();
       }
@@ -1175,6 +1230,7 @@
               document.getElementById('incomingCallActions').classList.remove('hidden');
               document.getElementById('activeCallActions').classList.add('hidden');
               document.getElementById('callModal').classList.remove('hidden');
+              startRingSound('incoming');
             }
           }
         });
@@ -1182,6 +1238,7 @@
     }
 
     window.acceptIncomingCall = async function () {
+      stopRingSound();
       if (!incomingCallData) return;
       try {
         activeCallId = incomingCallData.id;
@@ -1208,18 +1265,21 @@
           if (!snap.exists()) return;
           const d = snap.data();
           if (d.status === "ended") {
+            stopRingSound();
             showToast("Panggilan berakhir.");
             cleanupCallUI();
           }
         });
       } catch (err) {
         console.error(err);
+        stopRingSound();
         showToast("Gagal menjawab panggilan (cek izin mikrofon).");
         rejectIncomingCall();
       }
     };
 
     window.rejectIncomingCall = async function () {
+      stopRingSound();
       if (incomingCallData?.id) {
         await updateDoc(doc(db, "calls", incomingCallData.id), { status: "rejected" });
       }
@@ -1235,6 +1295,7 @@
     };
 
     window.hangupCall = async function (notifyRemote = true) {
+      stopRingSound();
       if (notifyRemote && activeCallId) {
         try {
           await updateDoc(doc(db, "calls", activeCallId), { status: "ended" });
@@ -1244,6 +1305,7 @@
     };
 
     function cleanupCallUI() {
+      stopRingSound();
       stopCallTimer();
       isMicMuted = false;
       document.getElementById('btnToggleMute').textContent = "🎙️ Mic On";
