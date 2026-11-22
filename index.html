@@ -595,25 +595,59 @@
       deferredInstallPrompt = null;
     };
 
-    // ================= NADA DERING PANGGILAN (WEB AUDIO API) =================
+    // ================= NADA DERING & AUDIO BOOST (WEB AUDIO API) =================
     let audioCtx = null;
     let ringInterval = null;
+    let remoteGainNode = null;
+    let remoteAudioSource = null;
+
+    function ensureAudioContext() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+      if (!audioCtx) audioCtx = new AudioContextClass();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function boostRemoteStreamAudio(stream) {
+      try {
+        const audioEl = document.getElementById('remoteAudio');
+        if (!audioEl || !stream) return;
+        audioEl.srcObject = stream;
+        audioEl.volume = 1.0;
+        audioEl.muted = false;
+
+        const ctx = ensureAudioContext();
+        if (ctx) {
+          if (remoteAudioSource) {
+            try { remoteAudioSource.disconnect(); } catch (e) {}
+          }
+          remoteAudioSource = ctx.createMediaStreamSource(stream);
+          remoteGainNode = ctx.createGain();
+          remoteGainNode.gain.value = 1.8; // Boost volume suara lawan bicara agar tidak pelan
+          remoteAudioSource.connect(remoteGainNode);
+          remoteGainNode.connect(ctx.destination);
+        }
+
+        audioEl.play().catch(() => {});
+      } catch (e) {
+        console.warn("Boost audio skipped:", e);
+      }
+    }
 
     function playRingTonePulse(mode = 'incoming') {
       try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) return;
-        if (!audioCtx) audioCtx = new AudioContextClass();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        const ctx = ensureAudioContext();
+        if (!ctx) return;
 
-        const now = audioCtx.currentTime;
+        const now = ctx.currentTime;
         const notes = mode === 'incoming' ? [880, 1174.66] : [659.25];
 
         notes.forEach((freq, idx) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
           osc.type = 'sine';
           osc.frequency.setValueAtTime(freq, now + idx * 0.16);
 
@@ -622,7 +656,7 @@
           gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.16 + 0.14);
 
           osc.connect(gain);
-          gain.connect(audioCtx.destination);
+          gain.connect(ctx.destination);
           osc.start(now + idx * 0.16);
           osc.stop(now + idx * 0.16 + 0.15);
         });
@@ -657,6 +691,7 @@
     let unsubscribeUsers = null;
     let unsubscribeStories = null;
     let unsubscribeIncomingCalls = null;
+    let unsubscribeIncomingCallStatus = null;
     let unsubscribeActiveCallDoc = null;
     let unsubscribeCallCandidates = null;
     let pendingBase64Image = null;
@@ -668,6 +703,7 @@
     let localStream = null;
     let activeCallId = null;
     let incomingCallData = null;
+    let pendingIceCandidates = [];
     let isMicMuted = false;
     let callTimerInterval = null;
     let callSeconds = 0;
@@ -1103,16 +1139,35 @@
     };
 
     // ================= FITUR TELEPON SUARA (WEBRTC + FIRESTORE) =================
+    async function flushPendingIceCandidates() {
+      if (!peerConnection || !peerConnection.remoteDescription) return;
+      while (pendingIceCandidates.length > 0) {
+        const cand = pendingIceCandidates.shift();
+        try {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+        } catch (e) {
+          console.warn("Flush ICE error:", e);
+        }
+      }
+    }
+
     async function setupLocalAudioAndPeer(callId) {
-      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      pendingIceCandidates = [];
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: false
+      });
       peerConnection = new RTCPeerConnection(rtcConfig);
 
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
       peerConnection.ontrack = (event) => {
-        const audioEl = document.getElementById('remoteAudio');
         if (event.streams && event.streams[0]) {
-          audioEl.srcObject = event.streams[0];
+          boostRemoteStreamAudio(event.streams[0]);
         }
       };
 
@@ -1131,15 +1186,36 @@
         snap.docChanges().forEach(async (change) => {
           if (change.type === "added") {
             const data = change.doc.data();
-            if (data.fromUid !== currentUser.uid && peerConnection && peerConnection.remoteDescription) {
-              try {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-              } catch (e) {
-                console.warn("ICE add error:", e);
+            if (data.fromUid !== currentUser.uid && peerConnection) {
+              if (peerConnection.remoteDescription) {
+                try {
+                  await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                } catch (e) {
+                  console.warn("ICE add error:", e);
+                }
+              } else {
+                pendingIceCandidates.push(data.candidate);
               }
             }
           }
         });
+      });
+    }
+
+    function watchIncomingCallCancellation(callId) {
+      if (unsubscribeIncomingCallStatus) {
+        unsubscribeIncomingCallStatus();
+        unsubscribeIncomingCallStatus = null;
+      }
+      unsubscribeIncomingCallStatus = onSnapshot(doc(db, "calls", callId), (snap) => {
+        if (!snap.exists()) return;
+        const d = snap.data();
+        if (incomingCallData && incomingCallData.id === callId && !activeCallId) {
+          if (d.status === "ended" || d.status === "cancelled" || d.status === "rejected") {
+            showToast("Panggilan dibatalkan oleh penelepon.");
+            cleanupCallUI();
+          }
+        }
       });
     }
 
@@ -1166,6 +1242,7 @@
     window.startVoiceCall = async function () {
       if (!activePeer || !currentUser) return;
       try {
+        ensureAudioContext();
         const callDocRef = doc(collection(db, "calls"));
         activeCallId = callDocRef.id;
 
@@ -1195,14 +1272,15 @@
         unsubscribeActiveCallDoc = onSnapshot(callDocRef, async (snap) => {
           if (!snap.exists()) return;
           const d = snap.data();
-          if (d.answer && !peerConnection.currentRemoteDescription) {
+          if (d.answer && peerConnection && !peerConnection.currentRemoteDescription) {
             await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
+            await flushPendingIceCandidates();
           }
           if (d.status === "connected") {
             stopRingSound();
             document.getElementById('callStatusText').textContent = "Terhubung";
             startCallTimer();
-          } else if (d.status === "ended" || d.status === "rejected") {
+          } else if (d.status === "ended" || d.status === "cancelled" || d.status === "rejected") {
             stopRingSound();
             showToast(d.status === "rejected" ? "Panggilan ditolak." : "Panggilan berakhir.");
             cleanupCallUI();
@@ -1222,8 +1300,9 @@
         snap.docChanges().forEach((change) => {
           if (change.type === "added" || change.type === "modified") {
             const data = change.doc.data();
+            const callId = change.doc.id;
             if (data.calleeId === currentUser.uid && data.status === "ringing" && !activeCallId) {
-              incomingCallData = { id: change.doc.id, ...data };
+              incomingCallData = { id: callId, ...data };
               document.getElementById('callPeerAvatar').textContent = (data.callerName || 'U').charAt(0).toUpperCase();
               document.getElementById('callPeerName').textContent = data.callerName || "Pengguna";
               document.getElementById('callStatusText').textContent = "Panggilan suara masuk...";
@@ -1231,6 +1310,15 @@
               document.getElementById('activeCallActions').classList.add('hidden');
               document.getElementById('callModal').classList.remove('hidden');
               startRingSound('incoming');
+              watchIncomingCallCancellation(callId);
+            } else if (
+              incomingCallData &&
+              incomingCallData.id === callId &&
+              !activeCallId &&
+              (data.status === "ended" || data.status === "cancelled" || data.status === "rejected")
+            ) {
+              showToast("Panggilan dibatalkan oleh penelepon.");
+              cleanupCallUI();
             }
           }
         });
@@ -1239,8 +1327,13 @@
 
     window.acceptIncomingCall = async function () {
       stopRingSound();
+      if (unsubscribeIncomingCallStatus) {
+        unsubscribeIncomingCallStatus();
+        unsubscribeIncomingCallStatus = null;
+      }
       if (!incomingCallData) return;
       try {
+        ensureAudioContext();
         activeCallId = incomingCallData.id;
         const callDocRef = doc(db, "calls", activeCallId);
 
@@ -1250,6 +1343,8 @@
 
         await setupLocalAudioAndPeer(activeCallId);
         await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+        await flushPendingIceCandidates();
+
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
 
@@ -1264,7 +1359,7 @@
         unsubscribeActiveCallDoc = onSnapshot(callDocRef, (snap) => {
           if (!snap.exists()) return;
           const d = snap.data();
-          if (d.status === "ended") {
+          if (d.status === "ended" || d.status === "cancelled") {
             stopRingSound();
             showToast("Panggilan berakhir.");
             cleanupCallUI();
@@ -1281,7 +1376,9 @@
     window.rejectIncomingCall = async function () {
       stopRingSound();
       if (incomingCallData?.id) {
-        await updateDoc(doc(db, "calls", incomingCallData.id), { status: "rejected" });
+        try {
+          await updateDoc(doc(db, "calls", incomingCallData.id), { status: "rejected" });
+        } catch (e) {}
       }
       incomingCallData = null;
       cleanupCallUI();
@@ -1308,13 +1405,19 @@
       stopRingSound();
       stopCallTimer();
       isMicMuted = false;
+      pendingIceCandidates = [];
       document.getElementById('btnToggleMute').textContent = "🎙️ Mic On";
       document.getElementById('callModal').classList.add('hidden');
 
+      if (unsubscribeIncomingCallStatus) { unsubscribeIncomingCallStatus(); unsubscribeIncomingCallStatus = null; }
       if (unsubscribeActiveCallDoc) { unsubscribeActiveCallDoc(); unsubscribeActiveCallDoc = null; }
       if (unsubscribeCallCandidates) { unsubscribeCallCandidates(); unsubscribeCallCandidates = null; }
       if (peerConnection) { peerConnection.close(); peerConnection = null; }
       if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+      if (remoteGainNode) {
+        try { remoteGainNode.disconnect(); } catch (e) {}
+        remoteGainNode = null;
+      }
       const audioEl = document.getElementById('remoteAudio');
       if (audioEl) audioEl.srcObject = null;
 
