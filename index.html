@@ -3,51 +3,207 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ArzChat – Chatting Real-Time & Kirim Foto</title>
+  <title>ArzChat – WhatsApp Style Real-Time Chat & Story</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --wa-bg: #0b141a;
+      --wa-panel: #111b21;
+      --wa-header: #202c33;
+      --wa-input: #2a3942;
+      --wa-hover: #202c33;
+      --wa-active: #2a3942;
+      --wa-accent: #00a884;
+      --wa-out: #005c4b;
+      --wa-in: #202c33;
+      --wa-text: #e9edef;
+      --wa-muted: #8696a0;
+      --wa-border: rgba(134, 150, 160, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0b141a;
-      color: #e9edef;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--wa-bg);
+      color: var(--wa-text);
+      margin: 0;
+      padding: 0;
     }
-    .chat-wallpaper {
+
+    .wa-wallpaper {
       background-color: #0b141a;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
-      background-size: 24px 24px;
+      background-image:
+        radial-gradient(rgba(233, 237, 239, 0.045) 1px, transparent 0),
+        radial-gradient(rgba(0, 168, 132, 0.04) 1px, transparent 0);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(134, 150, 160, 0.3); border-radius: 9999px; }
-    .bubble-out { background-color: #005c4b; border-top-right-radius: 2px; }
-    .bubble-in { background-color: #202c33; border-top-left-radius: 2px; }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(134, 150, 160, 0.28);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(134, 150, 160, 0.45);
+    }
+
+    .bubble-out {
+      background-color: var(--wa-out);
+      border-radius: 10px;
+      border-top-right-radius: 2px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    }
+
+    .bubble-in {
+      background-color: var(--wa-in);
+      border-radius: 10px;
+      border-top-left-radius: 2px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    }
+
+    .status-ring {
+      background: conic-gradient(#00a884 0deg 360deg);
+      padding: 2px;
+      border-radius: 9999px;
+    }
+
+    .status-ring-seen {
+      background: conic-gradient(#54656f 0deg 360deg);
+      padding: 2px;
+      border-radius: 9999px;
+    }
   </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col">
+<body class="h-screen w-screen overflow-hidden flex flex-col select-none sm:select-auto">
 
   <!-- TOAST NOTIFIKASI -->
-  <div id="toastBox" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#202c33] border border-white/10 text-sm text-[#e9edef] px-4 py-2.5 rounded-full shadow-2xl max-w-[90vw] text-center"></div>
+  <div id="toastBox" class="hidden fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#233138] border border-white/10 text-xs sm:text-sm text-[#e9edef] px-4 py-2.5 rounded-full shadow-2xl max-w-[90vw] text-center"></div>
 
-  <!-- LIGHTBOX PRATINJAU FOTO -->
-  <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onclick="closeLightbox()">
-    <button class="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 rounded-full p-2">✕</button>
-    <img id="lightboxImg" src="" alt="Preview" class="max-h-[90vh] max-w-[95vw] rounded-lg object-contain" />
+  <!-- LIGHTBOX PRATINJAU FOTO CHAT -->
+  <div id="lightboxModal" class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4" onclick="closeLightbox()">
+    <button class="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center text-lg transition">✕</button>
+    <img id="lightboxImg" src="" alt="Preview" class="max-h-[90vh] max-w-[95vw] rounded-xl object-contain shadow-2xl" />
+  </div>
+
+  <!-- MODAL BUAT STORY / STATUS -->
+  <div id="createStoryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-[#111b21] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+      <div class="px-5 py-4 bg-[#202c33] flex items-center justify-between border-b border-white/10">
+        <h3 class="font-semibold text-white text-base">Buat Status / Story Baru</h3>
+        <button onclick="closeCreateStoryModal()" class="text-[#8696a0] hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4">
+        <!-- Pratinjau Story -->
+        <div id="storyPreviewBox" class="w-full h-56 rounded-2xl flex flex-col items-center justify-center p-5 text-center relative overflow-hidden border border-white/10 transition-colors" style="background: linear-gradient(135deg, #005c4b 0%, #0b141a 100%);">
+          <img id="storyPreviewImg" src="" alt="" class="hidden w-full h-full object-cover absolute inset-0" />
+          <div id="storyPreviewOverlay" class="hidden absolute inset-0 bg-black/35"></div>
+          <p id="storyPreviewText" class="relative z-10 text-white font-semibold text-lg break-words max-w-full drop-shadow">Tulis status kamu di sini...</p>
+        </div>
+
+        <!-- Pilihan Warna Latar Story -->
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs text-[#8696a0]">Warna Latar:</span>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #005c4b 0%, #0b141a 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#00a884"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #1d4ed8 0%, #0f172a 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#2563eb"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #7e22ce 0%, #1e1b4b 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#9333ea"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #be123c 0%, #1c1917 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#e11d48"></button>
+            <button type="button" onclick="setStoryBg('linear-gradient(135deg, #b45309 0%, #1c1917 100%)')" class="w-6 h-6 rounded-full border border-white/30" style="background:#d97706"></button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-[#8696a0] mb-1.5">Teks / Keterangan Status</label>
+          <textarea id="storyTextInput" rows="2" maxlength="180" oninput="updateStoryPreview()" placeholder="Apa yang sedang kamu lakukan?"
+            class="w-full bg-[#202c33] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-[#8696a0] focus:outline-none focus:border-[#00a884] resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between gap-3">
+          <label class="flex-1 cursor-pointer bg-[#202c33] hover:bg-[#2a3942] border border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-[#e9edef] flex items-center justify-center gap-2 transition">
+            <input id="storyPhotoInput" type="file" accept="image/*" class="hidden" onchange="handleStoryPhotoSelect(event)" />
+            <span>📷 Pilih Foto Story</span>
+          </label>
+          <button id="btnClearStoryPhoto" type="button" onclick="clearStoryPhoto()" class="hidden text-xs text-rose-400 hover:underline px-2">Hapus Foto</button>
+        </div>
+
+        <button id="btnPublishStory" onclick="publishStory()"
+          class="w-full bg-[#00a884] hover:bg-[#029676] text-[#111b21] font-semibold py-2.5 rounded-xl text-sm transition cursor-pointer">
+          Bagikan Status Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENONTON STORY / STATUS -->
+  <div id="storyViewerModal" class="hidden fixed inset-0 z-50 bg-[#0b141a] flex flex-col justify-between p-4 sm:p-6">
+    <!-- Progress Bar -->
+    <div class="w-full max-w-lg mx-auto flex gap-1.5 pt-1">
+      <div class="h-1 flex-1 bg-white/25 rounded-full overflow-hidden">
+        <div id="storyProgressFill" class="h-full bg-[#00a884] w-full transition-all duration-300"></div>
+      </div>
+    </div>
+
+    <!-- Header Story Viewer -->
+    <div class="w-full max-w-lg mx-auto flex items-center justify-between mt-3">
+      <div class="flex items-center gap-3">
+        <div id="viewerAvatar" class="w-10 h-10 rounded-full bg-[#00a884] text-[#111b21] font-bold flex items-center justify-center">U</div>
+        <div>
+          <p id="viewerName" class="text-sm font-semibold text-white">Pengguna</p>
+          <p id="viewerTime" class="text-xs text-[#8696a0]">Baru saja</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnDeleteMyStory" onclick="deleteCurrentStory()" class="hidden text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 px-3 py-1.5 rounded-lg">
+          Hapus
+        </button>
+        <button onclick="closeStoryViewer()" class="text-white/80 hover:text-white bg-white/10 rounded-full w-9 h-9 flex items-center justify-center">✕</button>
+      </div>
+    </div>
+
+    <!-- Konten Utama Story -->
+    <div id="storyViewerCanvas" class="w-full max-w-lg mx-auto my-auto h-[65vh] max-h-[540px] rounded-2xl flex flex-col items-center justify-center p-6 text-center relative overflow-hidden border border-white/10 shadow-2xl">
+      <img id="storyViewerImg" src="" alt="Story" class="hidden w-full h-full object-contain bg-black" />
+      <div id="storyViewerCaptionWrap" class="px-4 py-3 rounded-xl max-w-md">
+        <p id="storyViewerText" class="text-white text-xl sm:text-2xl font-semibold break-words leading-snug"></p>
+      </div>
+    </div>
+
+    <!-- Navigasi Prev / Next -->
+    <div class="w-full max-w-lg mx-auto flex items-center justify-between gap-4 pt-2">
+      <button onclick="prevStory()" class="flex-1 py-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] text-xs font-medium text-[#e9edef] transition">
+        ← Sebelumnya
+      </button>
+      <button onclick="nextStory()" class="flex-1 py-2.5 rounded-xl bg-[#202c33] hover:bg-[#2a3942] text-xs font-medium text-[#e9edef] transition">
+        Berikutnya →
+      </button>
+    </div>
   </div>
 
   <!-- HALAMAN LOGIN / DAFTAR NOMOR HP + SMS OTP -->
   <div id="authScreen" class="flex-1 flex items-center justify-center p-4 bg-[#0b141a] overflow-y-auto">
     <div class="w-full max-w-md bg-[#111b21] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl">
       <div class="flex flex-col items-center text-center mb-6">
-        <div class="w-14 h-14 rounded-2xl bg-[#00a884] flex items-center justify-center shadow-lg mb-3">
-          <svg class="w-8 h-8 text-[#111b21]" fill="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 rounded-2xl bg-[#00a884] flex items-center justify-center shadow-lg mb-3">
+          <svg class="w-9 h-9 text-[#111b21]" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.03 2 11c0 2.39 1.05 4.56 2.76 6.16L3.6 21.4a.75.75 0 0 0 .97.92l4.52-1.5A10.7 10.7 0 0 0 12 20c5.52 0 10-4.03 10-9s-4.48-9-10-9Z"/>
           </svg>
         </div>
         <h1 class="text-2xl font-bold tracking-tight text-white">ArzChat</h1>
-        <p class="text-xs text-[#8696a0] mt-1">Verifikasi Nomor HP Resmi via SMS OTP</p>
+        <p class="text-xs text-[#8696a0] mt-1">Pesan Real-Time, Kirim Foto & Status ala WhatsApp</p>
       </div>
 
       <!-- STEP 1: INPUT NAMA & NOMOR HP -->
@@ -68,7 +224,6 @@
           <p id="phoneError" class="hidden text-xs text-rose-400 mt-1.5"></p>
         </div>
 
-        <!-- Container wajib untuk reCAPTCHA Firebase Phone Auth -->
         <div id="recaptcha-container" class="flex justify-center"></div>
 
         <button id="btnSendOtp" onclick="sendRealOtp()"
@@ -79,7 +234,7 @@
 
       <!-- STEP 2: VERIFIKASI 6 DIGIT KODE OTP -->
       <div id="stepOtp" class="hidden space-y-4">
-        <div class="bg-[#202c33]/70 border border-white/5 rounded-xl p-3.5 text-center">
+        <div class="bg-[#202c33]/80 border border-white/10 rounded-xl p-3.5 text-center">
           <p class="text-xs text-[#8696a0]">Kode OTP SMS telah dikirim ke</p>
           <p id="displayPhone" class="text-sm font-semibold text-[#00a884] mt-0.5">+62 812-3456-7890</p>
           <button onclick="resetToPhoneStep()" class="text-xs text-[#8696a0] underline hover:text-white mt-1.5">Ganti nomor HP</button>
@@ -99,74 +254,162 @@
     </div>
   </div>
 
-  <!-- HALAMAN UTAMA APLIKASI CHAT -->
+  <!-- HALAMAN UTAMA APLIKASI CHAT ALA WHATSAPP -->
   <div id="appScreen" class="hidden flex-1 flex h-full w-full overflow-hidden">
-    <!-- SIDEBAR DAFTAR CHAT & PENGGUNA TERDAFTAR -->
-    <div id="sidebarPanel" class="w-full md:w-[360px] lg:w-[400px] bg-[#111b21] border-r border-white/10 flex flex-col h-full">
+
+    <!-- SIDEBAR KIRI (WHATSAPP STYLE) -->
+    <aside id="sidebarPanel" class="w-full md:w-[380px] lg:w-[420px] bg-[#111b21] border-r border-white/10 flex flex-col h-full shrink-0">
+
       <!-- Header Profil -->
-      <div class="px-4 py-3 bg-[#202c33] flex items-center justify-between">
+      <div class="px-4 py-3 bg-[#202c33] flex items-center justify-between border-b border-white/5">
         <div class="flex items-center gap-3 min-w-0">
-          <div id="myAvatar" class="w-10 h-10 rounded-full bg-[#00a884] text-[#111b21] font-bold flex items-center justify-center shrink-0">A</div>
+          <div id="myAvatar" class="w-10 h-10 rounded-full bg-[#00a884] text-[#111b21] font-bold flex items-center justify-center shrink-0 text-base">A</div>
           <div class="min-w-0">
             <h2 id="myNameDisplay" class="text-sm font-semibold text-white truncate">Pengguna</h2>
-            <p id="myPhoneDisplay" class="text-xs text-[#8696a0] truncate">+62...</p>
+            <p id="myPhoneDisplay" class="text-[11px] text-[#8696a0] truncate">+62...</p>
           </div>
         </div>
-        <button onclick="logoutUser()" title="Keluar" class="text-xs bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 px-3 py-1.5 rounded-lg">
-          Keluar
+        <div class="flex items-center gap-2">
+          <button onclick="openCreateStoryModal()" title="Buat Status / Story"
+            class="text-xs bg-[#00a884]/15 hover:bg-[#00a884]/25 text-[#00a884] font-medium px-2.5 py-1.5 rounded-lg transition cursor-pointer">
+            + Story
+          </button>
+          <button onclick="logoutUser()" title="Keluar"
+            class="text-xs bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 px-2.5 py-1.5 rounded-lg transition cursor-pointer">
+            Keluar
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Navigasi WhatsApp (Chats & Status/Story) -->
+      <div class="grid grid-cols-2 bg-[#111b21] border-b border-white/10 text-xs font-semibold">
+        <button id="tabChatsBtn" onclick="switchSidebarTab('chats')"
+          class="py-3 text-[#00a884] border-b-2 border-[#00a884] flex items-center justify-center gap-2 transition cursor-pointer">
+          <span>Chats</span>
+          <span id="userCountBadge" class="bg-[#202c33] text-[#8696a0] px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+        </button>
+        <button id="tabStatusBtn" onclick="switchSidebarTab('status')"
+          class="py-3 text-[#8696a0] hover:text-white border-b-2 border-transparent flex items-center justify-center gap-2 transition cursor-pointer">
+          <span>Status</span>
+          <span id="storyCountBadge" class="bg-[#00a884]/20 text-[#00a884] px-1.5 py-0.5 rounded-full text-[10px]">0</span>
         </button>
       </div>
 
-      <!-- Pencarian Kontak Terdaftar -->
-      <div class="p-3 border-b border-white/5">
-        <input id="searchUserInput" oninput="renderUserList()" type="text" placeholder="Cari nama atau nomor HP terdaftar..."
-          class="w-full bg-[#202c33] rounded-xl px-3.5 py-2 text-xs text-white placeholder-[#8696a0] focus:outline-none" />
+      <!-- KONTEN TAB 1: CHATS & KONTAK -->
+      <div id="sidebarChatsView" class="flex-1 flex flex-col min-h-0">
+        <div class="p-2.5 border-b border-white/5 bg-[#111b21]">
+          <div class="bg-[#202c33] rounded-xl px-3.5 py-2 flex items-center gap-2">
+            <span class="text-[#8696a0] text-xs">🔍</span>
+            <input id="searchUserInput" oninput="renderUserList()" type="text" placeholder="Cari nama atau nomor HP terdaftar..."
+              class="w-full bg-transparent text-xs text-white placeholder-[#8696a0] focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#00a884] bg-[#111b21]/80">
+          Kontak Terdaftar
+        </div>
+
+        <div id="userListContainer" class="flex-1 overflow-y-auto divide-y divide-white/[0.04]"></div>
       </div>
 
-      <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#00a884] bg-[#111b21]">
-        Pengguna Terdaftar Online (<span id="userCount">0</span>)
+      <!-- KONTEN TAB 2: STATUS / STORY -->
+      <div id="sidebarStatusView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto">
+        <!-- Status Saya -->
+        <div onclick="handleMyStatusClick()" class="px-4 py-3.5 flex items-center justify-between hover:bg-[#202c33]/70 cursor-pointer border-b border-white/10 transition">
+          <div class="flex items-center gap-3 min-w-0">
+            <div id="myStoryRing" class="rounded-full shrink-0">
+              <div class="w-12 h-12 rounded-full bg-[#2a3942] text-[#00a884] font-bold flex items-center justify-center text-base relative">
+                <span id="myStoryAvatarLetter">A</span>
+                <span class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#00a884] text-[#111b21] text-xs font-bold flex items-center justify-center border-2 border-[#111b21]">+</span>
+              </div>
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-semibold text-white truncate">Status Saya</p>
+              <p id="myStorySubtitle" class="text-xs text-[#8696a0] truncate">Ketuk untuk menambah pembaruan status</p>
+            </div>
+          </div>
+          <button type="button" onclick="event.stopPropagation(); openCreateStoryModal();"
+            class="text-xs bg-[#202c33] hover:bg-[#2a3942] text-[#00a884] px-2.5 py-1.5 rounded-lg">
+            Buat
+          </button>
+        </div>
+
+        <div class="px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#8696a0] bg-[#111b21]/70">
+          Pembaruan Terbaru Kontak
+        </div>
+
+        <div id="storyListContainer" class="flex-1 divide-y divide-white/[0.04]"></div>
       </div>
+    </aside>
 
-      <!-- List Pengguna -->
-      <div id="userListContainer" class="flex-1 overflow-y-auto divide-y divide-white/5"></div>
-    </div>
+    <!-- RUANG OBROLAN KANAN -->
+    <main id="chatPanel" class="hidden md:flex flex-1 flex-col h-full wa-wallpaper min-w-0">
 
-    <!-- RUANG OBROLAN -->
-    <div id="chatPanel" class="hidden md:flex flex-1 flex-col h-full chat-wallpaper">
-      <!-- Placeholder Belum Pilih Chat -->
+      <!-- Tampilan Kosong Sebelum Memilih Kontak -->
       <div id="emptyChatState" class="flex-1 flex flex-col items-center justify-center text-center p-6">
-        <div class="w-16 h-16 rounded-full bg-[#202c33] flex items-center justify-center mb-4 text-2xl">💬</div>
-        <h3 class="text-lg font-semibold text-white">ArzChat Web & Mobile</h3>
-        <p class="text-xs text-[#8696a0] max-w-xs mt-1">Pilih salah satu pengguna terdaftar di daftar kontak untuk mulai mengirim pesan dan foto secara real-time.</p>
+        <div class="w-20 h-20 rounded-full bg-[#202c33] flex items-center justify-center mb-4 text-3xl shadow-lg">💬</div>
+        <h3 class="text-xl font-semibold text-white">ArzChat Web</h3>
+        <p class="text-xs sm:text-sm text-[#8696a0] max-w-sm mt-2 leading-relaxed">
+          Kirim dan terima pesan teks serta foto secara real-time, dan bagikan Status/Story kepada kontak terdaftar.
+        </p>
+        <div class="mt-5 text-[11px] text-[#8696a0] flex items-center gap-1.5">
+          <span>🔒</span>
+          <span>Terhubung langsung ke Firebase Firestore</span>
+        </div>
       </div>
 
-      <!-- Aktif Chat -->
-      <div id="activeChatBox" class="hidden flex-1 flex flex-col h-full">
-        <!-- Header Lawan Bicara -->
-        <div class="px-4 py-3 bg-[#202c33] border-b border-white/10 flex items-center gap-3">
-          <button onclick="backToSidebar()" class="md:hidden text-[#8696a0] hover:text-white p-1">←</button>
-          <div id="peerAvatar" class="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shrink-0">U</div>
-          <div class="min-w-0 flex-1">
-            <h3 id="peerName" class="text-sm font-semibold text-white truncate">Nama Kontak</h3>
-            <p id="peerPhone" class="text-xs text-[#8696a0] truncate">+62...</p>
+      <!-- Ruang Chat Aktif -->
+      <div id="activeChatBox" class="hidden flex-1 flex flex-col h-full min-h-0">
+
+        <!-- Header Kontak Aktif -->
+        <div class="px-4 py-2.5 bg-[#202c33] border-b border-white/10 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3 min-w-0">
+            <button onclick="backToSidebar()" class="md:hidden text-[#8696a0] hover:text-white p-1.5 rounded-lg">←</button>
+            <div id="peerAvatar" class="w-10 h-10 rounded-full bg-[#00a884]/20 text-[#00a884] font-bold flex items-center justify-center text-sm shrink-0">U</div>
+            <div class="min-w-0">
+              <h3 id="peerName" class="text-sm font-semibold text-white truncate">Nama Kontak</h3>
+              <p id="peerPhone" class="text-[11px] text-[#8696a0] truncate">+62...</p>
+            </div>
           </div>
         </div>
 
-        <!-- Area Pesan -->
-        <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-2.5"></div>
+        <!-- Daftar Pesan -->
+        <div id="messagesContainer" class="flex-1 overflow-y-auto px-4 sm:px-8 py-4 space-y-2"></div>
 
-        <!-- Pratinjau Foto Sebelum Kirim -->
-        <div id="imagePreviewBar" class="hidden px-4 py-2.5 bg-[#182229] border-t border-white/10 flex items-center justify-between">
+        <!-- Pratinjau Foto Sebelum Dikirim -->
+        <div id="imagePreviewBar" class="hidden px-4 py-2.5 bg-[#182229] border-t border-white/10 flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3">
-            <img id="previewThumb" src="" class="w-12 h-12 rounded-lg object-cover border border-white/10" />
-            <span class="text-xs text-[#8696a0]">Foto siap dikirim</span>
+            <img id="previewThumb" src="" alt="Thumb" class="w-12 h-12 rounded-lg object-cover border border-white/15" />
+            <div>
+              <p class="text-xs font-medium text-white">Foto siap dikirim</p>
+              <p class="text-[11px] text-[#8696a0]">Tambahkan pesan atau langsung tekan kirim</p>
+            </div>
           </div>
-          <button onclick="clearSelectedImage()" class="text-xs text-rose-400 hover:underline">Batal</button>
+          <button onclick="clearSelectedImage()" class="text-xs text-rose-400 hover:underline px-2 py-1">Batal</button>
         </div>
 
-        <!-- Input Kirim Pesan & Foto -->
-        <div class="p-3 bg-[#202c33] flex items-center gap-2">
-          <label class="cursor-pointer p-2.5 rounded-full hover:bg-white/10 text-[#8696a0] hover:text-white transition" title="Kirim Foto">
+        <!-- Panel Emoji Cepat -->
+        <div id="emojiPickerBar" class="hidden px-4 py-2 bg-[#182229] border-t border-white/10 flex items-center gap-2 overflow-x-auto shrink-0">
+          <button type="button" onclick="insertEmoji('😀')" class="text-xl hover:scale-110 transition">😀</button>
+          <button type="button" onclick="insertEmoji('😂')" class="text-xl hover:scale-110 transition">😂</button>
+          <button type="button" onclick="insertEmoji('🥰')" class="text-xl hover:scale-110 transition">🥰</button>
+          <button type="button" onclick="insertEmoji('😎')" class="text-xl hover:scale-110 transition">😎</button>
+          <button type="button" onclick="insertEmoji('👍')" class="text-xl hover:scale-110 transition">👍</button>
+          <button type="button" onclick="insertEmoji('🙏')" class="text-xl hover:scale-110 transition">🙏</button>
+          <button type="button" onclick="insertEmoji('🔥')" class="text-xl hover:scale-110 transition">🔥</button>
+          <button type="button" onclick="insertEmoji('❤️')" class="text-xl hover:scale-110 transition">❤️</button>
+          <button type="button" onclick="insertEmoji('✅')" class="text-xl hover:scale-110 transition">✅</button>
+          <button type="button" onclick="insertEmoji('🚀')" class="text-xl hover:scale-110 transition">🚀</button>
+        </div>
+
+        <!-- Bar Input Pesan & Foto -->
+        <div class="px-3 py-2.5 bg-[#202c33] flex items-center gap-2 border-t border-white/5 shrink-0">
+          <button type="button" onclick="toggleEmojiPicker()" title="Emoji"
+            class="p-2 rounded-full hover:bg-white/10 text-[#8696a0] hover:text-white transition text-lg leading-none cursor-pointer">
+            😊
+          </button>
+
+          <label class="cursor-pointer p-2 rounded-full hover:bg-white/10 text-[#8696a0] hover:text-white transition cursor-pointer" title="Kirim Foto">
             <input id="photoInput" type="file" accept="image/*" class="hidden" onchange="handleImageSelect(event)" />
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -175,33 +418,37 @@
             </svg>
           </label>
 
-          <input id="messageInput" type="text" placeholder="Ketik pesan..." onkeydown="if(event.key==='Enter') sendMessage()"
+          <input id="messageInput" type="text" placeholder="Ketik pesan" onkeydown="if(event.key==='Enter') sendMessage()"
             class="flex-1 bg-[#2a3942] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#8696a0] focus:outline-none" />
 
-          <button onclick="sendMessage()" class="bg-[#00a884] hover:bg-[#029676] text-[#111b21] p-2.5 rounded-xl font-semibold transition cursor-pointer">
+          <button onclick="sendMessage()" title="Kirim"
+            class="bg-[#00a884] hover:bg-[#029676] text-[#111b21] p-2.5 rounded-xl font-semibold transition cursor-pointer shrink-0">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
             </svg>
           </button>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <!-- FIREBASE SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      getFirestore, doc, setDoc, getDoc, collection, onSnapshot,
+      addDoc, deleteDoc, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDwyF6Sk_vxjAolh-ez97N3x84IO0_U5NQ",
+      apiKey: "AIzaSyDwyF6Sk_vxjAolh-ez97N3x84I00_U5NQ",
       authDomain: "arzchat-8c3ba.firebaseapp.com",
       projectId: "arzchat-8c3ba",
       storageBucket: "arzchat-8c3ba.firebasestorage.app",
       messagingSenderId: "590098283533",
       appId: "1:590098283533:web:9fd4d84629e9473e252944"
-    }; //[cite: 11]
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -211,9 +458,16 @@
     let confirmationResult = null;
     let currentUser = null;
     let allUsers = [];
+    let allStories = [];
+    let viewerStoryList = [];
+    let viewerStoryIndex = 0;
     let activePeer = null;
     let unsubscribeMessages = null;
+    let unsubscribeUsers = null;
+    let unsubscribeStories = null;
     let pendingBase64Image = null;
+    let pendingStoryImage = null;
+    let selectedStoryBg = "linear-gradient(135deg, #005c4b 0%, #0b141a 100%)";
 
     function showToast(msg) {
       const box = document.getElementById('toastBox');
@@ -223,29 +477,52 @@
       window._toastTimer = setTimeout(() => box.classList.add('hidden'), 4000);
     }
 
-    // Validasi ketat nomor HP Indonesia agar nomor asal seperti 55555555 tertolak
+    function formatTimeShort(ts) {
+      if (!ts) return "";
+      const date = ts.toDate ? ts.toDate() : new Date(ts);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+
     function validateIndoPhone(rawInput) {
       let digits = rawInput.replace(/\D/g, '');
       if (digits.startsWith('62')) digits = digits.slice(2);
       if (digits.startsWith('0')) digits = digits.slice(1);
 
-      // Wajib diawali angka 8 (prefix seluler Indonesia: 81x, 82x, 83x, 85x, 87x, 88x, 89x)
       if (!/^8[1-9][0-9]{7,10}$/.test(digits)) {
         return { valid: false, error: "Nomor harus nomor seluler Indonesia aktif (contoh: 81234567890)." };
       }
-      // Tolak angka berulang semua (misal 8888888888) atau urutan berulang
       if (/^(\d)\1+$/.test(digits) || digits.includes('1234567') || digits.includes('000000')) {
         return { valid: false, error: "Nomor tidak valid. Gunakan nomor HP pribadi yang aktif." };
       }
       return { valid: true, formatted: `+62${digits}` };
     }
 
-    // Inisialisasi reCAPTCHA Firebase
-    window.addEventListener('DOMContentLoaded', () => {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'normal'
+    function compressDataUrl(dataUrl, maxWidth, quality) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(1, maxWidth / img.width);
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = dataUrl;
       });
-      window.recaptchaVerifier.render();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'normal'
+        });
+        window.recaptchaVerifier.render();
+      } catch (e) {
+        console.warn("reCAPTCHA init:", e);
+      }
     });
 
     window.sendRealOtp = async function () {
@@ -338,18 +615,44 @@
         document.getElementById('appScreen').classList.remove('hidden');
         document.getElementById('myNameDisplay').textContent = profile.name;
         document.getElementById('myPhoneDisplay').textContent = profile.phone;
-        document.getElementById('myAvatar').textContent = profile.name.charAt(0).toUpperCase();
+        const initial = (profile.name || "A").charAt(0).toUpperCase();
+        document.getElementById('myAvatar').textContent = initial;
+        document.getElementById('myStoryAvatarLetter').textContent = initial;
 
         listenUsers();
+        listenStories();
       } else {
         currentUser = null;
+        if (unsubscribeUsers) unsubscribeUsers();
+        if (unsubscribeStories) unsubscribeStories();
+        if (unsubscribeMessages) unsubscribeMessages();
         document.getElementById('appScreen').classList.add('hidden');
         document.getElementById('authScreen').classList.remove('hidden');
       }
     });
 
+    window.switchSidebarTab = function (tab) {
+      const chatsBtn = document.getElementById('tabChatsBtn');
+      const statusBtn = document.getElementById('tabStatusBtn');
+      const chatsView = document.getElementById('sidebarChatsView');
+      const statusView = document.getElementById('sidebarStatusView');
+
+      if (tab === 'chats') {
+        chatsBtn.className = "py-3 text-[#00a884] border-b-2 border-[#00a884] flex items-center justify-center gap-2 transition cursor-pointer";
+        statusBtn.className = "py-3 text-[#8696a0] hover:text-white border-b-2 border-transparent flex items-center justify-center gap-2 transition cursor-pointer";
+        chatsView.classList.remove('hidden');
+        statusView.classList.add('hidden');
+      } else {
+        statusBtn.className = "py-3 text-[#00a884] border-b-2 border-[#00a884] flex items-center justify-center gap-2 transition cursor-pointer";
+        chatsBtn.className = "py-3 text-[#8696a0] hover:text-white border-b-2 border-transparent flex items-center justify-center gap-2 transition cursor-pointer";
+        statusView.classList.remove('hidden');
+        chatsView.classList.add('hidden');
+      }
+    };
+
     function listenUsers() {
-      onSnapshot(collection(db, "users"), (snapshot) => {
+      if (unsubscribeUsers) unsubscribeUsers();
+      unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
         allUsers = [];
         snapshot.forEach((d) => {
           if (d.id !== currentUser.uid) allUsers.push(d.data());
@@ -359,30 +662,34 @@
     }
 
     window.renderUserList = function () {
-      const keyword = document.getElementById('searchUserInput').value.toLowerCase();
+      const keyword = (document.getElementById('searchUserInput').value || '').toLowerCase();
       const filtered = allUsers.filter(u =>
         (u.name || '').toLowerCase().includes(keyword) ||
         (u.phone || '').includes(keyword)
       );
-      document.getElementById('userCount').textContent = filtered.length;
+      document.getElementById('userCountBadge').textContent = filtered.length;
       const container = document.getElementById('userListContainer');
       container.innerHTML = '';
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-xs text-[#8696a0]">Belum ada pengguna lain yang terdaftar.</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-xs text-[#8696a0]">Belum ada pengguna lain yang terdaftar.</div>`;
         return;
       }
 
       filtered.forEach((u) => {
+        const isSelected = activePeer && activePeer.uid === u.uid;
         const item = document.createElement('div');
-        item.className = "px-4 py-3 flex items-center gap-3 hover:bg-[#202c33] cursor-pointer transition";
+        item.className = `px-4 py-3 flex items-center gap-3 ${isSelected ? 'bg-[#2a3942]' : 'hover:bg-[#202c33]'} cursor-pointer transition`;
         item.onclick = () => openChatWith(u);
         item.innerHTML = `
-          <div class="w-11 h-11 rounded-full bg-[#2a3942] text-[#00a884] font-bold flex items-center justify-center shrink-0">
+          <div class="w-11 h-11 rounded-full bg-[#2a3942] text-[#00a884] font-bold flex items-center justify-center shrink-0 text-base">
             ${(u.name || 'U').charAt(0).toUpperCase()}
           </div>
           <div class="min-w-0 flex-1">
-            <div class="text-sm font-medium text-white truncate">${u.name}</div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm font-semibold text-white truncate">${u.name}</span>
+              <span class="text-[10px] text-[#00a884]">Online</span>
+            </div>
             <div class="text-xs text-[#8696a0] truncate">${u.phone}</div>
           </div>
         `;
@@ -390,19 +697,255 @@
       });
     };
 
+    // ================= FITUR STATUS / STORY =================
+    function listenStories() {
+      if (unsubscribeStories) unsubscribeStories();
+      const q = query(collection(db, "stories"), orderBy("createdAt", "desc"));
+      unsubscribeStories = onSnapshot(q, (snapshot) => {
+        allStories = [];
+        snapshot.forEach((d) => {
+          allStories.push({ id: d.id, ...d.data() });
+        });
+        renderStories();
+      });
+    }
+
+    function renderStories() {
+      if (!currentUser) return;
+      const myStories = allStories.filter(s => s.userId === currentUser.uid);
+      const otherStories = allStories.filter(s => s.userId !== currentUser.uid);
+
+      document.getElementById('storyCountBadge').textContent = allStories.length;
+
+      const myRing = document.getElementById('myStoryRing');
+      const mySub = document.getElementById('myStorySubtitle');
+      if (myStories.length > 0) {
+        myRing.className = "status-ring shrink-0";
+        const lastTime = formatTimeShort(myStories[0].createdAt);
+        mySub.textContent = `${myStories.length} status aktif • ${lastTime || 'Baru saja'}`;
+      } else {
+        myRing.className = "rounded-full shrink-0";
+        mySub.textContent = "Ketuk untuk menambah pembaruan status";
+      }
+
+      const container = document.getElementById('storyListContainer');
+      container.innerHTML = '';
+
+      if (otherStories.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-xs text-[#8696a0]">Belum ada status dari kontak lain.</div>`;
+        return;
+      }
+
+      otherStories.forEach((st, idx) => {
+        const row = document.createElement('div');
+        row.className = "px-4 py-3 flex items-center gap-3 hover:bg-[#202c33] cursor-pointer transition";
+        row.onclick = () => openStoryViewer(otherStories, idx);
+        row.innerHTML = `
+          <div class="status-ring shrink-0">
+            <div class="w-11 h-11 rounded-full bg-[#2a3942] text-white font-bold flex items-center justify-center text-sm">
+              ${(st.userName || 'U').charAt(0).toUpperCase()}
+            </div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-white truncate">${st.userName || 'Pengguna'}</p>
+            <p class="text-xs text-[#8696a0] truncate">${st.text ? st.text : '📷 Foto Story'} • ${formatTimeShort(st.createdAt) || 'Baru saja'}</p>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    window.handleMyStatusClick = function () {
+      if (!currentUser) return;
+      const myStories = allStories.filter(s => s.userId === currentUser.uid);
+      if (myStories.length > 0) {
+        openStoryViewer(myStories, 0);
+      } else {
+        openCreateStoryModal();
+      }
+    };
+
+    window.openCreateStoryModal = function () {
+      pendingStoryImage = null;
+      selectedStoryBg = "linear-gradient(135deg, #005c4b 0%, #0b141a 100%)";
+      document.getElementById('storyTextInput').value = '';
+      document.getElementById('storyPhotoInput').value = '';
+      document.getElementById('storyPreviewImg').classList.add('hidden');
+      document.getElementById('storyPreviewOverlay').classList.add('hidden');
+      document.getElementById('btnClearStoryPhoto').classList.add('hidden');
+      document.getElementById('storyPreviewBox').style.background = selectedStoryBg;
+      document.getElementById('storyPreviewText').textContent = "Tulis status kamu di sini...";
+      document.getElementById('createStoryModal').classList.remove('hidden');
+    };
+
+    window.closeCreateStoryModal = function () {
+      document.getElementById('createStoryModal').classList.add('hidden');
+    };
+
+    window.setStoryBg = function (grad) {
+      selectedStoryBg = grad;
+      if (!pendingStoryImage) {
+        document.getElementById('storyPreviewBox').style.background = grad;
+      }
+    };
+
+    window.updateStoryPreview = function () {
+      const val = document.getElementById('storyTextInput').value.trim();
+      document.getElementById('storyPreviewText').textContent = val || (pendingStoryImage ? "" : "Tulis status kamu di sini...");
+    };
+
+    window.handleStoryPhotoSelect = function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        pendingStoryImage = await compressDataUrl(ev.target.result, 900, 0.72);
+        const imgEl = document.getElementById('storyPreviewImg');
+        imgEl.src = pendingStoryImage;
+        imgEl.classList.remove('hidden');
+        document.getElementById('storyPreviewOverlay').classList.remove('hidden');
+        document.getElementById('btnClearStoryPhoto').classList.remove('hidden');
+        updateStoryPreview();
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.clearStoryPhoto = function () {
+      pendingStoryImage = null;
+      document.getElementById('storyPhotoInput').value = '';
+      document.getElementById('storyPreviewImg').classList.add('hidden');
+      document.getElementById('storyPreviewOverlay').classList.add('hidden');
+      document.getElementById('btnClearStoryPhoto').classList.add('hidden');
+      document.getElementById('storyPreviewBox').style.background = selectedStoryBg;
+      updateStoryPreview();
+    };
+
+    window.publishStory = async function () {
+      if (!currentUser) return;
+      const text = document.getElementById('storyTextInput').value.trim();
+      if (!text && !pendingStoryImage) {
+        showToast("Isi teks status atau pilih foto terlebih dahulu.");
+        return;
+      }
+
+      const btn = document.getElementById('btnPublishStory');
+      btn.disabled = true;
+      btn.textContent = "Membagikan...";
+
+      try {
+        await addDoc(collection(db, "stories"), {
+          userId: currentUser.uid,
+          userName: currentUser.name,
+          userPhone: currentUser.phone,
+          text: text,
+          image: pendingStoryImage || null,
+          bg: selectedStoryBg,
+          createdAt: serverTimestamp()
+        });
+        closeCreateStoryModal();
+        showToast("Status berhasil dibagikan!");
+      } catch (err) {
+        console.error(err);
+        showToast("Gagal membagikan status.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Bagikan Status Sekarang";
+      }
+    };
+
+    function openStoryViewer(list, startIndex) {
+      viewerStoryList = list;
+      viewerStoryIndex = startIndex;
+      renderStorySlide();
+      document.getElementById('storyViewerModal').classList.remove('hidden');
+    }
+
+    function renderStorySlide() {
+      const item = viewerStoryList[viewerStoryIndex];
+      if (!item) {
+        closeStoryViewer();
+        return;
+      }
+
+      document.getElementById('viewerAvatar').textContent = (item.userName || 'U').charAt(0).toUpperCase();
+      document.getElementById('viewerName').textContent = item.userName || 'Pengguna';
+      document.getElementById('viewerTime').textContent = formatTimeShort(item.createdAt) || 'Baru saja';
+
+      const canvas = document.getElementById('storyViewerCanvas');
+      const imgEl = document.getElementById('storyViewerImg');
+      const txtEl = document.getElementById('storyViewerText');
+      const capWrap = document.getElementById('storyViewerCaptionWrap');
+
+      if (item.image) {
+        canvas.style.background = "#000000";
+        imgEl.src = item.image;
+        imgEl.classList.remove('hidden');
+        txtEl.textContent = item.text || "";
+        capWrap.className = item.text ? "mt-3 px-4 py-2 rounded-xl bg-black/65 max-w-md" : "hidden";
+      } else {
+        imgEl.classList.add('hidden');
+        canvas.style.background = item.bg || "linear-gradient(135deg, #005c4b 0%, #0b141a 100%)";
+        txtEl.textContent = item.text || "";
+        capWrap.className = "px-4 py-3 rounded-xl max-w-md";
+      }
+
+      const delBtn = document.getElementById('btnDeleteMyStory');
+      if (currentUser && item.userId === currentUser.uid) {
+        delBtn.classList.remove('hidden');
+      } else {
+        delBtn.classList.add('hidden');
+      }
+    }
+
+    window.prevStory = function () {
+      if (viewerStoryIndex > 0) {
+        viewerStoryIndex--;
+        renderStorySlide();
+      } else {
+        showToast("Ini status pertama.");
+      }
+    };
+
+    window.nextStory = function () {
+      if (viewerStoryIndex < viewerStoryList.length - 1) {
+        viewerStoryIndex++;
+        renderStorySlide();
+      } else {
+        closeStoryViewer();
+      }
+    };
+
+    window.closeStoryViewer = function () {
+      document.getElementById('storyViewerModal').classList.add('hidden');
+    };
+
+    window.deleteCurrentStory = async function () {
+      const item = viewerStoryList[viewerStoryIndex];
+      if (!item || !item.id) return;
+      try {
+        await deleteDoc(doc(db, "stories", item.id));
+        closeStoryViewer();
+        showToast("Status dihapus.");
+      } catch (e) {
+        showToast("Gagal menghapus status.");
+      }
+    };
+
+    // ================= FITUR CHAT REAL-TIME =================
     function getChatRoomId(uid1, uid2) {
       return [uid1, uid2].sort().join('_');
     }
 
     function openChatWith(peer) {
       activePeer = peer;
+      renderUserList();
+
       document.getElementById('emptyChatState').classList.add('hidden');
       document.getElementById('activeChatBox').classList.remove('hidden');
       document.getElementById('peerName').textContent = peer.name;
       document.getElementById('peerPhone').textContent = peer.phone;
-      document.getElementById('peerAvatar').textContent = peer.name.charAt(0).toUpperCase();
+      document.getElementById('peerAvatar').textContent = (peer.name || 'U').charAt(0).toUpperCase();
 
-      // Responsif HP: sembunyikan sidebar saat membuka obrolan
       if (window.innerWidth < 768) {
         document.getElementById('sidebarPanel').classList.add('hidden');
         document.getElementById('chatPanel').classList.remove('hidden');
@@ -423,16 +966,21 @@
           wrap.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
 
           const imgHtml = msg.image
-            ? `<img src="${msg.image}" onclick="openLightbox('${msg.image}')" class="max-w-[230px] sm:max-w-[280px] rounded-lg mb-1.5 cursor-pointer hover:opacity-95" />`
+            ? `<img src="${msg.image}" onclick="openLightbox('${msg.image}')" class="max-w-[230px] sm:max-w-[280px] rounded-lg mb-1.5 cursor-pointer hover:opacity-95 object-cover" />`
             : '';
           const textHtml = msg.text
-            ? `<p class="text-sm text-[#e9edef] break-words whitespace-pre-wrap">${msg.text}</p>`
+            ? `<span class="text-sm text-[#e9edef] break-words whitespace-pre-wrap mr-2">${msg.text}</span>`
             : '';
+          const timeStr = formatTimeShort(msg.createdAt);
+          const checkHtml = isMe ? `<span class="text-[11px] text-[#53bdeb] ml-0.5">✓✓</span>` : '';
 
           wrap.innerHTML = `
-            <div class="${isMe ? 'bubble-out' : 'bubble-in'} max-w-[80%] rounded-xl px-3 py-2 shadow">
+            <div class="${isMe ? 'bubble-out' : 'bubble-in'} max-w-[82%] sm:max-w-[68%] px-3 py-1.5">
               ${imgHtml}
-              ${textHtml}
+              <div class="flex items-end justify-between gap-2 flex-wrap">
+                ${textHtml}
+                <span class="text-[10px] text-[#e9edef]/65 ml-auto shrink-0 select-none">${timeStr}${checkHtml}</span>
+              </div>
             </div>
           `;
           box.appendChild(wrap);
@@ -447,26 +995,24 @@
       document.getElementById('sidebarPanel').classList.remove('hidden');
     };
 
-    // Kompres foto sebelum dikirim agar ringan di database
+    window.toggleEmojiPicker = function () {
+      document.getElementById('emojiPickerBar').classList.toggle('hidden');
+    };
+
+    window.insertEmoji = function (emoji) {
+      const input = document.getElementById('messageInput');
+      input.value += emoji;
+      input.focus();
+    };
+
     window.handleImageSelect = function (e) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function (ev) {
-        const img = new Image();
-        img.onload = function () {
-          const canvas = document.createElement('canvas');
-          const maxW = 800;
-          const scale = Math.min(1, maxW / img.width);
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          pendingBase64Image = canvas.toDataURL('image/jpeg', 0.72);
-          document.getElementById('previewThumb').src = pendingBase64Image;
-          document.getElementById('imagePreviewBar').classList.remove('hidden');
-        };
-        img.src = ev.target.result;
+      reader.onload = async function (ev) {
+        pendingBase64Image = await compressDataUrl(ev.target.result, 800, 0.72);
+        document.getElementById('previewThumb').src = pendingBase64Image;
+        document.getElementById('imagePreviewBar').classList.remove('hidden');
       };
       reader.readAsDataURL(file);
     };
@@ -493,6 +1039,7 @@
 
       input.value = '';
       clearSelectedImage();
+      document.getElementById('emojiPickerBar').classList.add('hidden');
 
       await addDoc(collection(db, "chats", roomId, "messages"), payload);
     };
