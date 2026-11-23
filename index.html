@@ -1637,196 +1637,37 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
     });
 
     // ================= MENU SCROLLING & TIKTOK FEED =================
-    // Generator video animasi sendiri (Canvas -> MediaRecorder) supaya bisa scroll video tanpa link eksternal
-    const generatedVideoUrlCache = new Map();
-    const generatedVideoPromises = new Map();
-
-    const synthVideoTemplates = [
-      { key: "neon_wave", title: "Synth Wave #01 • Cyber Grid", topic: "tech", tag: "💻 Tech", style: "grid" },
-      { key: "pulse_ring", title: "Bass Pulse #02 • Neon Rings", topic: "music", tag: "🎧 Musik", style: "rings" },
-      { key: "star_warp", title: "Warp Speed #03 • Starfield", topic: "gaming", tag: "🎮 Game", style: "warp" },
-      { key: "sunset_horizon", title: "Horizon Glow #04 • Retro Vibe", topic: "travel", tag: "🌆 Travel", style: "horizon" },
-      { key: "matrix_rain", title: "Code Stream #05 • Matrix Flow", topic: "tech", tag: "💻 Tech", style: "matrix" },
-      { key: "eq_bars", title: "Beat Drop #06 • Audio Bars", topic: "music", tag: "🎧 Musik", style: "bars" }
+    // Menggunakan link/embed video TikTok asli tanpa membuat video sintetis canvas/MediaRecorder
+    const defaultTiktokClips = [
+      {
+        id: "tt-default-1",
+        title: "TikTok FYP #1 • Tech & Coding",
+        topic: "tech",
+        tag: "💻 Tech",
+        url: "https://www.tiktok.com/@tiktok/video/7106614796348738821"
+      },
+      {
+        id: "tt-default-2",
+        title: "TikTok FYP #2 • Gaming Highlights",
+        topic: "gaming",
+        tag: "🎮 Game",
+        url: "https://www.tiktok.com/@tiktok/video/7130688462602669314"
+      },
+      {
+        id: "tt-default-3",
+        title: "TikTok FYP #3 • Music & Vibe",
+        topic: "music",
+        tag: "🎧 Musik",
+        url: "https://www.tiktok.com/@tiktok/video/7161838922666446082"
+      },
+      {
+        id: "tt-default-4",
+        title: "TikTok FYP #4 • Street & Travel",
+        topic: "travel",
+        tag: "🌆 Travel",
+        url: "https://www.tiktok.com/@tiktok/video/7189443548315733250"
+      }
     ];
-
-    function renderSynthFrame(ctx, w, h, style, t) {
-      ctx.clearRect(0, 0, w, h);
-      if (style === "grid") {
-        const g = ctx.createLinearGradient(0, 0, w, h);
-        g.addColorStop(0, "#090514");
-        g.addColorStop(1, "#24104a");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, w, h);
-
-        ctx.strokeStyle = "rgba(34, 211, 238, 0.45)";
-        ctx.lineWidth = 2;
-        const offset = (t * 80) % 44;
-        for (let x = -44; x <= w + 44; x += 44) {
-          ctx.beginPath();
-          ctx.moveTo(x + offset * 0.4, h * 0.45);
-          ctx.lineTo(w / 2 + (x - w / 2) * 2.2, h);
-          ctx.stroke();
-        }
-        for (let y = h * 0.45; y <= h; y += 26 + ((t * 20) % 26)) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(w, y);
-          ctx.stroke();
-        }
-        ctx.fillStyle = "#f472b6";
-        ctx.beginPath();
-        ctx.arc(w / 2, h * 0.36 + Math.sin(t * 4) * 14, 54, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (style === "rings") {
-        ctx.fillStyle = "#0b0718";
-        ctx.fillRect(0, 0, w, h);
-        for (let i = 0; i < 6; i++) {
-          const r = ((t * 110 + i * 55) % 270) + 18;
-          ctx.strokeStyle = i % 2 === 0 ? "rgba(244, 114, 182, 0.75)" : "rgba(34, 211, 238, 0.75)";
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.arc(w / 2, h / 2, r, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-      } else if (style === "warp") {
-        ctx.fillStyle = "#070412";
-        ctx.fillRect(0, 0, w, h);
-        for (let i = 0; i < 36; i++) {
-          const angle = i * 0.65 + t * 0.6;
-          const dist = ((t * 180 + i * 29) % 260) + 10;
-          const x = w / 2 + Math.cos(angle) * dist;
-          const y = h / 2 + Math.sin(angle) * dist;
-          ctx.fillStyle = i % 3 === 0 ? "#a3e635" : (i % 3 === 1 ? "#22d3ee" : "#e879f9");
-          ctx.beginPath();
-          ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      } else if (style === "horizon") {
-        const sky = ctx.createLinearGradient(0, 0, 0, h * 0.62);
-        sky.addColorStop(0, "#1e1b4b");
-        sky.addColorStop(0.6, "#be185d");
-        sky.addColorStop(1, "#fb923c");
-        ctx.fillStyle = sky;
-        ctx.fillRect(0, 0, w, h * 0.62);
-
-        ctx.fillStyle = "#fde047";
-        ctx.beginPath();
-        ctx.arc(w / 2, h * 0.44 + Math.cos(t * 2) * 8, 62, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#090514";
-        ctx.fillRect(0, h * 0.62, w, h * 0.38);
-      } else if (style === "matrix") {
-        ctx.fillStyle = "#050b09";
-        ctx.fillRect(0, 0, w, h);
-        ctx.font = "bold 16px monospace";
-        const cols = 14;
-        for (let c = 0; c < cols; c++) {
-          const x = c * (w / cols) + 6;
-          const headY = ((t * 160 + c * 47) % (h + 80)) - 40;
-          for (let k = 0; k < 5; k++) {
-            ctx.fillStyle = k === 0 ? "#ecfccb" : "rgba(163, 230, 53, 0.65)";
-            ctx.fillText(String((c + k + Math.floor(t * 10)) % 2), x, headY - k * 18);
-          }
-        }
-      } else {
-        ctx.fillStyle = "#0d0720";
-        ctx.fillRect(0, 0, w, h);
-        const barCount = 12;
-        const bw = (w - 80) / barCount;
-        for (let b = 0; b < barCount; b++) {
-          const amp = 40 + Math.abs(Math.sin(t * 5 + b * 0.7)) * 180;
-          const bx = 40 + b * bw;
-          const by = h * 0.65 - amp;
-          ctx.fillStyle = b % 2 === 0 ? "#22d3ee" : "#f472b6";
-          ctx.beginPath();
-          ctx.roundRect(bx + 2, by, bw - 5, amp, 6);
-          ctx.fill();
-        }
-      }
-
-      ctx.fillStyle = "rgba(255,255,255,0.85)";
-      ctx.font = "bold 15px sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText("ARZCHAT GENERATED REEL", w / 2, 44);
-    }
-
-    function createGeneratedVideoBlobUrl(style, durationMs = 2600) {
-      const cacheKey = `${style}_${durationMs}`;
-      if (generatedVideoUrlCache.has(cacheKey)) {
-        return Promise.resolve(generatedVideoUrlCache.get(cacheKey));
-      }
-      if (generatedVideoPromises.has(cacheKey)) {
-        return generatedVideoPromises.get(cacheKey);
-      }
-
-      const promise = new Promise((resolve) => {
-        try {
-          if (typeof MediaRecorder === "undefined" || typeof HTMLCanvasElement.prototype.captureStream !== "function") {
-            resolve(null);
-            return;
-          }
-          const canvas = document.createElement("canvas");
-          canvas.width = 360;
-          canvas.height = 540;
-          const ctx = canvas.getContext("2d");
-          const stream = canvas.captureStream(24);
-
-          const mimeTypes = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
-          const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || "";
-          const recorder = chosenMime ? new MediaRecorder(stream, { mimeType: chosenMime }) : new MediaRecorder(stream);
-
-          const chunks = [];
-          recorder.ondataavailable = (ev) => {
-            if (ev.data && ev.data.size > 0) chunks.push(ev.data);
-          };
-
-          const startTime = performance.now();
-          let rafId = null;
-
-          function tick(now) {
-            const elapsed = now - startTime;
-            renderSynthFrame(ctx, canvas.width, canvas.height, style, elapsed / 1000);
-            if (elapsed < durationMs && recorder.state === "recording") {
-              rafId = requestAnimationFrame(tick);
-            } else if (recorder.state === "recording") {
-              recorder.stop();
-            }
-          }
-
-          recorder.onstop = () => {
-            if (rafId) cancelAnimationFrame(rafId);
-            stream.getTracks().forEach(tr => tr.stop());
-            if (chunks.length === 0) {
-              resolve(null);
-              return;
-            }
-            const blob = new Blob(chunks, { type: chosenMime || "video/webm" });
-            const url = URL.createObjectURL(blob);
-            generatedVideoUrlCache.set(cacheKey, url);
-            resolve(url);
-          };
-
-          recorder.start();
-          renderSynthFrame(ctx, canvas.width, canvas.height, style, 0);
-          rafId = requestAnimationFrame(tick);
-        } catch (e) {
-          resolve(null);
-        }
-      });
-
-      generatedVideoPromises.set(cacheKey, promise);
-      return promise;
-    }
-
-    const defaultTiktokClips = synthVideoTemplates.map((tpl, idx) => ({
-      id: `synth-feed-${idx + 1}`,
-      title: tpl.title,
-      topic: tpl.topic,
-      tag: tpl.tag,
-      synthStyle: tpl.style
-    }));
 
     function loadCustomTiktokClips() {
       try {
@@ -2078,67 +1919,28 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
     function renderScrollStageFeed(focusClipId = null) {
       const feedEl = document.getElementById('scrollFeedContainer');
       if (!feedEl) return;
-      const clips = getAllTiktokClips();
+      const clips = getAllTiktokClips().filter(c => Boolean(c.url));
       const canIframeTikTok = isElectronOrCapacitorApp();
 
       feedEl.innerHTML = clips.map((clip, idx) => {
-        if (clip.synthStyle) {
-          return `
-            <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-xs font-extrabold text-lime-300 truncate">#${idx + 1} • ${clip.title}</span>
-                <button type="button" onclick="likeTikTokFeedClip('${clip.id}', '${clip.topic || 'music'}')" class="text-[10px] px-2.5 py-1 rounded-full bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 font-bold shrink-0 cursor-pointer">❤️ Suka</button>
-              </div>
-              <div class="relative w-full h-[460px] sm:h-[520px] rounded-2xl bg-black overflow-hidden border border-white/15">
-                <canvas data-synth-style="${clip.synthStyle}" width="360" height="540" class="w-full h-full object-cover block"></canvas>
-                <video data-synth-video-idx="${idx}" controls playsinline loop class="hidden w-full h-full object-cover bg-black"></video>
-              </div>
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-[10px] text-[#b8b2d8]">Dibuat langsung oleh kode</span>
-                <button type="button" onclick="exportSynthClipAsVideo('${clip.synthStyle}', '${clip.title.replace(/'/g, '')}', ${idx})" class="text-[10px] px-2.5 py-1 rounded-lg bg-cyan-400/15 hover:bg-cyan-400/25 text-cyan-200 font-bold cursor-pointer">
-                  🎬 Render Video File
-                </button>
-              </div>
-            </div>
-          `;
-        }
-
         const vidId = extractTiktokVideoId(clip.url);
         const embedSrc = vidId ? `https://www.tiktok.com/embed/v2/${vidId}` : null;
+        const frameSrc = canIframeTikTok ? (embedSrc || clip.url) : embedSrc;
 
-        if (canIframeTikTok) {
-          const frameSrc = embedSrc || clip.url;
+        if (frameSrc) {
           return `
             <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
-                <button type="button" onclick="reloadScrollFrame('${clip.id}')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-lime-300 font-bold shrink-0 cursor-pointer">
-                  ↻ Muat Ulang
-                </button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button type="button" onclick="likeTikTokFeedClip('${clip.id}', '${clip.topic || 'music'}')" class="text-[10px] px-2 py-1 rounded-lg bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 font-bold cursor-pointer">❤️ Suka</button>
+                  <button type="button" onclick="reloadScrollFrame('${clip.id}')" class="text-[10px] px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-lime-300 font-bold cursor-pointer">↻</button>
+                  <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2 py-1 rounded-lg bg-cyan-500/20 text-cyan-200 font-bold">TikTok ↗</a>
+                </div>
               </div>
               <iframe
                 id="tt-frame-${clip.id}"
                 src="${frameSrc}"
-                class="w-full h-[520px] sm:h-[580px] rounded-2xl bg-white border border-white/15"
-                allow="autoplay; encrypted-media; fullscreen; clipboard-write"
-                allowfullscreen
-              ></iframe>
-            </div>
-          `;
-        }
-
-        if (embedSrc) {
-          return `
-            <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
-              <div class="flex items-center justify-between gap-2">
-                <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
-                <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-200 font-bold shrink-0">
-                  Buka TikTok ↗
-                </a>
-              </div>
-              <iframe
-                id="tt-frame-${clip.id}"
-                src="${embedSrc}"
                 referrerpolicy="no-referrer-when-downgrade"
                 class="w-full h-[540px] sm:h-[600px] rounded-2xl bg-[#090514] border border-white/15"
                 allow="autoplay; encrypted-media; fullscreen; clipboard-write"
@@ -2153,103 +1955,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
               <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-200 font-bold shrink-0">
-                Buka ↗
+                Buka TikTok ↗
               </a>
             </div>
+            <p class="text-xs text-[#b8b2d8] break-all">${clip.url}</p>
           </div>
         `;
       }).join('');
-
-      feedEl.querySelectorAll('video[data-feed-idx]').forEach((vidEl) => {
-        const idx = Number(vidEl.getAttribute('data-feed-idx') || '0');
-        vidEl.addEventListener('play', () => {
-          const clipObj = clips[idx];
-          if (clipObj && clipObj.topic) {
-            const aff = loadTikTokAffinityMap();
-            aff[clipObj.topic] = (aff[clipObj.topic] || 1) + 1;
-            saveTikTokAffinityMap(aff);
-          }
-        });
-        vidEl.addEventListener('ended', () => {
-          scrollToNextFeedCard(idx, clips.length);
-        });
-      });
-
-      startLiveSynthCanvases(clips);
 
       if (focusClipId) {
         const target = document.getElementById(`scroll-card-${focusClipId}`);
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
-
-    let synthCanvasRaf = null;
-    let synthObserver = null;
-    const visibleSynthCanvases = new Set();
-
-    function startLiveSynthCanvases(activeClips) {
-      if (synthCanvasRaf) cancelAnimationFrame(synthCanvasRaf);
-      if (synthObserver) synthObserver.disconnect();
-      visibleSynthCanvases.clear();
-
-      const canvases = Array.from(document.querySelectorAll('canvas[data-synth-style]'));
-      if (canvases.length === 0) return;
-
-      if (typeof IntersectionObserver !== "undefined") {
-        synthObserver = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) visibleSynthCanvases.add(entry.target);
-            else visibleSynthCanvases.delete(entry.target);
-          });
-        }, { threshold: 0.1 });
-        canvases.forEach((cv) => synthObserver.observe(cv));
-      } else {
-        canvases.forEach((cv) => visibleSynthCanvases.add(cv));
-      }
-
-      const t0 = performance.now();
-      function frame(now) {
-        if (document.hidden) {
-          synthCanvasRaf = requestAnimationFrame(frame);
-          return;
-        }
-        const sec = (now - t0) / 1000;
-        const targets = visibleSynthCanvases.size > 0 ? Array.from(visibleSynthCanvases) : canvases.slice(0, 2);
-        targets.forEach((cv) => {
-          const st = cv.getAttribute('data-synth-style') || 'grid';
-          const ctx = cv.getContext('2d');
-          if (ctx) renderSynthFrame(ctx, cv.width, cv.height, st, sec);
-        });
-        synthCanvasRaf = requestAnimationFrame(frame);
-      }
-      synthCanvasRaf = requestAnimationFrame(frame);
-    }
-
-    window.exportSynthClipAsVideo = async function (style, title, idx) {
-      showToast("🎬 Sedang merender video buatan sendiri...");
-      const url = await createGeneratedVideoBlobUrl(style, 2600);
-      if (!url) {
-        showToast("Browser tidak mendukung perekaman video Canvas.");
-        return;
-      }
-      const card = document.getElementById(`scroll-card-synth-feed-${idx + 1}`);
-      if (card) {
-        const cv = card.querySelector('canvas[data-synth-style]');
-        const vid = card.querySelector('video[data-synth-video-idx]');
-        if (cv && vid) {
-          cv.classList.add('hidden');
-          vid.classList.remove('hidden');
-          vid.src = url;
-          vid.play().catch(() => {});
-          vid.onended = () => scrollToNextFeedCard(idx, getAllTiktokClips().length);
-        }
-      }
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.webm`;
-      a.click();
-      showToast("✅ Video berhasil dirender & diunduh!");
-    };
 
     window.openTikTokPopupWindow = function (url) {
       window.open(url, 'ArzChatTikTokClient', 'width=430,height=780,menubar=no,toolbar=no,location=yes,status=no');
@@ -3015,7 +2733,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
     function listenIncomingCalls() {
       if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
-      if (unsubscribeLeaderboard) unsubscribeLeaderboard();
       const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
 
       unsubscribeIncomingCalls = onSnapshot(collection(db, "calls"), (snap) => {
@@ -4574,8 +4291,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
     // ================= KEYBOARD CONTROLS FOR SNAKE & 2048 =================
     window.addEventListener('keydown', (e) => {
       if (!document.getElementById('shooterGameView').classList.contains('hidden')) {
-        if (e.key === 'ArrowLeft' || e.key === 'a') setShooterMove(-1);
-        else if (e.key === 'ArrowRight' || e.key === 'd') setShooterMove(1);
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') setShooterMove(-1);
+        else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') setShooterMove(1);
         else if (e.key === ' ') { e.preventDefault(); fireShooterLaser(); }
       } else if (!document.getElementById('snakeGameView').classList.contains('hidden')) {
         if (e.key === 'ArrowUp' || e.key === 'w') setSnakeDir(0, -1);
@@ -4589,6 +4306,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
         else if (e.key === 'ArrowRight') move2048('right');
       }
     });
+
+    window.addEventListener('keyup', (e) => {
+      if (!document.getElementById('shooterGameView').classList.contains('hidden')) {
+        if (['ArrowLeft', 'ArrowRight', 'a', 'A', 'd', 'D'].includes(e.key)) {
+          setShooterMove(0);
+        }
+      }
+    });
+
 
     window.openLightbox = function (src) {
       document.getElementById('lightboxImg').src = src;
@@ -4610,7 +4336,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
       if (unsubscribeStories) unsubscribeStories();
       if (unsubscribeMessages) unsubscribeMessages();
       if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
-      if (unsubscribeLeaderboard) unsubscribeLeaderboard();
       currentUser = null;
       await signOut(auth).catch(() => {});
       document.getElementById('appScreen').classList.add('hidden');
