@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ArzChat 3D – Gen Z Chat, Story & Voice Call</title>
+  <title>ArzChat – Chat, Story, Voice Call & Game</title>
 
-  <!-- KONFIGURASI PWA (INSTALL SEBAGAI APLIKASI) -->
+  <!-- KONFIGURASI PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#160f2d" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -23,7 +23,6 @@
       --bg-deep: #0b0718;
       --bg-mid: #160f2d;
       --card-3d: rgba(28, 20, 58, 0.78);
-      --card-3d-light: rgba(42, 31, 82, 0.85);
       --neon-purple: #a855f7;
       --neon-cyan: #22d3ee;
       --neon-pink: #f472b6;
@@ -213,7 +212,7 @@
   <div id="createStoryModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
     <div class="glass-3d w-full max-w-md rounded-3xl overflow-hidden">
       <div class="px-5 py-4 bg-white/5 flex items-center justify-between border-b border-white/10">
-        <h3 class="font-bold text-white text-base">✨ Buat Story 3D Baru</h3>
+        <h3 class="font-bold text-white text-base">✨ Buat Story Baru</h3>
         <button onclick="closeCreateStoryModal()" class="text-[#b8b2d8] hover:text-white text-lg">✕</button>
       </div>
 
@@ -286,7 +285,7 @@
     </div>
   </div>
 
-  <!-- HALAMAN LOGIN / DAFTAR NOMOR HP + SMS OTP -->
+  <!-- HALAMAN LOGIN / DAFTAR NOMOR HP + PASSWORD/PIN ADMIN FIREBASE -->
   <div id="authScreen" class="flex-1 flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass-3d w-full max-w-md rounded-3xl p-6 sm:p-8">
       <div class="flex flex-col items-center text-center mb-6">
@@ -295,14 +294,11 @@
             <path d="M12 2C6.48 2 2 6.03 2 11c0 2.39 1.05 4.56 2.76 6.16L3.6 21.4a.75.75 0 0 0 .97.92l4.52-1.5A10.7 10.7 0 0 0 12 20c5.52 0 10-4.03 10-9s-4.48-9-10-9Z"/>
           </svg>
         </div>
-        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 border border-purple-400/30 mb-2">
-          Gen Z 3D Edition
-        </span>
         <h1 class="text-2xl font-extrabold tracking-tight text-white">ArzChat</h1>
         <p class="text-xs text-[#b8b2d8] mt-1">Chatting, Story & Telepon Suara Real-Time</p>
       </div>
 
-      <!-- STEP 1 -->
+      <!-- STEP 1: IDENTITAS & NOMOR HP -->
       <div id="stepPhone" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-[#b8b2d8] mb-1.5">Nama Tampilan</label>
@@ -320,10 +316,8 @@
           <p id="phoneError" class="hidden text-xs text-rose-400 mt-1.5"></p>
         </div>
 
-        <div id="recaptcha-container" class="flex justify-center"></div>
-
-        <button id="btnSendOtp" onclick="sendRealOtp()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
-          Kirim Kode OTP via SMS
+        <button id="btnGoToPassword" onclick="proceedToPasswordStep()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
+          Masukkan Password
         </button>
 
         <button id="btnInstallAuth" onclick="triggerInstallApp()" class="hidden btn-3d-soft w-full py-2.5 rounded-2xl text-xs font-semibold text-cyan-300 cursor-pointer">
@@ -331,22 +325,22 @@
         </button>
       </div>
 
-      <!-- STEP 2 -->
-      <div id="stepOtp" class="hidden space-y-4">
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 text-center">
-          <p class="text-xs text-[#b8b2d8]">Kode OTP SMS telah dikirim ke</p>
-          <p id="displayPhone" class="text-sm font-bold text-cyan-300 mt-0.5">+62 812-3456-7890</p>
-          <button onclick="resetToPhoneStep()" class="text-xs text-[#b8b2d8] underline hover:text-white mt-1.5">Ganti nomor HP</button>
-        </div>
-
+      <!-- STEP 2: PASSWORD / PIN LOGIN (DIATUR ADMIN DI FIREBASE) -->
+      <div id="stepPin" class="hidden space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-[#b8b2d8] mb-1.5 text-center">Masukkan 6 Digit Kode SMS</label>
-          <input id="inputOtp" type="text" inputmode="numeric" maxlength="6" placeholder="• • • • • •"
+          <label class="block text-xs font-semibold text-[#b8b2d8] mb-1.5 text-center">Masukkan Password / PIN Login</label>
+          <input id="inputPin" type="password" inputmode="numeric" maxlength="8" placeholder="• • • • • •"
+            onkeydown="if(event.key==='Enter') verifyAdminPinLogin()"
             class="w-full bg-white/5 border border-white/15 rounded-2xl px-4 py-3.5 text-center text-xl font-extrabold tracking-[0.4em] text-white focus:outline-none focus:border-cyan-400" />
+          <p id="pinError" class="hidden text-xs text-rose-400 mt-2 text-center"></p>
         </div>
 
-        <button id="btnVerifyOtp" onclick="verifyRealOtp()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
-          Verifikasi & Masuk ArzChat
+        <button id="btnVerifyPin" onclick="verifyAdminPinLogin()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
+          Masuk ke ArzChat
+        </button>
+
+        <button type="button" onclick="backToPhoneStep()" class="w-full text-xs text-[#b8b2d8] hover:text-white py-1 cursor-pointer">
+          ← Kembali
         </button>
       </div>
     </div>
@@ -381,17 +375,21 @@
         </div>
       </div>
 
-      <!-- Tab Chats & Story -->
-      <div class="grid grid-cols-2 p-2 gap-2 border-b border-white/10 bg-black/20">
+      <!-- Tab Chats, Story & Game -->
+      <div class="grid grid-cols-3 p-2 gap-1.5 border-b border-white/10 bg-black/20">
         <button id="tabChatsBtn" onclick="switchSidebarTab('chats')"
-          class="btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer">
+          class="btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer">
           <span>💬 Chats</span>
           <span id="userCountBadge" class="bg-black/30 text-white px-1.5 py-0.5 rounded-full text-[10px]">0</span>
         </button>
         <button id="tabStatusBtn" onclick="switchSidebarTab('status')"
-          class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-2 cursor-pointer">
+          class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
           <span>✨ Story</span>
           <span id="storyCountBadge" class="bg-cyan-400/20 text-cyan-300 px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+        </button>
+        <button id="tabGamesBtn" onclick="switchSidebarTab('games')"
+          class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
+          <span>🎮 Game</span>
         </button>
       </div>
 
@@ -438,17 +436,46 @@
 
         <div id="storyListContainer" class="space-y-1.5"></div>
       </div>
+
+      <!-- TAB 3: PILIHAN MINI GAME -->
+      <div id="sidebarGamesView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-3 space-y-3">
+        <div class="px-1 text-[10px] font-bold uppercase tracking-widest text-lime-300">
+          Arcade Mini Games
+        </div>
+
+        <div onclick="openGameStage('snake')" class="glass-3d p-4 rounded-2xl cursor-pointer hover:border-cyan-400/50 transition flex items-center gap-3.5">
+          <div class="avatar-3d w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0">🐍</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-bold text-white">Neon Snake</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-400/20 text-lime-300 font-bold">Populer</span>
+            </div>
+            <p class="text-xs text-[#b8b2d8] mt-0.5">Makan energi neon biar ular makin panjang & pecahkan rekor!</p>
+          </div>
+        </div>
+
+        <div onclick="openGameStage('reflex')" class="glass-3d p-4 rounded-2xl cursor-pointer hover:border-pink-400/50 transition flex items-center gap-3.5">
+          <div class="avatar-3d w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0">⚡</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-bold text-white">Neon Tap Reflex</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-bold">15 Detik</span>
+            </div>
+            <p class="text-xs text-[#b8b2d8] mt-0.5">Ketuk target petir secepat mungkin sebelum waktu habis!</p>
+          </div>
+        </div>
+      </div>
     </aside>
 
-    <!-- RUANG OBROLAN KANAN -->
+    <!-- RUANG KANAN (CHAT / MINI GAME) -->
     <main id="chatPanel" class="hidden md:flex flex-1 flex-col h-full chat-grid-3d min-w-0">
 
       <!-- State Kosong -->
       <div id="emptyChatState" class="flex-1 flex flex-col items-center justify-center text-center p-6">
         <div class="avatar-3d w-20 h-20 rounded-3xl flex items-center justify-center mb-4 text-3xl shadow-xl">⚡</div>
-        <h3 class="text-xl font-extrabold text-white">ArzChat Gen Z 3D</h3>
+        <h3 class="text-xl font-extrabold text-white">ArzChat</h3>
         <p class="text-xs sm:text-sm text-[#b8b2d8] max-w-sm mt-2 leading-relaxed">
-          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, atau mulai <span class="text-cyan-300 font-semibold">telepon suara langsung</span>.
+          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau main <span class="text-lime-300 font-semibold">Neon Snake & Mini Game</span>.
         </p>
       </div>
 
@@ -527,13 +554,80 @@
           </button>
         </div>
       </div>
+
+      <!-- AREA MINI GAME (SNAKE & REFLEX) -->
+      <div id="gameStageBox" class="hidden flex-1 flex flex-col h-full min-h-0 overflow-y-auto">
+        <div class="panel-3d px-4 py-2.5 border-b flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3">
+            <button onclick="backToSidebar()" class="btn-3d-soft md:hidden text-white w-9 h-9 rounded-xl flex items-center justify-center">←</button>
+            <h3 id="gameStageTitle" class="text-sm font-bold text-white">🐍 Neon Snake</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openGameStage('snake')" class="btn-3d-soft text-xs px-3 py-1.5 rounded-xl text-lime-300 font-semibold cursor-pointer">🐍 Snake</button>
+            <button onclick="openGameStage('reflex')" class="btn-3d-soft text-xs px-3 py-1.5 rounded-xl text-cyan-300 font-semibold cursor-pointer">⚡ Reflex</button>
+          </div>
+        </div>
+
+        <!-- GAME 1: NEON SNAKE -->
+        <div id="snakeGameView" class="flex-1 flex flex-col items-center justify-center p-4 gap-3">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-6 text-xs font-bold">
+            <span>Skor: <strong id="snakeScore" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Panjang: <strong id="snakeLength" class="text-pink-300 text-sm">3</strong></span>
+            <span>Rekor: <strong id="snakeHighScore" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <div class="relative rounded-3xl overflow-hidden border-2 border-purple-400/40 shadow-2xl bg-[#090514]">
+            <canvas id="snakeCanvas" width="320" height="320" class="block"></canvas>
+            <div id="snakeOverlay" class="absolute inset-0 bg-[#090514]/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center">
+              <p id="snakeOverlayTitle" class="text-lg font-extrabold text-white mb-1">🐍 Neon Snake</p>
+              <p id="snakeOverlaySub" class="text-xs text-[#b8b2d8] mb-4">Makan bola energi menyala biar ular makin panjang!</p>
+              <button onclick="startSnakeGame()" class="btn-3d-primary px-6 py-2.5 rounded-2xl text-xs cursor-pointer">
+                Mulai Main
+              </button>
+            </div>
+          </div>
+
+          <!-- Kontrol D-Pad Layar untuk HP -->
+          <div class="grid grid-cols-3 gap-2 w-44 select-none pt-1">
+            <div></div>
+            <button type="button" onclick="setSnakeDir(0, -1)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▲</button>
+            <div></div>
+            <button type="button" onclick="setSnakeDir(-1, 0)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">◀</button>
+            <button type="button" onclick="setSnakeDir(0, 1)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▼</button>
+            <button type="button" onclick="setSnakeDir(1, 0)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▶</button>
+          </div>
+        </div>
+
+        <!-- GAME 2: NEON TAP REFLEX -->
+        <div id="reflexGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-4">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-6 text-xs font-bold">
+            <span>Skor: <strong id="reflexScore" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Waktu: <strong id="reflexTime" class="text-pink-300 text-sm">15s</strong></span>
+            <span>Rekor: <strong id="reflexBest" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <div id="reflexArena" class="relative w-80 h-80 rounded-3xl border-2 border-cyan-400/35 bg-[#090514] overflow-hidden shadow-2xl">
+            <button id="reflexTargetBtn" onclick="hitReflexTarget()"
+              class="hidden absolute w-14 h-14 rounded-2xl avatar-3d text-2xl font-extrabold flex items-center justify-center cursor-pointer transition-transform active:scale-90">
+              ⚡
+            </button>
+            <div id="reflexOverlay" class="absolute inset-0 bg-[#090514]/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center">
+              <p class="text-lg font-extrabold text-white mb-1">⚡ Neon Tap Reflex</p>
+              <p class="text-xs text-[#b8b2d8] mb-4">Ketuk ikon petir yang berpindah tempat dalam 15 detik!</p>
+              <button onclick="startReflexGame()" class="btn-3d-primary px-6 py-2.5 rounded-2xl text-xs cursor-pointer">
+                Mulai Tantangan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
-  <!-- FIREBASE & PWA SCRIPT -->
+  <!-- FIREBASE, PIN AUTH, WEBRTC & GAME SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot,
       addDoc, deleteDoc, query, orderBy, serverTimestamp
@@ -550,7 +644,6 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    auth.languageCode = 'id';
     const db = getFirestore(app);
 
     const rtcConfig = {
@@ -565,9 +658,7 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch((err) => {
-          console.warn("SW register skipped:", err);
-        });
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
       });
     }
 
@@ -595,7 +686,7 @@
       deferredInstallPrompt = null;
     };
 
-    // ================= NADA DERING & AUDIO BOOST (WEB AUDIO API) =================
+    // ================= NADA DERING & AUDIO BOOST =================
     let audioCtx = null;
     let ringInterval = null;
     let remoteGainNode = null;
@@ -626,22 +717,19 @@
           }
           remoteAudioSource = ctx.createMediaStreamSource(stream);
           remoteGainNode = ctx.createGain();
-          remoteGainNode.gain.value = 1.8; // Boost volume suara lawan bicara agar tidak pelan
+          remoteGainNode.gain.value = 1.8;
           remoteAudioSource.connect(remoteGainNode);
           remoteGainNode.connect(ctx.destination);
         }
 
         audioEl.play().catch(() => {});
-      } catch (e) {
-        console.warn("Boost audio skipped:", e);
-      }
+      } catch (e) {}
     }
 
     function playRingTonePulse(mode = 'incoming') {
       try {
         const ctx = ensureAudioContext();
         if (!ctx) return;
-
         const now = ctx.currentTime;
         const notes = mode === 'incoming' ? [880, 1174.66] : [659.25];
 
@@ -660,9 +748,7 @@
           osc.start(now + idx * 0.16);
           osc.stop(now + idx * 0.16 + 0.15);
         });
-      } catch (e) {
-        console.warn("Ring tone audio skipped:", e);
-      }
+      } catch (e) {}
     }
 
     function startRingSound(mode = 'incoming') {
@@ -680,7 +766,9 @@
       }
     }
 
-    let confirmationResult = null;
+    // ================= STATE APLIKASI =================
+    let pendingLoginName = "";
+    let pendingLoginPhone = "";
     let currentUser = null;
     let allUsers = [];
     let allStories = [];
@@ -734,7 +822,7 @@
       if (/^(\d)\1+$/.test(digits) || digits.includes('1234567') || digits.includes('000000')) {
         return { valid: false, error: "Nomor tidak valid. Gunakan nomor HP pribadi yang aktif." };
       }
-      return { valid: true, formatted: `+62${digits}` };
+      return { valid: true, formatted: `+62${digits}`, rawDigits: `62${digits}` };
     }
 
     function compressDataUrl(dataUrl, maxWidth, quality) {
@@ -753,16 +841,8 @@
       });
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      try {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'normal' });
-        window.recaptchaVerifier.render();
-      } catch (e) {
-        console.warn("reCAPTCHA init:", e);
-      }
-    });
-
-    window.sendRealOtp = async function () {
+    // ================= LOGIN DENGAN PASSWORD / PIN ADMIN FIREBASE =================
+    window.proceedToPasswordStep = function () {
       const name = document.getElementById('inputName').value.trim();
       const rawPhone = document.getElementById('inputPhone').value.trim();
       const errEl = document.getElementById('phoneError');
@@ -781,111 +861,144 @@
         return;
       }
 
-      const btn = document.getElementById('btnSendOtp');
-      btn.disabled = true;
-      btn.textContent = "Mengirim SMS OTP...";
-
-      try {
-        localStorage.setItem('arzchat_pending_name', name);
-        confirmationResult = await signInWithPhoneNumber(auth, check.formatted, window.recaptchaVerifier);
-        document.getElementById('displayPhone').textContent = check.formatted;
-        document.getElementById('stepPhone').classList.add('hidden');
-        document.getElementById('stepOtp').classList.remove('hidden');
-        showToast("Kode OTP SMS telah dikirim ke nomor HP kamu!");
-      } catch (err) {
-        errEl.textContent = "Gagal mengirim SMS: " + (err.message || "Periksa pengaturan Firebase Phone Auth.");
-        errEl.classList.remove('hidden');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Kirim Kode OTP via SMS";
-      }
+      pendingLoginName = name;
+      pendingLoginPhone = check.formatted;
+      document.getElementById('pinError').classList.add('hidden');
+      document.getElementById('inputPin').value = '';
+      document.getElementById('stepPhone').classList.add('hidden');
+      document.getElementById('stepPin').classList.remove('hidden');
+      document.getElementById('inputPin').focus();
     };
 
-    window.verifyRealOtp = async function () {
-      const code = document.getElementById('inputOtp').value.trim();
-      if (code.length !== 6 || !confirmationResult) {
-        showToast("Masukkan 6 digit kode OTP dari SMS.");
-        return;
-      }
-      const btn = document.getElementById('btnVerifyOtp');
-      btn.disabled = true;
-      btn.textContent = "Memverifikasi...";
-
-      try {
-        const result = await confirmationResult.confirm(code);
-        const user = result.user;
-        const savedName = localStorage.getItem('arzchat_pending_name') || "Pengguna ArzChat";
-
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          name: savedName,
-          phone: user.phoneNumber,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-
-        showToast("Berhasil masuk ke ArzChat 3D!");
-      } catch (err) {
-        showToast("Kode OTP salah atau kedaluwarsa.");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Verifikasi & Masuk ArzChat";
-      }
-    };
-
-    window.resetToPhoneStep = function () {
-      document.getElementById('stepOtp').classList.add('hidden');
+    window.backToPhoneStep = function () {
+      document.getElementById('stepPin').classList.add('hidden');
       document.getElementById('stepPhone').classList.remove('hidden');
     };
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const snap = await getDoc(doc(db, "users", user.uid));
-        const profile = snap.exists() ? snap.data() : {
-          uid: user.uid,
-          name: localStorage.getItem('arzchat_pending_name') || "Pengguna",
-          phone: user.phoneNumber
+    window.verifyAdminPinLogin = async function () {
+      const enteredPin = document.getElementById('inputPin').value.trim();
+      const pinErr = document.getElementById('pinError');
+      pinErr.classList.add('hidden');
+
+      if (enteredPin.length < 4) {
+        pinErr.textContent = "Masukkan Password / PIN yang diberikan Admin.";
+        pinErr.classList.remove('hidden');
+        return;
+      }
+
+      const btn = document.getElementById('btnVerifyPin');
+      btn.disabled = true;
+      btn.textContent = "Memeriksa Password...";
+
+      try {
+        // Pastikan sesi Firebase Auth aktif agar bisa membaca dokumen PIN di Firestore
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
+
+        // Admin mengatur dokumen di Firestore: koleksi "allowed_pins", ID dokumen = "+6283851922441" (atau "default")
+        // Field di Firestore: { pin: "123456", active: true }
+        const phoneDocSnap = await getDoc(doc(db, "allowed_pins", pendingLoginPhone));
+        const defaultDocSnap = !phoneDocSnap.exists() ? await getDoc(doc(db, "allowed_pins", "default")) : null;
+
+        let validPinData = null;
+        if (phoneDocSnap.exists()) {
+          validPinData = phoneDocSnap.data();
+        } else if (defaultDocSnap && defaultDocSnap.exists()) {
+          validPinData = defaultDocSnap.data();
+        }
+
+        if (!validPinData || validPinData.active === false || String(validPinData.pin) !== enteredPin) {
+          pinErr.textContent = "Password / PIN salah atau nomor belum diaktifkan Admin.";
+          pinErr.classList.remove('hidden');
+          btn.disabled = false;
+          btn.textContent = "Masuk ke ArzChat";
+          return;
+        }
+
+        // Gunakan ID konsisten berbasis nomor HP agar kontak & riwayat chat tidak berubah
+        const userDocId = pendingLoginPhone.replace('+', 'user_');
+        const profileData = {
+          uid: userDocId,
+          name: pendingLoginName,
+          phone: pendingLoginPhone,
+          updatedAt: serverTimestamp()
         };
-        currentUser = profile;
 
-        document.getElementById('authScreen').classList.add('hidden');
-        document.getElementById('appScreen').classList.remove('hidden');
-        document.getElementById('myNameDisplay').textContent = profile.name;
-        document.getElementById('myPhoneDisplay').textContent = profile.phone;
-        const initial = (profile.name || "A").charAt(0).toUpperCase();
-        document.getElementById('myAvatar').textContent = initial;
-        document.getElementById('myStoryAvatarLetter').textContent = initial;
+        await setDoc(doc(db, "users", userDocId), profileData, { merge: true });
+        localStorage.setItem('arzchat_session', JSON.stringify({
+          uid: userDocId,
+          name: pendingLoginName,
+          phone: pendingLoginPhone
+        }));
 
-        listenUsers();
-        listenStories();
-        listenIncomingCalls();
-      } else {
-        currentUser = null;
-        if (unsubscribeUsers) unsubscribeUsers();
-        if (unsubscribeStories) unsubscribeStories();
-        if (unsubscribeMessages) unsubscribeMessages();
-        if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
-        document.getElementById('appScreen').classList.add('hidden');
-        document.getElementById('authScreen').classList.remove('hidden');
+        enterAppWithProfile({
+          uid: userDocId,
+          name: pendingLoginName,
+          phone: pendingLoginPhone
+        });
+        showToast("Berhasil masuk ke ArzChat!");
+      } catch (err) {
+        console.error(err);
+        pinErr.textContent = "Gagal memverifikasi PIN ke Firebase (" + (err.message || "cek Firestore Rules") + ").";
+        pinErr.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Masuk ke ArzChat";
+      }
+    };
+
+    function enterAppWithProfile(profile) {
+      currentUser = profile;
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+      document.getElementById('myNameDisplay').textContent = profile.name;
+      document.getElementById('myPhoneDisplay').textContent = profile.phone;
+      const initial = (profile.name || "A").charAt(0).toUpperCase();
+      document.getElementById('myAvatar').textContent = initial;
+      document.getElementById('myStoryAvatarLetter').textContent = initial;
+
+      listenUsers();
+      listenStories();
+      listenIncomingCalls();
+    }
+
+    // Pulihkan sesi jika sudah pernah login dengan PIN valid
+    window.addEventListener('DOMContentLoaded', async () => {
+      const saved = localStorage.getItem('arzchat_session');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.uid && parsed.phone) {
+            if (!auth.currentUser) {
+              await signInAnonymously(auth).catch(() => {});
+            }
+            enterAppWithProfile(parsed);
+          }
+        } catch (e) {}
       }
     });
 
+    // ================= NAVIGASI SIDEBAR (CHATS / STORY / GAME) =================
     window.switchSidebarTab = function (tab) {
       const chatsBtn = document.getElementById('tabChatsBtn');
       const statusBtn = document.getElementById('tabStatusBtn');
+      const gamesBtn = document.getElementById('tabGamesBtn');
+
       const chatsView = document.getElementById('sidebarChatsView');
       const statusView = document.getElementById('sidebarStatusView');
+      const gamesView = document.getElementById('sidebarGamesView');
 
-      if (tab === 'chats') {
-        chatsBtn.className = "btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer";
-        statusBtn.className = "btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-2 cursor-pointer";
-        chatsView.classList.remove('hidden');
-        statusView.classList.add('hidden');
-      } else {
-        statusBtn.className = "btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer";
-        chatsBtn.className = "btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-2 cursor-pointer";
-        statusView.classList.remove('hidden');
-        chatsView.classList.add('hidden');
-      }
+      const activeCls = "btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer";
+      const softCls = "btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer";
+
+      chatsBtn.className = tab === 'chats' ? activeCls : softCls;
+      statusBtn.className = tab === 'status' ? activeCls : softCls;
+      gamesBtn.className = tab === 'games' ? activeCls : softCls;
+
+      chatsView.classList.toggle('hidden', tab !== 'chats');
+      statusView.classList.toggle('hidden', tab !== 'status');
+      gamesView.classList.toggle('hidden', tab !== 'games');
     };
 
     function listenUsers() {
@@ -1145,9 +1258,7 @@
         const cand = pendingIceCandidates.shift();
         try {
           await peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-        } catch (e) {
-          console.warn("Flush ICE error:", e);
-        }
+        } catch (e) {}
       }
     }
 
@@ -1190,9 +1301,7 @@
               if (peerConnection.remoteDescription) {
                 try {
                   await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                } catch (e) {
-                  console.warn("ICE add error:", e);
-                }
+                } catch (e) {}
               } else {
                 pendingIceCandidates.push(data.candidate);
               }
@@ -1287,7 +1396,6 @@
           }
         });
       } catch (err) {
-        console.error(err);
         stopRingSound();
         showToast("Izinkan akses mikrofon terlebih dahulu untuk telepon suara.");
         cleanupCallUI();
@@ -1366,7 +1474,6 @@
           }
         });
       } catch (err) {
-        console.error(err);
         stopRingSound();
         showToast("Gagal menjawab panggilan (cek izin mikrofon).");
         rejectIncomingCall();
@@ -1435,6 +1542,7 @@
       renderUserList();
 
       document.getElementById('emptyChatState').classList.add('hidden');
+      document.getElementById('gameStageBox').classList.add('hidden');
       document.getElementById('activeChatBox').classList.remove('hidden');
       document.getElementById('peerName').textContent = peer.name;
       document.getElementById('peerPhone').textContent = peer.phone;
@@ -1484,6 +1592,8 @@
     }
 
     window.backToSidebar = function () {
+      stopSnakeLoop();
+      stopReflexLoop();
       document.getElementById('chatPanel').classList.add('hidden');
       document.getElementById('chatPanel').classList.remove('flex');
       document.getElementById('sidebarPanel').classList.remove('hidden');
@@ -1538,6 +1648,228 @@
       await addDoc(collection(db, "chats", roomId, "messages"), payload);
     };
 
+    // ================= MINI GAME 1: NEON SNAKE =================
+    let snakeTimer = null;
+    let snakeBody = [];
+    let snakeDir = { x: 1, y: 0 };
+    let nextSnakeDir = { x: 1, y: 0 };
+    let snakeFood = { x: 10, y: 10 };
+    let snakeScoreVal = 0;
+    const gridCount = 16;
+    const tileSize = 20;
+
+    function stopSnakeLoop() {
+      if (snakeTimer) {
+        clearInterval(snakeTimer);
+        snakeTimer = null;
+      }
+    }
+
+    window.openGameStage = function (gameName) {
+      activePeer = null;
+      renderUserList();
+
+      document.getElementById('emptyChatState').classList.add('hidden');
+      document.getElementById('activeChatBox').classList.add('hidden');
+      document.getElementById('gameStageBox').classList.remove('hidden');
+
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebarPanel').classList.add('hidden');
+        document.getElementById('chatPanel').classList.remove('hidden');
+        document.getElementById('chatPanel').classList.add('flex');
+      }
+
+      if (gameName === 'snake') {
+        stopReflexLoop();
+        document.getElementById('gameStageTitle').textContent = "🐍 Neon Snake";
+        document.getElementById('snakeGameView').classList.remove('hidden');
+        document.getElementById('reflexGameView').classList.add('hidden');
+        document.getElementById('snakeHighScore').textContent = localStorage.getItem('arzchat_snake_best') || '0';
+        drawSnakeFrame();
+      } else {
+        stopSnakeLoop();
+        document.getElementById('gameStageTitle').textContent = "⚡ Neon Tap Reflex";
+        document.getElementById('reflexGameView').classList.remove('hidden');
+        document.getElementById('snakeGameView').classList.add('hidden');
+        document.getElementById('reflexBest').textContent = localStorage.getItem('arzchat_reflex_best') || '0';
+      }
+    };
+
+    function spawnSnakeFood() {
+      while (true) {
+        const fx = Math.floor(Math.random() * gridCount);
+        const fy = Math.floor(Math.random() * gridCount);
+        if (!snakeBody.some(seg => seg.x === fx && seg.y === fy)) {
+          snakeFood = { x: fx, y: fy };
+          break;
+        }
+      }
+    }
+
+    window.setSnakeDir = function (dx, dy) {
+      if (dx === -snakeDir.x && dy === -snakeDir.y) return;
+      nextSnakeDir = { x: dx, y: dy };
+    };
+
+    window.addEventListener('keydown', (e) => {
+      if (document.getElementById('snakeGameView').classList.contains('hidden')) return;
+      if (e.key === 'ArrowUp' || e.key === 'w') setSnakeDir(0, -1);
+      else if (e.key === 'ArrowDown' || e.key === 's') setSnakeDir(0, 1);
+      else if (e.key === 'ArrowLeft' || e.key === 'a') setSnakeDir(-1, 0);
+      else if (e.key === 'ArrowRight' || e.key === 'd') setSnakeDir(1, 0);
+    });
+
+    window.startSnakeGame = function () {
+      stopSnakeLoop();
+      snakeBody = [
+        { x: 6, y: 8 },
+        { x: 5, y: 8 },
+        { x: 4, y: 8 }
+      ];
+      snakeDir = { x: 1, y: 0 };
+      nextSnakeDir = { x: 1, y: 0 };
+      snakeScoreVal = 0;
+      document.getElementById('snakeScore').textContent = '0';
+      document.getElementById('snakeLength').textContent = '3';
+      document.getElementById('snakeOverlay').classList.add('hidden');
+      spawnSnakeFood();
+      drawSnakeFrame();
+
+      snakeTimer = setInterval(stepSnakeGame, 145);
+    };
+
+    function stepSnakeGame() {
+      snakeDir = nextSnakeDir;
+      const head = {
+        x: (snakeBody[0].x + snakeDir.x + gridCount) % gridCount,
+        y: (snakeBody[0].y + snakeDir.y + gridCount) % gridCount
+      };
+
+      // Tabrak badan sendiri -> Game Over
+      if (snakeBody.some(seg => seg.x === head.x && seg.y === head.y)) {
+        stopSnakeLoop();
+        const best = Number(localStorage.getItem('arzchat_snake_best') || '0');
+        if (snakeScoreVal > best) {
+          localStorage.setItem('arzchat_snake_best', String(snakeScoreVal));
+          document.getElementById('snakeHighScore').textContent = String(snakeScoreVal);
+        }
+        document.getElementById('snakeOverlayTitle').textContent = "💥 Game Over!";
+        document.getElementById('snakeOverlaySub').textContent = `Skor akhir: ${snakeScoreVal} • Panjang ular: ${snakeBody.length}`;
+        document.getElementById('snakeOverlay').classList.remove('hidden');
+        return;
+      }
+
+      snakeBody.unshift(head);
+
+      // Makan makanan -> ular bertambah panjang
+      if (head.x === snakeFood.x && head.y === snakeFood.y) {
+        snakeScoreVal += 10;
+        document.getElementById('snakeScore').textContent = String(snakeScoreVal);
+        document.getElementById('snakeLength').textContent = String(snakeBody.length);
+        spawnSnakeFood();
+      } else {
+        snakeBody.pop();
+      }
+
+      drawSnakeFrame();
+    }
+
+    function drawSnakeFrame() {
+      const canvas = document.getElementById('snakeCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#090514';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Grid halus
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      for (let i = 0; i <= gridCount; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * tileSize, 0);
+        ctx.lineTo(i * tileSize, canvas.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * tileSize);
+        ctx.lineTo(canvas.width, i * tileSize);
+        ctx.stroke();
+      }
+
+      // Makanan energi neon
+      ctx.fillStyle = '#a3e635';
+      ctx.beginPath();
+      ctx.arc(
+        snakeFood.x * tileSize + tileSize / 2,
+        snakeFood.y * tileSize + tileSize / 2,
+        tileSize / 2.6,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+
+      // Badan ular
+      snakeBody.forEach((seg, index) => {
+        ctx.fillStyle = index === 0 ? '#22d3ee' : '#a855f7';
+        ctx.beginPath();
+        ctx.roundRect(seg.x * tileSize + 1.5, seg.y * tileSize + 1.5, tileSize - 3, tileSize - 3, 6);
+        ctx.fill();
+      });
+    }
+
+    // ================= MINI GAME 2: NEON TAP REFLEX =================
+    let reflexTimer = null;
+    let reflexScoreVal = 0;
+    let reflexTimeLeft = 15;
+
+    function stopReflexLoop() {
+      if (reflexTimer) {
+        clearInterval(reflexTimer);
+        reflexTimer = null;
+      }
+    }
+
+    function moveReflexTarget() {
+      const arena = document.getElementById('reflexArena');
+      const btn = document.getElementById('reflexTargetBtn');
+      const maxX = arena.clientWidth - 64;
+      const maxY = arena.clientHeight - 64;
+      btn.style.left = `${Math.max(8, Math.floor(Math.random() * maxX))}px`;
+      btn.style.top = `${Math.max(8, Math.floor(Math.random() * maxY))}px`;
+    }
+
+    window.startReflexGame = function () {
+      stopReflexLoop();
+      reflexScoreVal = 0;
+      reflexTimeLeft = 15;
+      document.getElementById('reflexScore').textContent = '0';
+      document.getElementById('reflexTime').textContent = '15s';
+      document.getElementById('reflexOverlay').classList.add('hidden');
+      const btn = document.getElementById('reflexTargetBtn');
+      btn.classList.remove('hidden');
+      moveReflexTarget();
+
+      reflexTimer = setInterval(() => {
+        reflexTimeLeft--;
+        document.getElementById('reflexTime').textContent = `${reflexTimeLeft}s`;
+        if (reflexTimeLeft <= 0) {
+          stopReflexLoop();
+          btn.classList.add('hidden');
+          const best = Number(localStorage.getItem('arzchat_reflex_best') || '0');
+          if (reflexScoreVal > best) {
+            localStorage.setItem('arzchat_reflex_best', String(reflexScoreVal));
+            document.getElementById('reflexBest').textContent = String(reflexScoreVal);
+          }
+          document.getElementById('reflexOverlay').classList.remove('hidden');
+          showToast(`Waktu habis! Skor Reflex kamu: ${reflexScoreVal}`);
+        }
+      }, 1000);
+    };
+
+    window.hitReflexTarget = function () {
+      reflexScoreVal++;
+      document.getElementById('reflexScore').textContent = String(reflexScoreVal);
+      moveReflexTarget();
+    };
+
     window.openLightbox = function (src) {
       document.getElementById('lightboxImg').src = src;
       document.getElementById('lightboxModal').classList.remove('hidden');
@@ -1546,8 +1878,19 @@
       document.getElementById('lightboxModal').classList.add('hidden');
     };
     window.logoutUser = async function () {
+      stopSnakeLoop();
+      stopReflexLoop();
       await hangupCall(false);
-      await signOut(auth);
+      localStorage.removeItem('arzchat_session');
+      if (unsubscribeUsers) unsubscribeUsers();
+      if (unsubscribeStories) unsubscribeStories();
+      if (unsubscribeMessages) unsubscribeMessages();
+      if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
+      currentUser = null;
+      await signOut(auth).catch(() => {});
+      document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+      backToPhoneStep();
     };
   </script>
 </body>
