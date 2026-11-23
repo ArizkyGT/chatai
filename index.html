@@ -381,6 +381,7 @@
           class="btn-3d-primary py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 cursor-pointer">
           <span>💬 Chats</span>
           <span id="userCountBadge" class="bg-black/30 text-white px-1.5 py-0.5 rounded-full text-[10px]">0</span>
+          <span id="totalUnreadBadge" class="hidden bg-rose-500 text-white px-1.5 py-0.5 rounded-full text-[10px] font-extrabold">0</span>
         </button>
         <button id="tabStatusBtn" onclick="switchSidebarTab('status')"
           class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
@@ -627,10 +628,10 @@
   <!-- FIREBASE, PIN AUTH, WEBRTC & GAME SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot,
-      addDoc, deleteDoc, query, orderBy, serverTimestamp
+      addDoc, deleteDoc, query, orderBy, limit, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -775,6 +776,9 @@
     let viewerStoryList = [];
     let viewerStoryIndex = 0;
     let activePeer = null;
+    let unreadByPeer = {}; // { [peerPhoneDigits]: jumlahPesanBelumDibaca }
+    let roomListeners = new Map(); // [roomId]: unsubscribeFn
+    let seenMessageIds = new Set();
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
     let unsubscribeStories = null;
@@ -795,6 +799,12 @@
     let isMicMuted = false;
     let callTimerInterval = null;
     let callSeconds = 0;
+
+    function normalizePhoneDigits(phoneOrId) {
+      let digits = String(phoneOrId || '').replace(/\D/g, '');
+      if (digits.startsWith('0')) digits = '62' + digits.slice(1);
+      return digits;
+    }
 
     function showToast(msg) {
       const box = document.getElementById('toastBox');
@@ -891,13 +901,10 @@
       btn.textContent = "Memeriksa Password...";
 
       try {
-        // Pastikan sesi Firebase Auth aktif agar bisa membaca dokumen PIN di Firestore
         if (!auth.currentUser) {
           await signInAnonymously(auth);
         }
 
-        // Admin mengatur dokumen di Firestore: koleksi "allowed_pins", ID dokumen = "+6283851922441" (atau "default")
-        // Field di Firestore: { pin: "123456", active: true }
         const phoneDocSnap = await getDoc(doc(db, "allowed_pins", pendingLoginPhone));
         const defaultDocSnap = !phoneDocSnap.exists() ? await getDoc(doc(db, "allowed_pins", "default")) : null;
 
@@ -916,24 +923,23 @@
           return;
         }
 
-        // Gunakan ID konsisten berbasis nomor HP agar kontak & riwayat chat tidak berubah
-        const userDocId = pendingLoginPhone.replace('+', 'user_');
+        const cleanPhoneDigits = normalizePhoneDigits(pendingLoginPhone);
         const profileData = {
-          uid: userDocId,
+          uid: cleanPhoneDigits,
           name: pendingLoginName,
           phone: pendingLoginPhone,
           updatedAt: serverTimestamp()
         };
 
-        await setDoc(doc(db, "users", userDocId), profileData, { merge: true });
+        await setDoc(doc(db, "users", cleanPhoneDigits), profileData, { merge: true });
         localStorage.setItem('arzchat_session', JSON.stringify({
-          uid: userDocId,
+          uid: cleanPhoneDigits,
           name: pendingLoginName,
           phone: pendingLoginPhone
         }));
 
         enterAppWithProfile({
-          uid: userDocId,
+          uid: cleanPhoneDigits,
           name: pendingLoginName,
           phone: pendingLoginPhone
         });
@@ -949,12 +955,20 @@
     };
 
     function enterAppWithProfile(profile) {
-      currentUser = profile;
+      const cleanDigits = normalizePhoneDigits(profile.phone || profile.uid);
+      currentUser = {
+        uid: cleanDigits,
+        name: profile.name,
+        phone: profile.phone || `+${cleanDigits}`
+      };
+      unreadByPeer = {};
+      seenMessageIds.clear();
+
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
-      document.getElementById('myNameDisplay').textContent = profile.name;
-      document.getElementById('myPhoneDisplay').textContent = profile.phone;
-      const initial = (profile.name || "A").charAt(0).toUpperCase();
+      document.getElementById('myNameDisplay').textContent = currentUser.name;
+      document.getElementById('myPhoneDisplay').textContent = currentUser.phone;
+      const initial = (currentUser.name || "A").charAt(0).toUpperCase();
       document.getElementById('myAvatar').textContent = initial;
       document.getElementById('myStoryAvatarLetter').textContent = initial;
 
@@ -963,13 +977,12 @@
       listenIncomingCalls();
     }
 
-    // Pulihkan sesi jika sudah pernah login dengan PIN valid
     window.addEventListener('DOMContentLoaded', async () => {
       const saved = localStorage.getItem('arzchat_session');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (parsed && parsed.uid && parsed.phone) {
+          if (parsed && (parsed.uid || parsed.phone)) {
             if (!auth.currentUser) {
               await signInAnonymously(auth).catch(() => {});
             }
@@ -1001,13 +1014,100 @@
       gamesView.classList.toggle('hidden', tab !== 'games');
     };
 
+    function updateTotalUnreadBadge() {
+      const total = Object.values(unreadByPeer).reduce((acc, n) => acc + (n || 0), 0);
+      const badge = document.getElementById('totalUnreadBadge');
+      if (!badge) return;
+      if (total > 0) {
+        badge.textContent = String(total);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    function syncUnreadListenersForUsers() {
+      if (!currentUser) return;
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      const activeRoomIds = new Set();
+
+      allUsers.forEach((u) => {
+        const peerDigits = normalizePhoneDigits(u.phone || u.uid);
+        if (!peerDigits || peerDigits === myDigits) return;
+        const roomId = getChatRoomId(myDigits, peerDigits);
+        activeRoomIds.add(roomId);
+
+        if (!roomListeners.has(roomId)) {
+          let initialLoadDone = false;
+          const qLatest = query(collection(db, "chats", roomId, "messages"), orderBy("createdAt", "desc"), limit(20));
+          const unsub = onSnapshot(qLatest, (snap) => {
+            if (!initialLoadDone) {
+              snap.docChanges().forEach((ch) => {
+                if (ch.type === "added") seenMessageIds.add(ch.doc.id);
+              });
+              initialLoadDone = true;
+              return;
+            }
+
+            snap.docChanges().forEach((ch) => {
+              if (ch.type === "added") {
+                const msgId = ch.doc.id;
+                if (seenMessageIds.has(msgId)) return;
+                seenMessageIds.add(msgId);
+
+                const msg = ch.doc.data();
+                const senderDigits = normalizePhoneDigits(msg.senderId || msg.senderPhone);
+                if (senderDigits && senderDigits !== myDigits) {
+                  const isViewingThisPeer = activePeer && normalizePhoneDigits(activePeer.phone || activePeer.uid) === senderDigits;
+                  if (!isViewingThisPeer) {
+                    unreadByPeer[senderDigits] = (unreadByPeer[senderDigits] || 0) + 1;
+                    updateTotalUnreadBadge();
+                    renderUserList();
+                    showToast(`💬 Pesan baru dari ${u.name || '+' + senderDigits}`);
+                  }
+                }
+              }
+            });
+          });
+          roomListeners.set(roomId, unsub);
+        }
+      });
+
+      for (const [roomId, unsub] of roomListeners.entries()) {
+        if (!activeRoomIds.has(roomId)) {
+          unsub();
+          roomListeners.delete(roomId);
+        }
+      }
+    }
+
+    function clearRoomListeners() {
+      for (const unsub of roomListeners.values()) {
+        unsub();
+      }
+      roomListeners.clear();
+    }
+
     function listenUsers() {
       if (unsubscribeUsers) unsubscribeUsers();
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+
       unsubscribeUsers = onSnapshot(collection(db, "users"), (snapshot) => {
-        allUsers = [];
+        const mapByPhone = new Map();
         snapshot.forEach((d) => {
-          if (d.id !== currentUser.uid) allUsers.push(d.data());
+          const data = d.data();
+          const digits = normalizePhoneDigits(data.phone || data.uid || d.id);
+          if (!digits || digits === myDigits) return;
+          if (!mapByPhone.has(digits)) {
+            mapByPhone.set(digits, {
+              ...data,
+              uid: digits,
+              phone: data.phone || `+${digits}`
+            });
+          }
         });
+        allUsers = Array.from(mapByPhone.values());
+        syncUnreadListenersForUsers();
         renderUserList();
       });
     }
@@ -1016,9 +1116,11 @@
       const keyword = (document.getElementById('searchUserInput').value || '').toLowerCase();
       const filtered = allUsers.filter(u =>
         (u.name || '').toLowerCase().includes(keyword) ||
-        (u.phone || '').includes(keyword)
+        (u.phone || '').toLowerCase().includes(keyword)
       );
       document.getElementById('userCountBadge').textContent = filtered.length;
+      updateTotalUnreadBadge();
+
       const container = document.getElementById('userListContainer');
       container.innerHTML = '';
 
@@ -1028,7 +1130,10 @@
       }
 
       filtered.forEach((u) => {
-        const isSelected = activePeer && activePeer.uid === u.uid;
+        const peerDigits = normalizePhoneDigits(u.phone || u.uid);
+        const unreadCount = unreadByPeer[peerDigits] || 0;
+        const isSelected = activePeer && normalizePhoneDigits(activePeer.phone || activePeer.uid) === peerDigits;
+
         const item = document.createElement('div');
         item.className = `px-3.5 py-3 rounded-2xl flex items-center gap-3 ${isSelected ? 'glass-3d border-cyan-400/40' : 'hover:bg-white/[0.06]'} cursor-pointer transition`;
         item.onclick = () => openChatWith(u);
@@ -1039,7 +1144,10 @@
           <div class="min-w-0 flex-1">
             <div class="flex items-center justify-between gap-2">
               <span class="text-sm font-bold text-white truncate">${u.name}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-300">● Online</span>
+              <div class="flex items-center gap-1.5 shrink-0">
+                ${unreadCount > 0 ? `<span class="bg-pink-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">${unreadCount}</span>` : ''}
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-300">● Online</span>
+              </div>
             </div>
             <div class="text-xs text-[#b8b2d8] truncate">${u.phone}</div>
           </div>
@@ -1061,8 +1169,9 @@
 
     function renderStories() {
       if (!currentUser) return;
-      const myStories = allStories.filter(s => s.userId === currentUser.uid);
-      const otherStories = allStories.filter(s => s.userId !== currentUser.uid);
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      const myStories = allStories.filter(s => normalizePhoneDigits(s.userPhone || s.userId) === myDigits);
+      const otherStories = allStories.filter(s => normalizePhoneDigits(s.userPhone || s.userId) !== myDigits);
 
       document.getElementById('storyCountBadge').textContent = allStories.length;
 
@@ -1105,7 +1214,8 @@
 
     window.handleMyStatusClick = function () {
       if (!currentUser) return;
-      const myStories = allStories.filter(s => s.userId === currentUser.uid);
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      const myStories = allStories.filter(s => normalizePhoneDigits(s.userPhone || s.userId) === myDigits);
       if (myStories.length > 0) openStoryViewer(myStories, 0);
       else openCreateStoryModal();
     };
@@ -1225,8 +1335,10 @@
         capWrap.className = "px-4 py-3 rounded-2xl max-w-md";
       }
 
+      const myDigits = currentUser ? normalizePhoneDigits(currentUser.phone || currentUser.uid) : "";
+      const itemDigits = normalizePhoneDigits(item.userPhone || item.userId);
       const delBtn = document.getElementById('btnDeleteMyStory');
-      delBtn.classList.toggle('hidden', !(currentUser && item.userId === currentUser.uid));
+      delBtn.classList.toggle('hidden', !(currentUser && myDigits === itemDigits));
     }
 
     window.prevStory = function () {
@@ -1297,7 +1409,7 @@
         snap.docChanges().forEach(async (change) => {
           if (change.type === "added") {
             const data = change.doc.data();
-            if (data.fromUid !== currentUser.uid && peerConnection) {
+            if (normalizePhoneDigits(data.fromUid) !== normalizePhoneDigits(currentUser.uid) && peerConnection) {
               if (peerConnection.remoteDescription) {
                 try {
                   await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
@@ -1370,7 +1482,7 @@
         await setDoc(callDocRef, {
           callerId: currentUser.uid,
           callerName: currentUser.name,
-          calleeId: activePeer.uid,
+          calleeId: normalizePhoneDigits(activePeer.phone || activePeer.uid),
           calleeName: activePeer.name,
           status: "ringing",
           offer: { type: offer.type, sdp: offer.sdp },
@@ -1404,12 +1516,16 @@
 
     function listenIncomingCalls() {
       if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+
       unsubscribeIncomingCalls = onSnapshot(collection(db, "calls"), (snap) => {
         snap.docChanges().forEach((change) => {
           if (change.type === "added" || change.type === "modified") {
             const data = change.doc.data();
             const callId = change.doc.id;
-            if (data.calleeId === currentUser.uid && data.status === "ringing" && !activeCallId) {
+            const calleeDigits = normalizePhoneDigits(data.calleeId);
+
+            if (calleeDigits === myDigits && data.status === "ringing" && !activeCallId) {
               incomingCallData = { id: callId, ...data };
               document.getElementById('callPeerAvatar').textContent = (data.callerName || 'U').charAt(0).toUpperCase();
               document.getElementById('callPeerName').textContent = data.callerName || "Pengguna";
@@ -1533,12 +1649,16 @@
     }
 
     // ================= CHAT REAL-TIME =================
-    function getChatRoomId(uid1, uid2) {
-      return [uid1, uid2].sort().join('_');
+    function getChatRoomId(id1, id2) {
+      const a = normalizePhoneDigits(id1);
+      const b = normalizePhoneDigits(id2);
+      return [a, b].sort().join('_');
     }
 
     function openChatWith(peer) {
       activePeer = peer;
+      const peerDigits = normalizePhoneDigits(peer.phone || peer.uid);
+      unreadByPeer[peerDigits] = 0;
       renderUserList();
 
       document.getElementById('emptyChatState').classList.add('hidden');
@@ -1555,15 +1675,18 @@
       }
 
       if (unsubscribeMessages) unsubscribeMessages();
-      const roomId = getChatRoomId(currentUser.uid, peer.uid);
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      const roomId = getChatRoomId(myDigits, peerDigits);
       const q = query(collection(db, "chats", roomId, "messages"), orderBy("createdAt", "asc"));
 
       unsubscribeMessages = onSnapshot(q, (snap) => {
         const box = document.getElementById('messagesContainer');
         box.innerHTML = '';
         snap.forEach((docSnap) => {
+          seenMessageIds.add(docSnap.id);
           const msg = docSnap.data();
-          const isMe = msg.senderId === currentUser.uid;
+          const senderDigits = normalizePhoneDigits(msg.senderId || msg.senderPhone);
+          const isMe = senderDigits === myDigits;
           const wrap = document.createElement('div');
           wrap.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
 
@@ -1594,6 +1717,8 @@
     window.backToSidebar = function () {
       stopSnakeLoop();
       stopReflexLoop();
+      activePeer = null;
+      renderUserList();
       document.getElementById('chatPanel').classList.add('hidden');
       document.getElementById('chatPanel').classList.remove('flex');
       document.getElementById('sidebarPanel').classList.remove('hidden');
@@ -1633,9 +1758,13 @@
       const text = input.value.trim();
       if (!text && !pendingBase64Image) return;
 
-      const roomId = getChatRoomId(currentUser.uid, activePeer.uid);
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      const peerDigits = normalizePhoneDigits(activePeer.phone || activePeer.uid);
+      const roomId = getChatRoomId(myDigits, peerDigits);
+
       const payload = {
-        senderId: currentUser.uid,
+        senderId: myDigits,
+        senderPhone: currentUser.phone,
         text,
         image: pendingBase64Image || null,
         createdAt: serverTimestamp()
@@ -1745,7 +1874,6 @@
         y: (snakeBody[0].y + snakeDir.y + gridCount) % gridCount
       };
 
-      // Tabrak badan sendiri -> Game Over
       if (snakeBody.some(seg => seg.x === head.x && seg.y === head.y)) {
         stopSnakeLoop();
         const best = Number(localStorage.getItem('arzchat_snake_best') || '0');
@@ -1761,7 +1889,6 @@
 
       snakeBody.unshift(head);
 
-      // Makan makanan -> ular bertambah panjang
       if (head.x === snakeFood.x && head.y === snakeFood.y) {
         snakeScoreVal += 10;
         document.getElementById('snakeScore').textContent = String(snakeScoreVal);
@@ -1781,7 +1908,6 @@
       ctx.fillStyle = '#090514';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Grid halus
       ctx.strokeStyle = 'rgba(255,255,255,0.04)';
       for (let i = 0; i <= gridCount; i++) {
         ctx.beginPath();
@@ -1794,7 +1920,6 @@
         ctx.stroke();
       }
 
-      // Makanan energi neon
       ctx.fillStyle = '#a3e635';
       ctx.beginPath();
       ctx.arc(
@@ -1806,7 +1931,6 @@
       );
       ctx.fill();
 
-      // Badan ular
       snakeBody.forEach((seg, index) => {
         ctx.fillStyle = index === 0 ? '#22d3ee' : '#a855f7';
         ctx.beginPath();
@@ -1880,6 +2004,7 @@
     window.logoutUser = async function () {
       stopSnakeLoop();
       stopReflexLoop();
+      clearRoomListeners();
       await hangupCall(false);
       localStorage.removeItem('arzchat_session');
       if (unsubscribeUsers) unsubscribeUsers();
