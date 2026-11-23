@@ -258,9 +258,82 @@
           <button id="btnClearStoryPhoto" type="button" onclick="clearStoryPhoto()" class="hidden text-xs text-rose-400 hover:underline px-2">Hapus Foto</button>
         </div>
 
+        <label class="flex items-center gap-2.5 text-xs text-pink-200 bg-white/5 px-3.5 py-2.5 rounded-2xl border border-pink-400/25 cursor-pointer select-none">
+          <input id="storyIsHighlightInput" type="checkbox" class="accent-pink-500 w-4 h-4 rounded" />
+          <span>✨ Simpan juga ke <strong>Sorotan Profil (Highlight)</strong></span>
+        </label>
+
         <button id="btnPublishStory" onclick="publishStory()" class="btn-3d-primary w-full py-3 rounded-2xl text-sm cursor-pointer">
           Posting Story Sekarang
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PROFIL KONTAK & SOROTAN STORY (HIGHLIGHTS) -->
+  <div id="profileHighlightModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-3d w-full max-w-md rounded-3xl overflow-hidden">
+      <div class="px-5 py-4 bg-white/5 flex items-center justify-between border-b border-white/10">
+        <h3 id="profileModalTitle" class="font-bold text-white text-base">👤 Profil & Sorotan</h3>
+        <button onclick="closeProfileHighlightModal()" class="text-[#b8b2d8] hover:text-white text-lg cursor-pointer">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="flex items-center gap-3.5">
+          <div id="profAvatar" class="avatar-3d w-14 h-14 rounded-2xl font-extrabold text-xl flex items-center justify-center text-white shrink-0">U</div>
+          <div class="min-w-0 flex-1">
+            <h4 id="profName" class="text-base font-extrabold text-white truncate">Nama Pengguna</h4>
+            <p id="profPhone" class="text-xs text-cyan-300 truncate">+62...</p>
+            <p id="profLastSeen" class="text-[11px] text-[#b8b2d8] mt-0.5">● Online</p>
+          </div>
+        </div>
+
+        <div class="border-t border-white/10 pt-3">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-pink-300">✨ Sorotan Story (Highlights)</span>
+            <button id="btnAddHighlightFromProfile" onclick="closeProfileHighlightModal(); openCreateStoryModal(true);"
+              class="hidden btn-3d-soft text-[11px] px-2.5 py-1 rounded-xl text-cyan-300 font-semibold cursor-pointer">
+              + Tambah Sorotan
+            </button>
+          </div>
+          <div id="profileHighlightsGrid" class="flex items-center gap-3 overflow-x-auto pb-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AKSI & INFO PESAN (EDIT / HAPUS / INFO SEPERTI WA) -->
+  <div id="messageActionModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target===this) closeMessageActionModal()">
+    <div class="glass-3d w-full max-w-sm rounded-3xl overflow-hidden">
+      <div class="px-5 py-3.5 bg-white/5 flex items-center justify-between border-b border-white/10">
+        <h3 class="font-bold text-white text-sm">💬 Opsi & Info Pesan</h3>
+        <button onclick="closeMessageActionModal()" class="text-[#b8b2d8] hover:text-white text-base cursor-pointer">✕</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-3 text-xs space-y-1">
+          <p class="text-[#b8b2d8]">Isi Pesan: <strong id="msgInfoPreview" class="text-white break-words">-</strong></p>
+          <p class="text-[#b8b2d8]">Waktu Terkirim: <strong id="msgInfoSentAt" class="text-cyan-300">-</strong></p>
+          <p class="text-[#b8b2d8]">Status: <strong id="msgInfoStatus" class="text-lime-300">✓✓ Terkirim & Dibaca</strong></p>
+          <p id="msgInfoEditedRow" class="hidden text-[#b8b2d8]">Terakhir Diedit: <strong id="msgInfoEditedAt" class="text-amber-300">-</strong></p>
+        </div>
+
+        <div id="msgEditFormWrap" class="hidden space-y-2">
+          <label class="block text-[11px] text-cyan-300 font-semibold">Edit Teks Pesan:</label>
+          <input id="msgEditInput" type="text" onkeydown="if(event.key==='Enter') submitEditMessage()"
+            class="w-full bg-white/5 border border-cyan-400/40 rounded-2xl px-3.5 py-2 text-xs text-white focus:outline-none" />
+          <div class="flex gap-2">
+            <button onclick="submitEditMessage()" class="btn-3d-primary flex-1 py-2 rounded-xl text-xs cursor-pointer">Simpan Edit</button>
+            <button onclick="cancelEditMessageMode()" class="btn-3d-soft px-3 py-2 rounded-xl text-xs text-[#b8b2d8] cursor-pointer">Batal</button>
+          </div>
+        </div>
+
+        <div id="msgOwnerActions" class="grid grid-cols-2 gap-2 pt-1">
+          <button id="btnStartEditMsg" onclick="enableEditMessageMode()" class="btn-3d-soft py-2.5 rounded-2xl text-xs font-semibold text-cyan-300 cursor-pointer">
+            ✏️ Edit Pesan
+          </button>
+          <button onclick="deleteSelectedMessage()" class="py-2.5 rounded-2xl bg-rose-500/25 hover:bg-rose-500/35 text-rose-200 text-xs font-bold cursor-pointer">
+            🗑️ Hapus Pesan
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -377,7 +450,10 @@
             class="hidden btn-3d-soft text-xs text-lime-300 font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer">
             📲 Install
           </button>
-          <button onclick="openCreateStoryModal()" class="btn-3d-soft text-xs text-cyan-300 font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer">
+          <button onclick="openMyProfileHighlights()" title="Profil & Sorotan" class="btn-3d-soft text-xs text-pink-300 font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer">
+            👤 Sorotan
+          </button>
+          <button onclick="openCreateStoryModal(false)" class="btn-3d-soft text-xs text-cyan-300 font-semibold px-2.5 py-1.5 rounded-xl cursor-pointer">
             + Story
           </button>
           <button onclick="logoutUser()" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-2.5 py-1.5 rounded-xl transition cursor-pointer">
@@ -401,7 +477,7 @@
         </button>
         <button id="tabGamesBtn" onclick="switchSidebarTab('games')"
           class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
-          <span>🎮 Game (8)</span>
+          <span>🎮 Game (9)</span>
         </button>
       </div>
 
@@ -452,7 +528,18 @@
       <!-- TAB 3: PILIHAN 6 MINI GAME -->
       <div id="sidebarGamesView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-3 space-y-2.5">
         <div class="px-1 text-[10px] font-bold uppercase tracking-widest text-lime-300">
-          Arcade Mini Games (8 Game)
+          Arcade Mini Games (9 Game)
+        </div>
+
+        <div onclick="openGameStage('cooking')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-pink-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">👨‍🍳</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Royal Cooking Tycoon</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-pink-400/20 text-pink-300 font-bold shrink-0">Upgrade</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Masak pesanan, kumpulkan koin & upgrade dapur bintang 5!</p>
+          </div>
         </div>
 
         <div onclick="openGameStage('shooter')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-cyan-400/50 transition flex items-center gap-3">
@@ -553,7 +640,7 @@
         <div class="avatar-3d w-20 h-20 rounded-3xl flex items-center justify-center mb-4 text-3xl shadow-xl">⚡</div>
         <h3 class="text-xl font-extrabold text-white">ArzChat</h3>
         <p class="text-xs sm:text-sm text-[#b8b2d8] max-w-sm mt-2 leading-relaxed">
-          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau buka tab <span class="text-lime-300 font-semibold">Game (8)</span>.
+          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau buka tab <span class="text-lime-300 font-semibold">Game (9)</span>.
         </p>
       </div>
 
@@ -564,10 +651,12 @@
         <div class="panel-3d px-4 py-2.5 border-b flex items-center justify-between shrink-0">
           <div class="flex items-center gap-3 min-w-0">
             <button onclick="backToSidebar()" class="btn-3d-soft md:hidden text-white w-9 h-9 rounded-xl flex items-center justify-center">←</button>
-            <div id="peerAvatar" class="avatar-3d w-10 h-10 rounded-2xl font-extrabold flex items-center justify-center text-sm shrink-0">U</div>
-            <div class="min-w-0">
-              <h3 id="peerName" class="text-sm font-bold text-white truncate">Nama Kontak</h3>
-              <p id="peerPhone" class="text-[11px] text-cyan-300 truncate">+62...</p>
+            <div onclick="openPeerProfileHighlights()" class="flex items-center gap-3 min-w-0 cursor-pointer group" title="Lihat Profil & Sorotan Story">
+              <div id="peerAvatar" class="avatar-3d w-10 h-10 rounded-2xl font-extrabold flex items-center justify-center text-sm shrink-0">U</div>
+              <div class="min-w-0">
+                <h3 id="peerName" class="text-sm font-bold text-white truncate group-hover:text-cyan-300 transition">Nama Kontak</h3>
+                <p id="peerPhone" class="text-[11px] text-cyan-300 truncate">● Online</p>
+              </div>
             </div>
           </div>
 
@@ -649,6 +738,7 @@
             <h3 id="gameStageTitle" class="text-sm font-bold text-white">🐍 Neon Snake</h3>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="openGameStage('cooking')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-pink-300 font-semibold cursor-pointer">👨‍🍳 Masak</button>
             <button onclick="openGameStage('shooter')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-cyan-300 font-semibold cursor-pointer">🚀 Tembak</button>
             <button onclick="openGameStage('guess')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-amber-300 font-semibold cursor-pointer">🖼️ Tebak</button>
             <button onclick="openGameStage('snake')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-lime-300 font-semibold cursor-pointer">🐍 Snake</button>
@@ -657,6 +747,74 @@
             <button onclick="openGameStage('2048')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-orange-300 font-semibold cursor-pointer">🔢 2048</button>
             <button onclick="openGameStage('memory')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-emerald-300 font-semibold cursor-pointer">🃏 Flip</button>
             <button onclick="openGameStage('rps')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-rose-300 font-semibold cursor-pointer">✊ Suit</button>
+          </div>
+        </div>
+
+        <!-- GAME 9: ROYAL COOKING TYCOON (UPGRADE DAPUR ALA COOKING MAMA) -->
+        <div id="cookingGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-3">
+          <div class="glass-3d px-4 py-2.5 rounded-2xl flex items-center gap-4 text-xs font-bold flex-wrap justify-center">
+            <span>Koin: <strong id="cookCoins" class="text-amber-300 text-sm">0 🪙</strong></span>
+            <span>Level Dapur: <strong id="cookKitchenLv" class="text-pink-300 text-sm">Lv.1</strong></span>
+            <span>Porsi: <strong id="cookServed" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <div class="glass-3d w-full max-w-xs rounded-3xl p-4 text-center space-y-3 border border-pink-400/30">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-200 font-bold">Pesanan Pelanggan</span>
+              <span id="cookComboBadge" class="text-cyan-300 font-bold">Combo x1</span>
+            </div>
+
+            <div class="bg-[#090514]/80 border border-white/10 rounded-2xl p-3.5 space-y-1.5">
+              <div id="cookOrderDish" class="text-3xl">🍔</div>
+              <p id="cookOrderName" class="text-sm font-extrabold text-white">Royal Cheese Burger</p>
+              <p id="cookOrderSteps" class="text-xs text-cyan-300 font-semibold">Langkah: 🥩 Panggang → 🧀 Keju → 🍽️ Sajikan</p>
+              <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden mt-2">
+                <div id="cookProgressBar" class="bg-gradient-to-r from-pink-500 to-amber-400 h-full transition-all duration-200" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Tombol Aksi Memasak -->
+            <div class="grid grid-cols-4 gap-1.5">
+              <button type="button" onclick="performCookAction('prep')" class="btn-3d-soft py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
+                <span class="text-base">🔪</span>
+                <span class="text-[10px]">Potong</span>
+              </button>
+              <button type="button" onclick="performCookAction('fry')" class="btn-3d-soft py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
+                <span class="text-base">🍳</span>
+                <span class="text-[10px]">Masak</span>
+              </button>
+              <button type="button" onclick="performCookAction('garnish')" class="btn-3d-soft py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
+                <span class="text-base">🧀</span>
+                <span class="text-[10px]">Topping</span>
+              </button>
+              <button type="button" onclick="performCookAction('serve')" class="btn-3d-primary py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
+                <span class="text-base">🍽️</span>
+                <span class="text-[10px]">Sajikan</span>
+              </button>
+            </div>
+
+            <!-- Panel Upgrade Alat Dapur -->
+            <div class="border-t border-white/10 pt-2.5 text-left space-y-1.5">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-amber-300">⬆️ Upgrade Peralatan Dapur</p>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="upgradeKitchenItem('stove')" class="btn-3d-soft p-2 rounded-xl text-[11px] text-left cursor-pointer">
+                  <div class="font-bold text-white">🔥 Kompor Turbo <span id="upgStoveLv" class="text-cyan-300">Lv.1</span></div>
+                  <div id="upgStoveCost" class="text-[10px] text-amber-300">+Koin Porsi • 50 🪙</div>
+                </button>
+                <button type="button" onclick="upgradeKitchenItem('menu')" class="btn-3d-soft p-2 rounded-xl text-[11px] text-left cursor-pointer">
+                  <div class="font-bold text-white">👑 Resep Royal <span id="upgMenuLv" class="text-pink-300">Lv.1</span></div>
+                  <div id="upgMenuCost" class="text-[10px] text-amber-300">Menu Mewah • 80 🪙</div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-pink-300">🏆 Top Chef Royal Cooking ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_cooking" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
           </div>
         </div>
 
@@ -1284,6 +1442,7 @@
       document.getElementById('myAvatar').textContent = initial;
       document.getElementById('myStoryAvatarLetter').textContent = initial;
 
+      startUserPresenceHeartbeat();
       listenUsers();
       listenStories();
       listenIncomingCalls();
@@ -1422,6 +1581,13 @@
         allUsers = Array.from(mapByPhone.values());
         syncUnreadListenersForUsers();
         renderUserList();
+        if (activePeer) {
+          const refreshedPeer = allUsers.find(u => normalizePhoneDigits(u.phone || u.uid) === normalizePhoneDigits(activePeer.phone || activePeer.uid));
+          if (refreshedPeer) {
+            activePeer = refreshedPeer;
+            document.getElementById('peerPhone').textContent = formatLastSeenText(refreshedPeer);
+          }
+        }
       });
     }
 
@@ -1459,7 +1625,7 @@
               <span class="text-sm font-bold text-white truncate">${u.name}</span>
               <div class="flex items-center gap-1.5 shrink-0">
                 ${unreadCount > 0 ? `<span class="bg-pink-500 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">${unreadCount}</span>` : ''}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/15 text-emerald-300">● Online</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full ${formatLastSeenText(u) === '● Online' ? 'bg-emerald-400/15 text-emerald-300' : 'bg-white/10 text-[#b8b2d8]'}">${formatLastSeenText(u) === '● Online' ? '● Online' : 'Off'}</span>
               </div>
             </div>
             <div class="text-xs text-[#b8b2d8] truncate">${u.phone}</div>
@@ -1467,6 +1633,138 @@
         `;
         container.appendChild(item);
       });
+    };
+
+    // ================= PRESENCE ONLINE & TERAKHIR DILIHAT OFF =================
+    let presenceHeartbeatTimer = null;
+
+    function formatLastSeenText(userObj) {
+      if (!userObj) return "Offline";
+      const nowMs = Date.now();
+      let lastMs = 0;
+      if (userObj.lastSeen && userObj.lastSeen.toMillis) {
+        lastMs = userObj.lastSeen.toMillis();
+      } else if (typeof userObj.lastSeenMs === 'number') {
+        lastMs = userObj.lastSeenMs;
+      } else if (userObj.updatedAt && userObj.updatedAt.toMillis) {
+        lastMs = userObj.updatedAt.toMillis();
+      }
+
+      const isExplicitOnline = userObj.isOnline === true && (nowMs - lastMs < 65000);
+      if (isExplicitOnline) return "● Online";
+      if (!lastMs) return "Terakhir dilihat baru-baru ini";
+
+      const d = new Date(lastMs);
+      const today = new Date();
+      const isSameDay = d.toDateString() === today.toDateString();
+      const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      if (isSameDay) return `Terakhir dilihat hari ini pukul ${timeStr}`;
+      const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+      return `Terakhir dilihat ${dateStr} pukul ${timeStr}`;
+    }
+
+    async function updateMyPresence(isOnline) {
+      if (!currentUser) return;
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      try {
+        await setDoc(doc(db, "users", myDigits), {
+          isOnline: Boolean(isOnline),
+          lastSeen: serverTimestamp(),
+          lastSeenMs: Date.now()
+        }, { merge: true });
+      } catch (e) {}
+    }
+
+    function startUserPresenceHeartbeat() {
+      stopUserPresenceHeartbeat();
+      updateMyPresence(true);
+      presenceHeartbeatTimer = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          updateMyPresence(true);
+        }
+      }, 25000);
+    }
+
+    function stopUserPresenceHeartbeat() {
+      if (presenceHeartbeatTimer) {
+        clearInterval(presenceHeartbeatTimer);
+        presenceHeartbeatTimer = null;
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!currentUser) return;
+      updateMyPresence(document.visibilityState === 'visible');
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (currentUser) updateMyPresence(false);
+    });
+
+    // ================= PROFIL & SOROTAN STORY (HIGHLIGHTS) =================
+    window.openMyProfileHighlights = function () {
+      if (!currentUser) return;
+      openProfileHighlightModal({
+        uid: currentUser.uid,
+        name: currentUser.name,
+        phone: currentUser.phone,
+        isOnline: true,
+        lastSeenMs: Date.now()
+      }, true);
+    };
+
+    window.openPeerProfileHighlights = function () {
+      if (!activePeer) return;
+      const latestPeer = allUsers.find(u => normalizePhoneDigits(u.phone || u.uid) === normalizePhoneDigits(activePeer.phone || activePeer.uid)) || activePeer;
+      openProfileHighlightModal(latestPeer, false);
+    };
+
+    function openProfileHighlightModal(userObj, isMe) {
+      const targetDigits = normalizePhoneDigits(userObj.phone || userObj.uid);
+      document.getElementById('profileModalTitle').textContent = isMe ? "👤 Profil & Sorotan Saya" : "👤 Profil & Sorotan Kontak";
+      document.getElementById('profAvatar').textContent = (userObj.name || 'U').charAt(0).toUpperCase();
+      document.getElementById('profName').textContent = userObj.name || "Pengguna";
+      document.getElementById('profPhone').textContent = userObj.phone || `+${targetDigits}`;
+      document.getElementById('profLastSeen').textContent = isMe ? "● Online" : formatLastSeenText(userObj);
+
+      const addBtn = document.getElementById('btnAddHighlightFromProfile');
+      addBtn.classList.toggle('hidden', !isMe);
+
+      const userStories = allStories.filter(s => normalizePhoneDigits(s.userPhone || s.userId) === targetDigits);
+      const highlights = userStories.filter(s => s.isHighlight === true);
+      const displayList = highlights.length > 0 ? highlights : userStories;
+
+      const grid = document.getElementById('profileHighlightsGrid');
+      grid.innerHTML = '';
+
+      if (displayList.length === 0) {
+        grid.innerHTML = `<p class="text-xs text-[#b8b2d8] py-2">Belum ada sorotan story di profil ini.</p>`;
+      } else {
+        displayList.forEach((st, idx) => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = "flex flex-col items-center gap-1.5 shrink-0 w-20 cursor-pointer group";
+          item.onclick = () => {
+            closeProfileHighlightModal();
+            openStoryViewer(displayList, idx);
+          };
+          const thumbHtml = st.image
+            ? `<img src="${st.image}" class="w-14 h-14 rounded-full object-cover" />`
+            : `<div class="w-14 h-14 rounded-full flex items-center justify-center text-xs font-bold text-white p-1 text-center overflow-hidden" style="background:${st.bg || 'linear-gradient(135deg,#9333ea,#06b6d4)'}">${(st.text || '✨').slice(0, 12)}</div>`;
+
+          item.innerHTML = `
+            <div class="status-ring-3d">${thumbHtml}</div>
+            <span class="text-[11px] text-white truncate w-full text-center group-hover:text-cyan-300">${st.isHighlight ? '⭐ ' : ''}${st.text ? st.text : 'Sorotan'}</span>
+          `;
+          grid.appendChild(item);
+        });
+      }
+
+      document.getElementById('profileHighlightModal').classList.remove('hidden');
+    }
+
+    window.closeProfileHighlightModal = function () {
+      document.getElementById('profileHighlightModal').classList.add('hidden');
     };
 
     // ================= STORY / STATUS =================
@@ -1533,8 +1831,10 @@
       else openCreateStoryModal();
     };
 
-    window.openCreateStoryModal = function () {
+    window.openCreateStoryModal = function (defaultHighlight = false) {
       pendingStoryImage = null;
+      const hlCheck = document.getElementById('storyIsHighlightInput');
+      if (hlCheck) hlCheck.checked = Boolean(defaultHighlight);
       selectedStoryBg = "linear-gradient(135deg, #9333ea 0%, #06b6d4 100%)";
       document.getElementById('storyTextInput').value = '';
       document.getElementById('storyPhotoInput').value = '';
@@ -1604,6 +1904,7 @@
           text,
           image: pendingStoryImage || null,
           bg: selectedStoryBg,
+          isHighlight: Boolean(document.getElementById('storyIsHighlightInput')?.checked),
           createdAt: serverTimestamp()
         });
         closeCreateStoryModal();
@@ -1731,16 +2032,25 @@
       peerConnection = new RTCPeerConnection(rtcConfig);
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
+      const remoteCombinedStream = new MediaStream();
       peerConnection.ontrack = (event) => {
-        if (event.streams && event.streams[0]) {
-          const remoteStream = event.streams[0];
-          boostRemoteStreamAudio(remoteStream);
-          if (isVideo) {
-            const remoteVidEl = document.getElementById('remoteVideo');
-            if (remoteVidEl) {
-              remoteVidEl.srcObject = remoteStream;
-              remoteVidEl.play().catch(() => {});
+        const stream = (event.streams && event.streams[0]) ? event.streams[0] : remoteCombinedStream;
+        if (!event.streams || !event.streams[0]) {
+          if (event.track && !remoteCombinedStream.getTracks().some(t => t.id === event.track.id)) {
+            remoteCombinedStream.addTrack(event.track);
+          }
+        }
+        boostRemoteStreamAudio(stream);
+        const hasVideoTrack = isVideo || (event.track && event.track.kind === 'video') || stream.getVideoTracks().length > 0;
+        if (hasVideoTrack) {
+          const remoteVidEl = document.getElementById('remoteVideo');
+          if (remoteVidEl) {
+            if (remoteVidEl.srcObject !== stream) {
+              remoteVidEl.srcObject = stream;
             }
+            remoteVidEl.muted = true; // audio sudah diputar lewat boostRemoteStreamAudio agar tidak terblokir autoplay browser
+            remoteVidEl.onloadedmetadata = () => remoteVidEl.play().catch(() => {});
+            remoteVidEl.play().catch(() => {});
           }
         }
       };
@@ -2044,7 +2354,7 @@
       document.getElementById('gameStageBox').classList.add('hidden');
       document.getElementById('activeChatBox').classList.remove('hidden');
       document.getElementById('peerName').textContent = peer.name;
-      document.getElementById('peerPhone').textContent = peer.phone;
+      document.getElementById('peerPhone').textContent = formatLastSeenText(peer);
       document.getElementById('peerAvatar').textContent = (peer.name || 'U').charAt(0).toUpperCase();
 
       if (window.innerWidth < 768) {
@@ -2069,24 +2379,32 @@
           const wrap = document.createElement('div');
           wrap.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
 
-          const imgHtml = msg.image
-            ? `<img src="${msg.image}" onclick="openLightbox('${msg.image}')" class="max-w-[230px] sm:max-w-[280px] rounded-xl mb-1.5 cursor-pointer hover:opacity-95 object-cover" />`
+          const isDeleted = msg.deleted === true;
+          const imgHtml = (!isDeleted && msg.image)
+            ? `<img src="${msg.image}" onclick="event.stopPropagation(); openLightbox('${msg.image}')" class="max-w-[230px] sm:max-w-[280px] rounded-xl mb-1.5 cursor-pointer hover:opacity-95 object-cover" />`
             : '';
-          const textHtml = msg.text
-            ? `<span class="text-sm text-white break-words whitespace-pre-wrap mr-2">${msg.text}</span>`
-            : '';
+          const textHtml = isDeleted
+            ? `<span class="text-xs italic text-white/60 mr-2">🚫 Pesan ini telah dihapus</span>`
+            : (msg.text ? `<span class="text-sm text-white break-words whitespace-pre-wrap mr-2">${msg.text}</span>` : '');
+          const editedBadge = (!isDeleted && msg.edited) ? `<span class="text-[9px] text-amber-200/90 italic mr-1">diedit</span>` : '';
           const timeStr = formatTimeShort(msg.createdAt);
           const checkHtml = isMe ? `<span class="text-[11px] text-cyan-200 ml-0.5">✓✓</span>` : '';
 
-          wrap.innerHTML = `
-            <div class="${isMe ? 'bubble-out-3d' : 'bubble-in-3d'} max-w-[82%] sm:max-w-[68%] px-3.5 py-2">
-              ${imgHtml}
-              <div class="flex items-end justify-between gap-2 flex-wrap">
-                ${textHtml}
-                <span class="text-[10px] text-white/70 ml-auto shrink-0 select-none">${timeStr}${checkHtml}</span>
-              </div>
+          const bubbleDiv = document.createElement('div');
+          bubbleDiv.className = `${isMe ? 'bubble-out-3d' : 'bubble-in-3d'} max-w-[82%] sm:max-w-[68%] px-3.5 py-2 cursor-pointer group relative`;
+          bubbleDiv.title = "Klik untuk Info, Edit, atau Hapus Pesan";
+          bubbleDiv.onclick = () => openMessageActionModal(roomId, docSnap.id, msg, isMe);
+          bubbleDiv.innerHTML = `
+            ${imgHtml}
+            <div class="flex items-end justify-between gap-2 flex-wrap">
+              ${textHtml}
+              <span class="text-[10px] text-white/70 ml-auto shrink-0 select-none flex items-center gap-1">
+                ${editedBadge}${timeStr}${checkHtml}
+                <span class="opacity-70 group-hover:opacity-100 text-[10px] ml-0.5">▾</span>
+              </span>
             </div>
           `;
+          wrap.appendChild(bubbleDiv);
           box.appendChild(wrap);
         });
         box.scrollTop = box.scrollHeight;
@@ -2157,7 +2475,225 @@
       await addDoc(collection(db, "chats", roomId, "messages"), payload);
     };
 
-    // ================= MINI GAME STAGE CONTROLLER (6 GAME) =================
+    // ================= EDIT, HAPUS & INFO PESAN (SEPERTI WHATSAPP) =================
+    let selectedMsgContext = null;
+
+    function formatFullDateTime(ts) {
+      if (!ts) return "Baru saja";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      if (Number.isNaN(d.getTime())) return "Baru saja";
+      return d.toLocaleString('id-ID', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    }
+
+    function openMessageActionModal(roomId, msgId, msgData, isMe) {
+      selectedMsgContext = { roomId, msgId, msgData, isMe };
+      const isDeleted = msgData.deleted === true;
+
+      document.getElementById('msgInfoPreview').textContent = isDeleted
+        ? "(Pesan telah dihapus)"
+        : (msgData.text || (msgData.image ? "📷 Foto" : "-"));
+      document.getElementById('msgInfoSentAt').textContent = formatFullDateTime(msgData.createdAt);
+      document.getElementById('msgInfoStatus').textContent = isMe ? "✓✓ Terkirim & Dibaca" : "Diterima";
+
+      const editedRow = document.getElementById('msgInfoEditedRow');
+      if (msgData.edited && !isDeleted) {
+        editedRow.classList.remove('hidden');
+        document.getElementById('msgInfoEditedAt').textContent = formatFullDateTime(msgData.editedAt);
+      } else {
+        editedRow.classList.add('hidden');
+      }
+
+      document.getElementById('msgEditFormWrap').classList.add('hidden');
+      const ownerActions = document.getElementById('msgOwnerActions');
+      const btnEdit = document.getElementById('btnStartEditMsg');
+
+      if (isMe && !isDeleted) {
+        ownerActions.classList.remove('hidden');
+        btnEdit.classList.toggle('hidden', !msgData.text);
+      } else {
+        ownerActions.classList.add('hidden');
+      }
+
+      document.getElementById('messageActionModal').classList.remove('hidden');
+    }
+
+    window.closeMessageActionModal = function () {
+      document.getElementById('messageActionModal').classList.add('hidden');
+      selectedMsgContext = null;
+    };
+
+    window.enableEditMessageMode = function () {
+      if (!selectedMsgContext || !selectedMsgContext.msgData.text) return;
+      document.getElementById('msgEditInput').value = selectedMsgContext.msgData.text;
+      document.getElementById('msgEditFormWrap').classList.remove('hidden');
+      document.getElementById('msgEditInput').focus();
+    };
+
+    window.cancelEditMessageMode = function () {
+      document.getElementById('msgEditFormWrap').classList.add('hidden');
+    };
+
+    window.submitEditMessage = async function () {
+      if (!selectedMsgContext) return;
+      const newText = document.getElementById('msgEditInput').value.trim();
+      if (!newText) {
+        showToast("Teks pesan tidak boleh kosong.");
+        return;
+      }
+      const { roomId, msgId } = selectedMsgContext;
+      try {
+        await updateDoc(doc(db, "chats", roomId, "messages", msgId), {
+          text: newText,
+          edited: true,
+          editedAt: serverTimestamp()
+        });
+        closeMessageActionModal();
+        showToast("✏️ Pesan berhasil diedit!");
+      } catch (e) {
+        showToast("Gagal mengedit pesan.");
+      }
+    };
+
+    window.deleteSelectedMessage = async function () {
+      if (!selectedMsgContext) return;
+      const { roomId, msgId } = selectedMsgContext;
+      try {
+        await updateDoc(doc(db, "chats", roomId, "messages", msgId), {
+          text: "",
+          image: null,
+          deleted: true,
+          deletedAt: serverTimestamp()
+        });
+        closeMessageActionModal();
+        showToast("🗑️ Pesan dihapus untuk semua.");
+      } catch (e) {
+        showToast("Gagal menghapus pesan.");
+      }
+    };
+
+    // ================= GAME 9: ROYAL COOKING TYCOON (UPGRADE DAPUR ALA COOKING MAMA) =================
+    const cookingRecipes = [
+      { minMenuLv: 1, dish: "🍳", name: "Telur Mata Sapi Crispy", steps: ["fry", "garnish", "serve"], labels: "🍳 Masak → 🧀 Topping → 🍽️ Sajikan", baseReward: 25 },
+      { minMenuLv: 1, dish: "🍔", name: "Cheese Burger Spesial", steps: ["prep", "fry", "garnish", "serve"], labels: "🔪 Potong → 🍳 Masak → 🧀 Topping → 🍽️ Sajikan", baseReward: 35 },
+      { minMenuLv: 2, dish: "🍜", name: "Ramen Kuah Pedas", steps: ["prep", "fry", "garnish", "serve"], labels: "🔪 Potong → 🍳 Masak → 🧀 Topping → 🍽️ Sajikan", baseReward: 55 },
+      { minMenuLv: 3, dish: "🍣", name: "Royal Salmon Sushi", steps: ["prep", "garnish", "serve"], labels: "🔪 Potong → 🧀 Topping → 🍽️ Sajikan", baseReward: 80 },
+      { minMenuLv: 4, dish: "🦞", name: "Lobster Panggang Bintang 5", steps: ["prep", "fry", "fry", "garnish", "serve"], labels: "🔪 Potong → 🍳 Masak 2x → 🧀 Topping → 🍽️ Sajikan", baseReward: 120 }
+    ];
+
+    let cookState = {
+      coins: Number(localStorage.getItem('arzchat_cook_coins') || '0'),
+      served: Number(localStorage.getItem('arzchat_cook_served') || '0'),
+      stoveLv: Number(localStorage.getItem('arzchat_cook_stove') || '1'),
+      menuLv: Number(localStorage.getItem('arzchat_cook_menu') || '1'),
+      combo: 1,
+      currentRecipe: null,
+      stepIndex: 0
+    };
+
+    function saveCookProgress() {
+      localStorage.setItem('arzchat_cook_coins', String(cookState.coins));
+      localStorage.setItem('arzchat_cook_served', String(cookState.served));
+      localStorage.setItem('arzchat_cook_stove', String(cookState.stoveLv));
+      localStorage.setItem('arzchat_cook_menu', String(cookState.menuLv));
+    }
+
+    function pickNextCookingOrder() {
+      const unlocked = cookingRecipes.filter(r => r.minMenuLv <= cookState.menuLv);
+      cookState.currentRecipe = unlocked[Math.floor(Math.random() * unlocked.length)];
+      cookState.stepIndex = 0;
+      renderCookingUI();
+    }
+
+    function renderCookingUI() {
+      const r = cookState.currentRecipe;
+      if (!r) return;
+      document.getElementById('cookCoins').textContent = `${cookState.coins} 🪙`;
+      document.getElementById('cookKitchenLv').textContent = `Lv.${cookState.stoveLv + cookState.menuLv - 1}`;
+      document.getElementById('cookServed').textContent = String(cookState.served);
+      document.getElementById('cookComboBadge').textContent = `Combo x${cookState.combo}`;
+
+      document.getElementById('cookOrderDish').textContent = r.dish;
+      document.getElementById('cookOrderName').textContent = r.name;
+      document.getElementById('cookOrderSteps').textContent = `Langkah: ${r.labels}`;
+      const pct = Math.round((cookState.stepIndex / r.steps.length) * 100);
+      document.getElementById('cookProgressBar').style.width = `${pct}%`;
+
+      const stoveCost = cookState.stoveLv * 50;
+      const menuCost = cookState.menuLv * 80;
+      document.getElementById('upgStoveLv').textContent = `Lv.${cookState.stoveLv}`;
+      document.getElementById('upgStoveCost').textContent = `+Koin Porsi • ${stoveCost} 🪙`;
+      document.getElementById('upgMenuLv').textContent = `Lv.${cookState.menuLv}`;
+      document.getElementById('upgMenuCost').textContent = cookState.menuLv >= 4 ? "Maksimal! 👑" : `Resep Baru • ${menuCost} 🪙`;
+    }
+
+    window.initCookingGame = function () {
+      if (!cookState.currentRecipe) {
+        pickNextCookingOrder();
+      } else {
+        renderCookingUI();
+      }
+    };
+
+    window.performCookAction = function (action) {
+      const r = cookState.currentRecipe;
+      if (!r) return;
+      const expected = r.steps[cookState.stepIndex];
+      if (action === expected) {
+        cookState.stepIndex++;
+        if (cookState.stepIndex >= r.steps.length) {
+          const earned = Math.round(r.baseReward * (1 + (cookState.stoveLv - 1) * 0.35) + cookState.combo * 5);
+          cookState.coins += earned;
+          cookState.served += 1;
+          cookState.combo = Math.min(10, cookState.combo + 1);
+          saveCookProgress();
+          submitGameScoreToFirebase('cooking', cookState.coins, 'desc');
+          showToast(`🍽️ ${r.name} siap! +${earned} 🪙`);
+          pickNextCookingOrder();
+        } else {
+          renderCookingUI();
+        }
+      } else {
+        cookState.combo = 1;
+        cookState.stepIndex = 0;
+        renderCookingUI();
+        showToast("⚠️ Urutan masak salah! Ulangi dari langkah pertama.");
+      }
+    };
+
+    window.upgradeKitchenItem = function (type) {
+      if (type === 'stove') {
+        const cost = cookState.stoveLv * 50;
+        if (cookState.coins < cost) {
+          showToast(`Koin kurang! Butuh ${cost} 🪙 untuk upgrade Kompor.`);
+          return;
+        }
+        cookState.coins -= cost;
+        cookState.stoveLv += 1;
+        saveCookProgress();
+        renderCookingUI();
+        showToast(`🔥 Kompor Turbo naik ke Lv.${cookState.stoveLv}!`);
+      } else if (type === 'menu') {
+        if (cookState.menuLv >= 4) {
+          showToast("👑 Semua Resep Royal sudah terbuka!");
+          return;
+        }
+        const cost = cookState.menuLv * 80;
+        if (cookState.coins < cost) {
+          showToast(`Koin kurang! Butuh ${cost} 🪙 untuk buka Resep Royal.`);
+          return;
+        }
+        cookState.coins -= cost;
+        cookState.menuLv += 1;
+        saveCookProgress();
+        pickNextCookingOrder();
+        showToast(`👑 Resep Royal naik ke Lv.${cookState.menuLv}! Menu baru terbuka.`);
+      }
+    };
+
+    // ================= MINI GAME STAGE CONTROLLER (9 GAME) =================
     window.openGameStage = function (gameName) {
       stopSnakeLoop();
       stopReflexLoop();
@@ -2175,6 +2711,7 @@
         document.getElementById('chatPanel').classList.add('flex');
       }
 
+      document.getElementById('cookingGameView').classList.toggle('hidden', gameName !== 'cooking');
       document.getElementById('shooterGameView').classList.toggle('hidden', gameName !== 'shooter');
       document.getElementById('guessGameView').classList.toggle('hidden', gameName !== 'guess');
       document.getElementById('snakeGameView').classList.toggle('hidden', gameName !== 'snake');
@@ -2184,7 +2721,10 @@
       document.getElementById('memoryGameView').classList.toggle('hidden', gameName !== 'memory');
       document.getElementById('rpsGameView').classList.toggle('hidden', gameName !== 'rps');
 
-      if (gameName === 'shooter') {
+      if (gameName === 'cooking') {
+        document.getElementById('gameStageTitle').textContent = "👨‍🍳 Royal Cooking Tycoon";
+        initCookingGame();
+      } else if (gameName === 'shooter') {
         document.getElementById('gameStageTitle').textContent = "🚀 Neon Space Shooter";
         document.getElementById('shooterBest').textContent = localStorage.getItem('arzchat_shooter_best') || '0';
         drawShooterIdle();
@@ -2955,6 +3495,7 @@
     let unsubscribeLeaderboard = null;
     let leaderboardRows = [];
     let bestScoresCache = {
+      cooking: 0,
       shooter: 0,
       guess: 0,
       snake: 0,
@@ -3012,6 +3553,7 @@
     }
 
     function renderAllLeaderboards() {
+      renderLeaderboardForGame('cooking', 'lb_cooking', 'desc', '🪙');
       renderLeaderboardForGame('shooter', 'lb_shooter', 'desc', 'pts');
       renderLeaderboardForGame('guess', 'lb_guess', 'desc', 'pts');
       renderLeaderboardForGame('snake', 'lb_snake', 'desc', 'pts');
@@ -3084,6 +3626,8 @@
       stopSnakeLoop();
       stopReflexLoop();
       stopShooterLoop();
+      stopUserPresenceHeartbeat();
+      await updateMyPresence(false);
       clearRoomListeners();
       await hangupCall(false);
       localStorage.removeItem('arzchat_session');
