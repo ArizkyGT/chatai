@@ -1594,22 +1594,25 @@
     // ================= MENU SCROLLING & TIKTOK FEED =================
     const defaultTiktokClips = [
       {
-        id: "tt-sample-1",
-        title: "Contoh Video TikTok #1 (Bisa Di-Scroll)",
-        url: "https://www.tiktok.com/@scout2015/video/6718335390845095173",
-        tag: "Scroll"
+        id: "local-demo-1",
+        title: "Demo Feed #1 • Neon Vibe Loop (Langsung Putar)",
+        mp4: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+        poster: "",
+        tag: "Live Feed"
       },
       {
-        id: "tt-sample-2",
-        title: "Contoh Video TikTok #2 (Bisa Di-Scroll)",
-        url: "https://www.tiktok.com/@tiktok/video/7106603940595305774",
-        tag: "Scroll"
+        id: "local-demo-2",
+        title: "Demo Feed #2 • Rabbit Short Clip (Langsung Putar)",
+        mp4: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        poster: "",
+        tag: "Live Feed"
       },
       {
-        id: "tt-sample-3",
-        title: "Contoh Video TikTok #3 (Bisa Di-Scroll)",
-        url: "https://www.tiktok.com/@tiktok/video/7201123404066901294",
-        tag: "Scroll"
+        id: "local-demo-3",
+        title: "Demo Feed #3 • Street Motion Clip (Langsung Putar)",
+        mp4: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+        poster: "",
+        tag: "Live Feed"
       }
     ];
 
@@ -1732,6 +1735,28 @@
       const canIframeTikTok = isElectronOrCapacitorApp();
 
       feedEl.innerHTML = clips.map((clip, idx) => {
+        if (clip.mp4) {
+          return `
+            <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-extrabold text-lime-300 truncate">#${idx + 1} • ${clip.title}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-400/15 text-lime-300 font-bold shrink-0">Langsung Putar</span>
+              </div>
+              <video
+                src="${clip.mp4}"
+                controls
+                loop
+                playsinline
+                preload="metadata"
+                class="w-full h-[460px] sm:h-[520px] rounded-2xl bg-black object-cover border border-white/15"
+              ></video>
+              <p class="text-[10px] text-[#b8b2d8] text-center">
+                Scroll ke bawah untuk lanjut ke video berikutnya — tidak perlu copy link.
+              </p>
+            </div>
+          `;
+        }
+
         const vidId = extractTiktokVideoId(clip.url);
         const embedSrc = vidId ? `https://www.tiktok.com/embed/v2/${vidId}` : null;
 
@@ -1756,21 +1781,25 @@
           `;
         }
 
-        // Di browser web biasa, TikTok memblokir iframe penuh (X-Frame-Options: DENY / CSP frame-ancestors).
-        // Jika ada video ID, gunakan /embed/v2/{id} yang diizinkan untuk di-embed; jika halaman penuh/login, beri akses cepat.
         if (embedSrc) {
           return `
             <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
-                <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-200 font-bold shrink-0">
-                  Login / TikTok ↗
-                </a>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button type="button" onclick="reloadScrollFrame('${clip.id}')" class="text-[10px] px-2 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-lime-300 font-bold cursor-pointer">
+                    ↻ Retry
+                  </button>
+                  <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-200 font-bold">
+                    Buka TikTok ↗
+                  </a>
+                </div>
               </div>
               <iframe
                 id="tt-frame-${clip.id}"
                 src="${embedSrc}"
-                class="w-full h-[520px] sm:h-[580px] rounded-2xl bg-black border border-white/15"
+                referrerpolicy="no-referrer-when-downgrade"
+                class="w-full h-[540px] sm:h-[600px] rounded-2xl bg-[#090514] border border-white/15"
                 allow="autoplay; encrypted-media; fullscreen; clipboard-write"
                 allowfullscreen
               ></iframe>
@@ -1782,22 +1811,9 @@
           <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-4 space-y-3 border border-cyan-400/25">
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 font-bold shrink-0">Blokir Iframe TikTok</span>
-            </div>
-            <div class="w-full min-h-[260px] rounded-2xl bg-gradient-to-br from-[#1f1342] via-[#120b29] to-[#0b2538] border border-white/15 p-5 flex flex-col items-center justify-center text-center gap-3">
-              <div class="text-3xl">🔒</div>
-              <p class="text-xs font-extrabold text-white">Server TikTok menolak halaman login/beranda di dalam iframe browser web</p>
-              <p class="text-[11px] text-[#b8b2d8] max-w-sm leading-relaxed">
-                Untuk login akun TikTok atau buka <strong class="text-cyan-300">${clip.title}</strong>, buka di jendela/tab baru atau bungkus aplikasi dengan Electron/WebView (<code class="text-lime-300">webSecurity: false</code> / native window).
-              </p>
-              <div class="flex items-center gap-2 flex-wrap justify-center pt-1">
-                <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="btn-3d-primary px-4 py-2 rounded-2xl text-xs font-extrabold">
-                  Buka & Login TikTok ↗
-                </a>
-                <button type="button" onclick="openTikTokPopupWindow('${clip.url}')" class="btn-3d-soft px-3.5 py-2 rounded-2xl text-xs font-bold text-cyan-300 cursor-pointer">
-                  Jendela Pop-up
-                </button>
-              </div>
+              <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-200 font-bold shrink-0">
+                Buka ↗
+              </a>
             </div>
           </div>
         `;
