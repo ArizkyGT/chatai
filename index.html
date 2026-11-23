@@ -750,68 +750,141 @@
           </div>
         </div>
 
-        <!-- GAME 9: ROYAL COOKING TYCOON (UPGRADE DAPUR ALA COOKING MAMA) -->
-        <div id="cookingGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-3">
-          <div class="glass-3d px-4 py-2.5 rounded-2xl flex items-center gap-4 text-xs font-bold flex-wrap justify-center">
-            <span>Koin: <strong id="cookCoins" class="text-amber-300 text-sm">0 🪙</strong></span>
-            <span>Level Dapur: <strong id="cookKitchenLv" class="text-pink-300 text-sm">Lv.1</strong></span>
-            <span>Porsi: <strong id="cookServed" class="text-lime-300 text-sm">0</strong></span>
-          </div>
-
-          <div class="glass-3d w-full max-w-xs rounded-3xl p-4 text-center space-y-3 border border-pink-400/30">
-            <div class="flex items-center justify-between text-[11px]">
-              <span class="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-200 font-bold">Pesanan Pelanggan</span>
-              <span id="cookComboBadge" class="text-cyan-300 font-bold">Combo x1</span>
-            </div>
-
-            <div class="bg-[#090514]/80 border border-white/10 rounded-2xl p-3.5 space-y-1.5">
-              <div id="cookOrderDish" class="text-3xl">🍔</div>
-              <p id="cookOrderName" class="text-sm font-extrabold text-white">Royal Cheese Burger</p>
-              <p id="cookOrderSteps" class="text-xs text-cyan-300 font-semibold">Langkah: 🥩 Panggang → 🧀 Keju → 🍽️ Sajikan</p>
-              <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden mt-2">
-                <div id="cookProgressBar" class="bg-gradient-to-r from-pink-500 to-amber-400 h-full transition-all duration-200" style="width: 0%"></div>
+        <!-- GAME 9: ROYAL COOKING TYCOON (BIKINI BOTTOM / KRABBY PATTY / MINUMAN / PIZZA) -->
+        <div id="cookingGameView" class="hidden flex-1 flex flex-col items-center p-3 sm:p-4 gap-3">
+          <!-- Top Bar Duit & Waktu Shift di Atas seperti Referensi -->
+          <div class="w-full max-w-xl glass-3d px-4 py-2.5 rounded-2xl flex items-center justify-between gap-2 flex-wrap border border-amber-300/30">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">💵</span>
+              <div>
+                <p class="text-[10px] uppercase tracking-wider text-amber-200/80 font-bold">Saldo Duit</p>
+                <p id="cookCoins" class="text-sm sm:text-base font-extrabold text-amber-300">$0</p>
               </div>
             </div>
 
-            <!-- Tombol Aksi Memasak -->
-            <div class="grid grid-cols-4 gap-1.5">
-              <button type="button" onclick="performCookAction('prep')" class="btn-3d-soft py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
-                <span class="text-base">🔪</span>
-                <span class="text-[10px]">Potong</span>
-              </button>
-              <button type="button" onclick="performCookAction('fry')" class="btn-3d-soft py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
-                <span class="text-base">🍳</span>
-                <span class="text-[10px]">Masak</span>
-              </button>
-              <button type="button" onclick="performCookAction('garnish')" class="btn-3d-soft py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
-                <span class="text-base">🧀</span>
-                <span class="text-[10px]">Topping</span>
-              </button>
-              <button type="button" onclick="performCookAction('serve')" class="btn-3d-primary py-2.5 rounded-xl text-xs font-bold text-white flex flex-col items-center cursor-pointer">
-                <span class="text-base">🍽️</span>
-                <span class="text-[10px]">Sajikan</span>
+            <div class="flex-1 min-w-[130px] max-w-[200px]">
+              <div class="flex items-center justify-between text-[11px] font-bold mb-1">
+                <span class="text-cyan-300">⏱️ Waktu Shift</span>
+                <span id="cookTimerLabel" class="text-lime-300">60s</span>
+              </div>
+              <div class="w-full h-2.5 bg-black/50 rounded-full overflow-hidden border border-white/15">
+                <div id="cookShiftBar" class="h-full bg-gradient-to-r from-lime-400 via-amber-300 to-rose-500 transition-all duration-300" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <p class="text-[10px] uppercase tracking-wider text-pink-200/80 font-bold">Terjual</p>
+              <p id="cookServed" class="text-sm sm:text-base font-extrabold text-lime-300">0 Porsi</p>
+            </div>
+          </div>
+
+          <!-- Area Restoran & Meja Pelanggan (Nuansa Bawah Laut / Bikini Bottom) -->
+          <div class="w-full max-w-xl rounded-3xl overflow-hidden border-2 border-cyan-400/35 shadow-2xl" style="background: linear-gradient(180deg, #0b3c6d 0%, #105b96 48%, #252c63 49%, #191d45 100%);">
+            <!-- Baris Pelanggan & Pesanan -->
+            <div class="p-3.5 flex items-center justify-between gap-3 border-b border-cyan-300/20">
+              <div class="flex items-center gap-3 min-w-0">
+                <div id="cookCustomerAvatar" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-300 to-orange-500 flex items-center justify-center text-3xl shadow-lg border-2 border-white/40 shrink-0">
+                  ⭐
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span id="cookCustomerName" class="text-xs font-extrabold text-amber-200">Patrick Star</span>
+                    <span id="cookComboBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200 font-bold">Combo x1</span>
+                  </div>
+                  <div class="mt-1 bg-[#fff8dc] text-[#1a1438] px-3 py-1.5 rounded-2xl rounded-tl-none shadow-md inline-block">
+                    <p id="cookOrderText" class="text-xs font-extrabold">Pesan: 🍔 Krabby Patty (+$25)</p>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" onclick="startCookShift()" class="btn-3d-soft px-3 py-2 rounded-xl text-[11px] font-extrabold text-cyan-200 shrink-0 cursor-pointer">
+                🔄 Shift Baru
               </button>
             </div>
 
-            <!-- Panel Upgrade Alat Dapur -->
-            <div class="border-t border-white/10 pt-2.5 text-left space-y-1.5">
-              <p class="text-[10px] font-bold uppercase tracking-wider text-amber-300">⬆️ Upgrade Peralatan Dapur</p>
-              <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="upgradeKitchenItem('stove')" class="btn-3d-soft p-2 rounded-xl text-[11px] text-left cursor-pointer">
-                  <div class="font-bold text-white">🔥 Kompor Turbo <span id="upgStoveLv" class="text-cyan-300">Lv.1</span></div>
-                  <div id="upgStoveCost" class="text-[10px] text-amber-300">+Koin Porsi • 50 🪙</div>
+            <!-- Baris Stasiun Masak (Masak Dulu Sebelum Sajikan ke Pelanggan) -->
+            <div class="p-3.5 space-y-3 bg-[#15193d]/80">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-bold text-cyan-200">🍳 Stasiun Masak & Racikan</span>
+                <span id="cookStepStatus" class="text-amber-300 font-bold">Langkah 0/2</span>
+              </div>
+
+              <!-- 4 Stasiun Alat Masak ala Dapur Restoran -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="cookStationAction('grill')" class="btn-3d-soft p-2.5 rounded-2xl flex flex-col items-center gap-1 cursor-pointer hover:border-amber-300/60">
+                  <span class="text-2xl">🔥</span>
+                  <span class="text-[11px] font-extrabold text-white">Panggang Patty</span>
+                  <span id="cookGrillSpeedTag" class="text-[10px] text-amber-300">Lv.1 • Cepat</span>
                 </button>
-                <button type="button" onclick="upgradeKitchenItem('menu')" class="btn-3d-soft p-2 rounded-xl text-[11px] text-left cursor-pointer">
-                  <div class="font-bold text-white">👑 Resep Royal <span id="upgMenuLv" class="text-pink-300">Lv.1</span></div>
-                  <div id="upgMenuCost" class="text-[10px] text-amber-300">Menu Mewah • 80 🪙</div>
+
+                <button type="button" onclick="cookStationAction('oven')" class="btn-3d-soft p-2.5 rounded-2xl flex flex-col items-center gap-1 cursor-pointer hover:border-orange-300/60">
+                  <span class="text-2xl">🍕</span>
+                  <span class="text-[11px] font-extrabold text-white">Oven Pizza</span>
+                  <span id="cookPizzaSpeedTag" class="text-[10px] text-orange-300">Lv.1 • Cepat</span>
                 </button>
+
+                <button type="button" onclick="cookStationAction('drink')" class="btn-3d-soft p-2.5 rounded-2xl flex flex-col items-center gap-1 cursor-pointer hover:border-cyan-300/60">
+                  <span class="text-2xl">🥤</span>
+                  <span class="text-[11px] font-extrabold text-white">Mesin Minuman</span>
+                  <span class="text-[10px] text-cyan-300">Es & Soda</span>
+                </button>
+
+                <button type="button" onclick="cookStationAction('assemble')" class="btn-3d-soft p-2.5 rounded-2xl flex flex-col items-center gap-1 cursor-pointer hover:border-pink-300/60">
+                  <span class="text-2xl">🧀</span>
+                  <span class="text-[11px] font-extrabold text-white">Racik & Topping</span>
+                  <span class="text-[10px] text-pink-300">Keju & Sayur</span>
+                </button>
+              </div>
+
+              <!-- Nampan Masakan Siap Saji + Tombol Sajikan ke Pembeli -->
+              <div class="bg-[#090514]/75 border border-cyan-400/25 rounded-2xl p-3 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div id="cookTrayIcon" class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl shrink-0">
+                    🍽️
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p id="cookTrayLabel" class="text-xs font-bold text-white truncate">Nampan kosong — masak pesanan dulu!</p>
+                    <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden mt-1.5">
+                      <div id="cookPrepProgressBar" class="h-full bg-gradient-to-r from-cyan-400 to-lime-400 transition-all duration-200" style="width: 0%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <button id="btnServeCustomer" type="button" onclick="serveOrderToCustomer()" disabled
+                  class="btn-3d-primary disabled:opacity-40 disabled:cursor-not-allowed px-4 py-2.5 rounded-2xl text-xs font-extrabold shrink-0 cursor-pointer">
+                  🍽️ Sajikan
+                </button>
+              </div>
+
+              <!-- Panel Upgrade Menggunakan Duit di Atas (Makin Cepat Masak Pizza, Patty, Minuman) -->
+              <div class="border-t border-white/10 pt-2.5 space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">⬆️ Upgrade Pakai Duit (Makin Cepat & Mahal)</p>
+                  <span class="text-[10px] text-[#b8b2d8]">Permanen</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button type="button" onclick="upgradeCookingGear('pizza')" class="btn-3d-soft p-2.5 rounded-2xl text-left cursor-pointer">
+                    <div class="text-xs font-extrabold text-white">🍕 Oven Pizza <span id="upgPizzaLv" class="text-orange-300">Lv.1</span></div>
+                    <div id="upgPizzaDesc" class="text-[10px] text-cyan-200">Masak lebih cepat • $45</div>
+                  </button>
+
+                  <button type="button" onclick="upgradeCookingGear('grill')" class="btn-3d-soft p-2.5 rounded-2xl text-left cursor-pointer">
+                    <div class="text-xs font-extrabold text-white">🍔 Kompor Patty <span id="upgGrillLv" class="text-amber-300">Lv.1</span></div>
+                    <div id="upgGrillDesc" class="text-[10px] text-cyan-200">Panggang lebih cepat • $40</div>
+                  </button>
+
+                  <button type="button" onclick="upgradeCookingGear('drink')" class="btn-3d-soft p-2.5 rounded-2xl text-left cursor-pointer">
+                    <div class="text-xs font-extrabold text-white">🥤 Dispenser <span id="upgDrinkLv" class="text-pink-300">Lv.1</span></div>
+                    <div id="upgDrinkDesc" class="text-[10px] text-cyan-200">Tuang & bonus $ • $35</div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+          <div class="glass-3d w-full max-w-xl rounded-2xl p-3 text-xs">
             <div class="flex items-center justify-between mb-1.5">
-              <span class="font-bold text-pink-300">🏆 Top Chef Royal Cooking ArzChat</span>
+              <span class="font-bold text-amber-300">🏆 Top Chef Restoran ArzChat</span>
               <span class="text-[10px] text-[#b8b2d8]">Live</span>
             </div>
             <div id="lb_cooking" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
@@ -2574,122 +2647,261 @@
       }
     };
 
-    // ================= GAME 9: ROYAL COOKING TYCOON (UPGRADE DAPUR ALA COOKING MAMA) =================
-    const cookingRecipes = [
-      { minMenuLv: 1, dish: "🍳", name: "Telur Mata Sapi Crispy", steps: ["fry", "garnish", "serve"], labels: "🍳 Masak → 🧀 Topping → 🍽️ Sajikan", baseReward: 25 },
-      { minMenuLv: 1, dish: "🍔", name: "Cheese Burger Spesial", steps: ["prep", "fry", "garnish", "serve"], labels: "🔪 Potong → 🍳 Masak → 🧀 Topping → 🍽️ Sajikan", baseReward: 35 },
-      { minMenuLv: 2, dish: "🍜", name: "Ramen Kuah Pedas", steps: ["prep", "fry", "garnish", "serve"], labels: "🔪 Potong → 🍳 Masak → 🧀 Topping → 🍽️ Sajikan", baseReward: 55 },
-      { minMenuLv: 3, dish: "🍣", name: "Royal Salmon Sushi", steps: ["prep", "garnish", "serve"], labels: "🔪 Potong → 🧀 Topping → 🍽️ Sajikan", baseReward: 80 },
-      { minMenuLv: 4, dish: "🦞", name: "Lobster Panggang Bintang 5", steps: ["prep", "fry", "fry", "garnish", "serve"], labels: "🔪 Potong → 🍳 Masak 2x → 🧀 Topping → 🍽️ Sajikan", baseReward: 120 }
+    // ================= GAME 9: ROYAL COOKING TYCOON (BIKINI BOTTOM / KRABBY PATTY / PIZZA / MINUMAN) =================
+    const cookCustomers = [
+      { name: "Patrick Star", avatar: "⭐" },
+      { name: "SpongeBob", avatar: "🧽" },
+      { name: "Squidward", avatar: "🐙" },
+      { name: "Sandy Cheeks", avatar: "🐿️" },
+      { name: "Mr. Krabs", avatar: "🦀" }
+    ];
+
+    const cookMenuItems = [
+      {
+        id: "krabby_patty",
+        icon: "🍔",
+        name: "Krabby Patty",
+        price: 25,
+        steps: ["grill", "assemble"],
+        stepHints: ["🔥 Panggang Patty dulu", "🧀 Racik & Topping ke roti"]
+      },
+      {
+        id: "double_krabby",
+        icon: "🧀",
+        name: "Double Krabby Cheese",
+        price: 38,
+        steps: ["grill", "grill", "assemble"],
+        stepHints: ["🔥 Panggang Patty #1", "🔥 Panggang Patty #2", "🧀 Racik keju & sajikan"]
+      },
+      {
+        id: "royal_pizza",
+        icon: "🍕",
+        name: "Pizza Keju Spesial",
+        price: 45,
+        steps: ["assemble", "oven"],
+        stepHints: ["🧀 Siapkan adonan & topping", "🍕 Panggang di Oven Pizza"]
+      },
+      {
+        id: "kelp_soda",
+        icon: "🥤",
+        name: "Minuman Kelp Soda",
+        price: 20,
+        steps: ["drink"],
+        stepHints: ["🥤 Tekan Mesin Minuman sampai penuh"]
+      },
+      {
+        id: "combo_feast",
+        icon: "🍱",
+        name: "Paket Krabby + Soda",
+        price: 55,
+        steps: ["grill", "drink", "assemble"],
+        stepHints: ["🔥 Panggang Patty", "🥤 Tuang Minuman", "🧀 Satukan di nampan"]
+      }
     ];
 
     let cookState = {
-      coins: Number(localStorage.getItem('arzchat_cook_coins') || '0'),
+      coins: Number(localStorage.getItem('arzchat_cook_coins') || '30'),
       served: Number(localStorage.getItem('arzchat_cook_served') || '0'),
-      stoveLv: Number(localStorage.getItem('arzchat_cook_stove') || '1'),
-      menuLv: Number(localStorage.getItem('arzchat_cook_menu') || '1'),
+      grillLv: Number(localStorage.getItem('arzchat_cook_grill_lv') || '1'),
+      pizzaLv: Number(localStorage.getItem('arzchat_cook_pizza_lv') || '1'),
+      drinkLv: Number(localStorage.getItem('arzchat_cook_drink_lv') || '1'),
       combo: 1,
-      currentRecipe: null,
-      stepIndex: 0
+      timeLeft: 60,
+      shiftTimer: null,
+      order: null,
+      stepIndex: 0,
+      readyToServe: false
     };
 
     function saveCookProgress() {
       localStorage.setItem('arzchat_cook_coins', String(cookState.coins));
       localStorage.setItem('arzchat_cook_served', String(cookState.served));
-      localStorage.setItem('arzchat_cook_stove', String(cookState.stoveLv));
-      localStorage.setItem('arzchat_cook_menu', String(cookState.menuLv));
+      localStorage.setItem('arzchat_cook_grill_lv', String(cookState.grillLv));
+      localStorage.setItem('arzchat_cook_pizza_lv', String(cookState.pizzaLv));
+      localStorage.setItem('arzchat_cook_drink_lv', String(cookState.drinkLv));
     }
 
-    function pickNextCookingOrder() {
-      const unlocked = cookingRecipes.filter(r => r.minMenuLv <= cookState.menuLv);
-      cookState.currentRecipe = unlocked[Math.floor(Math.random() * unlocked.length)];
+    function stopCookShiftTimer() {
+      if (cookState.shiftTimer) {
+        clearInterval(cookState.shiftTimer);
+        cookState.shiftTimer = null;
+      }
+    }
+
+    function pickNextCookOrder() {
+      const cust = cookCustomers[Math.floor(Math.random() * cookCustomers.length)];
+      const dish = cookMenuItems[Math.floor(Math.random() * cookMenuItems.length)];
+      cookState.order = { ...dish, customerName: cust.name, customerAvatar: cust.avatar };
       cookState.stepIndex = 0;
+      cookState.readyToServe = false;
       renderCookingUI();
     }
 
+    window.startCookShift = function () {
+      stopCookShiftTimer();
+      cookState.timeLeft = 60;
+      cookState.combo = 1;
+      pickNextCookOrder();
+
+      cookState.shiftTimer = setInterval(() => {
+        cookState.timeLeft--;
+        if (cookState.timeLeft <= 0) {
+          cookState.timeLeft = 0;
+          stopCookShiftTimer();
+          submitGameScoreToFirebase('cooking', cookState.coins, 'desc');
+          showToast(`⏰ Waktu shift habis! Total duitmu: $${cookState.coins}`);
+        }
+        renderCookingUI();
+      }, 1000);
+    };
+
     function renderCookingUI() {
-      const r = cookState.currentRecipe;
-      if (!r) return;
-      document.getElementById('cookCoins').textContent = `${cookState.coins} 🪙`;
-      document.getElementById('cookKitchenLv').textContent = `Lv.${cookState.stoveLv + cookState.menuLv - 1}`;
-      document.getElementById('cookServed').textContent = String(cookState.served);
+      const ord = cookState.order;
+      if (!ord) return;
+
+      document.getElementById('cookCoins').textContent = `$${cookState.coins}`;
+      document.getElementById('cookServed').textContent = `${cookState.served} Porsi`;
+      document.getElementById('cookTimerLabel').textContent = `${cookState.timeLeft}s`;
+      document.getElementById('cookShiftBar').style.width = `${Math.max(0, Math.min(100, (cookState.timeLeft / 60) * 100))}%`;
+
+      document.getElementById('cookCustomerAvatar').textContent = ord.customerAvatar;
+      document.getElementById('cookCustomerName').textContent = ord.customerName;
       document.getElementById('cookComboBadge').textContent = `Combo x${cookState.combo}`;
+      document.getElementById('cookOrderText').textContent = `Pesan: ${ord.icon} ${ord.name} (+$${ord.price})`;
 
-      document.getElementById('cookOrderDish').textContent = r.dish;
-      document.getElementById('cookOrderName').textContent = r.name;
-      document.getElementById('cookOrderSteps').textContent = `Langkah: ${r.labels}`;
-      const pct = Math.round((cookState.stepIndex / r.steps.length) * 100);
-      document.getElementById('cookProgressBar').style.width = `${pct}%`;
+      const totalSteps = ord.steps.length;
+      document.getElementById('cookStepStatus').textContent = `Langkah ${cookState.stepIndex}/${totalSteps}`;
+      const pct = Math.round((cookState.stepIndex / totalSteps) * 100);
+      document.getElementById('cookPrepProgressBar').style.width = `${pct}%`;
 
-      const stoveCost = cookState.stoveLv * 50;
-      const menuCost = cookState.menuLv * 80;
-      document.getElementById('upgStoveLv').textContent = `Lv.${cookState.stoveLv}`;
-      document.getElementById('upgStoveCost').textContent = `+Koin Porsi • ${stoveCost} 🪙`;
-      document.getElementById('upgMenuLv').textContent = `Lv.${cookState.menuLv}`;
-      document.getElementById('upgMenuCost').textContent = cookState.menuLv >= 4 ? "Maksimal! 👑" : `Resep Baru • ${menuCost} 🪙`;
+      const serveBtn = document.getElementById('btnServeCustomer');
+      if (cookState.readyToServe) {
+        document.getElementById('cookTrayIcon').textContent = ord.icon;
+        document.getElementById('cookTrayLabel').textContent = `${ord.name} matang & siap disajikan!`;
+        serveBtn.disabled = false;
+      } else {
+        document.getElementById('cookTrayIcon').textContent = "🍽️";
+        document.getElementById('cookTrayLabel').textContent = ord.stepHints[cookState.stepIndex] || "Selesaikan masakan dulu";
+        serveBtn.disabled = true;
+      }
+
+      const grillCost = cookState.grillLv * 40;
+      const pizzaCost = cookState.pizzaLv * 45;
+      const drinkCost = cookState.drinkLv * 35;
+
+      const grillSpeedPct = (cookState.grillLv - 1) * 20;
+      const pizzaSpeedPct = (cookState.pizzaLv - 1) * 25;
+      const drinkBonusDollar = (cookState.drinkLv - 1) * 5;
+
+      document.getElementById('cookGrillSpeedTag').textContent = `Lv.${cookState.grillLv} • +${grillSpeedPct}% Cepat`;
+      document.getElementById('cookPizzaSpeedTag').textContent = `Lv.${cookState.pizzaLv} • +${pizzaSpeedPct}% Cepat`;
+
+      document.getElementById('upgPizzaLv').textContent = `Lv.${cookState.pizzaLv}`;
+      document.getElementById('upgPizzaDesc').textContent = `Kecepatan +${pizzaSpeedPct + 25}% • $${pizzaCost}`;
+
+      document.getElementById('upgGrillLv').textContent = `Lv.${cookState.grillLv}`;
+      document.getElementById('upgGrillDesc').textContent = `Kecepatan +${grillSpeedPct + 20}% • $${grillCost}`;
+
+      document.getElementById('upgDrinkLv').textContent = `Lv.${cookState.drinkLv}`;
+      document.getElementById('upgDrinkDesc').textContent = `Bonus +$${drinkBonusDollar + 5}/porsi • $${drinkCost}`;
     }
 
     window.initCookingGame = function () {
-      if (!cookState.currentRecipe) {
-        pickNextCookingOrder();
+      if (!cookState.order) {
+        pickNextCookOrder();
       } else {
         renderCookingUI();
       }
+      if (!cookState.shiftTimer && cookState.timeLeft > 0) {
+        startCookShift();
+      }
     };
 
-    window.performCookAction = function (action) {
-      const r = cookState.currentRecipe;
-      if (!r) return;
-      const expected = r.steps[cookState.stepIndex];
-      if (action === expected) {
+    window.cookStationAction = function (stationKey) {
+      const ord = cookState.order;
+      if (!ord) return;
+      if (cookState.timeLeft <= 0) {
+        showToast("Shift selesai! Klik 'Shift Baru' untuk mulai lagi.");
+        return;
+      }
+      if (cookState.readyToServe) {
+        showToast("Pesanan sudah matang! Klik tombol 'Sajikan' ke pembeli.");
+        return;
+      }
+
+      const expected = ord.steps[cookState.stepIndex];
+      if (stationKey === expected) {
         cookState.stepIndex++;
-        if (cookState.stepIndex >= r.steps.length) {
-          const earned = Math.round(r.baseReward * (1 + (cookState.stoveLv - 1) * 0.35) + cookState.combo * 5);
-          cookState.coins += earned;
-          cookState.served += 1;
-          cookState.combo = Math.min(10, cookState.combo + 1);
-          saveCookProgress();
-          submitGameScoreToFirebase('cooking', cookState.coins, 'desc');
-          showToast(`🍽️ ${r.name} siap! +${earned} 🪙`);
-          pickNextCookingOrder();
-        } else {
-          renderCookingUI();
+        if (cookState.stepIndex >= ord.steps.length) {
+          cookState.readyToServe = true;
+          showToast(`✅ ${ord.name} sudah jadi! Klik 'Sajikan' ke ${ord.customerName}.`);
         }
+        renderCookingUI();
       } else {
         cookState.combo = 1;
         cookState.stepIndex = 0;
+        cookState.readyToServe = false;
         renderCookingUI();
-        showToast("⚠️ Urutan masak salah! Ulangi dari langkah pertama.");
+        showToast("⚠️ Salah alat masak! Ulangi langkah dari awal.");
       }
     };
 
-    window.upgradeKitchenItem = function (type) {
-      if (type === 'stove') {
-        const cost = cookState.stoveLv * 50;
+    window.serveOrderToCustomer = function () {
+      const ord = cookState.order;
+      if (!ord || !cookState.readyToServe) return;
+
+      const speedBonus = (cookState.pizzaLv - 1) * 4 + (cookState.grillLv - 1) * 3;
+      const drinkBonus = (cookState.drinkLv - 1) * 5;
+      const comboBonus = (cookState.combo - 1) * 5;
+      const totalEarned = ord.price + speedBonus + drinkBonus + comboBonus;
+
+      cookState.coins += totalEarned;
+      cookState.served += 1;
+      cookState.combo = Math.min(8, cookState.combo + 1);
+      if (cookState.timeLeft > 0) {
+        cookState.timeLeft = Math.min(60, cookState.timeLeft + 2);
+      }
+
+      saveCookProgress();
+      submitGameScoreToFirebase('cooking', cookState.coins, 'desc');
+      showToast(`💵 ${ord.customerName} bayar +$${totalEarned}!`);
+      pickNextCookOrder();
+    };
+
+    window.upgradeCookingGear = function (gearType) {
+      if (gearType === 'pizza') {
+        const cost = cookState.pizzaLv * 45;
         if (cookState.coins < cost) {
-          showToast(`Koin kurang! Butuh ${cost} 🪙 untuk upgrade Kompor.`);
+          showToast(`Duit kurang! Butuh $${cost} untuk upgrade Oven Pizza.`);
           return;
         }
         cookState.coins -= cost;
-        cookState.stoveLv += 1;
+        cookState.pizzaLv += 1;
         saveCookProgress();
         renderCookingUI();
-        showToast(`🔥 Kompor Turbo naik ke Lv.${cookState.stoveLv}!`);
-      } else if (type === 'menu') {
-        if (cookState.menuLv >= 4) {
-          showToast("👑 Semua Resep Royal sudah terbuka!");
-          return;
-        }
-        const cost = cookState.menuLv * 80;
+        showToast(`🍕 Oven Pizza naik ke Lv.${cookState.pizzaLv} — masak pizza makin cepat!`);
+      } else if (gearType === 'grill') {
+        const cost = cookState.grillLv * 40;
         if (cookState.coins < cost) {
-          showToast(`Koin kurang! Butuh ${cost} 🪙 untuk buka Resep Royal.`);
+          showToast(`Duit kurang! Butuh $${cost} untuk upgrade Kompor Patty.`);
           return;
         }
         cookState.coins -= cost;
-        cookState.menuLv += 1;
+        cookState.grillLv += 1;
         saveCookProgress();
-        pickNextCookingOrder();
-        showToast(`👑 Resep Royal naik ke Lv.${cookState.menuLv}! Menu baru terbuka.`);
+        renderCookingUI();
+        showToast(`🍔 Kompor Patty naik ke Lv.${cookState.grillLv} — panggang makin cepat!`);
+      } else if (gearType === 'drink') {
+        const cost = cookState.drinkLv * 35;
+        if (cookState.coins < cost) {
+          showToast(`Duit kurang! Butuh $${cost} untuk upgrade Dispenser Minuman.`);
+          return;
+        }
+        cookState.coins -= cost;
+        cookState.drinkLv += 1;
+        saveCookProgress();
+        renderCookingUI();
+        showToast(`🥤 Dispenser Minuman naik ke Lv.${cookState.drinkLv}!`);
       }
     };
 
@@ -3553,7 +3765,7 @@
     }
 
     function renderAllLeaderboards() {
-      renderLeaderboardForGame('cooking', 'lb_cooking', 'desc', '🪙');
+      renderLeaderboardForGame('cooking', 'lb_cooking', 'desc', '$');
       renderLeaderboardForGame('shooter', 'lb_shooter', 'desc', 'pts');
       renderLeaderboardForGame('guess', 'lb_guess', 'desc', 'pts');
       renderLeaderboardForGame('snake', 'lb_snake', 'desc', 'pts');
