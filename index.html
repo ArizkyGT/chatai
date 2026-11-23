@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ArzChat – Chat, Story, Voice Call & Game</title>
+  <title>ArzChat – Chat, Story, Voice Call & Multi-Game Arcade</title>
 
   <!-- KONFIGURASI PWA -->
   <link rel="manifest" href="manifest.json" />
@@ -295,7 +295,7 @@
           </svg>
         </div>
         <h1 class="text-2xl font-extrabold tracking-tight text-white">ArzChat</h1>
-        <p class="text-xs text-[#b8b2d8] mt-1">Chatting, Story & Telepon Suara Real-Time</p>
+        <p class="text-xs text-[#b8b2d8] mt-1">Chatting, Story, Voice Call & Multi-Game Arcade</p>
       </div>
 
       <!-- STEP 1: IDENTITAS & NOMOR HP -->
@@ -390,7 +390,7 @@
         </button>
         <button id="tabGamesBtn" onclick="switchSidebarTab('games')"
           class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
-          <span>🎮 Game</span>
+          <span>🎮 Game (6)</span>
         </button>
       </div>
 
@@ -438,37 +438,81 @@
         <div id="storyListContainer" class="space-y-1.5"></div>
       </div>
 
-      <!-- TAB 3: PILIHAN MINI GAME -->
-      <div id="sidebarGamesView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-3 space-y-3">
+      <!-- TAB 3: PILIHAN 6 MINI GAME -->
+      <div id="sidebarGamesView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-3 space-y-2.5">
         <div class="px-1 text-[10px] font-bold uppercase tracking-widest text-lime-300">
-          Arcade Mini Games
+          Arcade Mini Games (6 Game)
         </div>
 
-        <div onclick="openGameStage('snake')" class="glass-3d p-4 rounded-2xl cursor-pointer hover:border-cyan-400/50 transition flex items-center gap-3.5">
-          <div class="avatar-3d w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0">🐍</div>
+        <div onclick="openGameStage('snake')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-cyan-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">🐍</div>
           <div class="min-w-0 flex-1">
-            <div class="flex items-center justify-between">
-              <h4 class="text-sm font-bold text-white">Neon Snake</h4>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-400/20 text-lime-300 font-bold">Populer</span>
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Neon Snake</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-400/20 text-lime-300 font-bold shrink-0">Populer</span>
             </div>
-            <p class="text-xs text-[#b8b2d8] mt-0.5">Makan energi neon biar ular makin panjang & pecahkan rekor!</p>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Makan energi neon biar ular makin panjang!</p>
           </div>
         </div>
 
-        <div onclick="openGameStage('reflex')" class="glass-3d p-4 rounded-2xl cursor-pointer hover:border-pink-400/50 transition flex items-center gap-3.5">
-          <div class="avatar-3d w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0">⚡</div>
+        <div onclick="openGameStage('reflex')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-pink-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">⚡</div>
           <div class="min-w-0 flex-1">
-            <div class="flex items-center justify-between">
-              <h4 class="text-sm font-bold text-white">Neon Tap Reflex</h4>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-bold">15 Detik</span>
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Neon Tap Reflex</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-bold shrink-0">15 Detik</span>
             </div>
-            <p class="text-xs text-[#b8b2d8] mt-0.5">Ketuk target petir secepat mungkin sebelum waktu habis!</p>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Ketuk target petir secepat mungkin!</p>
+          </div>
+        </div>
+
+        <div onclick="openGameStage('tictactoe')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-purple-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">❌</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Tic-Tac-Toe 3D</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-400/20 text-purple-200 font-bold shrink-0">vs Bot</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Susun 3 simbol X berjajar lawan AI!</p>
+          </div>
+        </div>
+
+        <div onclick="openGameStage('2048')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-amber-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">🔢</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Neon 2048</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold shrink-0">Puzzle</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Gabungkan angka sama hingga tembus 2048!</p>
+          </div>
+        </div>
+
+        <div onclick="openGameStage('memory')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-emerald-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">🃏</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Cyber Card Flip</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-300 font-bold shrink-0">Ingatan</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Cocokkan semua pasangan kartu neon!</p>
+          </div>
+        </div>
+
+        <div onclick="openGameStage('rps')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-rose-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">✊</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Suit Batu Gunting Kertas</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-400/20 text-rose-300 font-bold shrink-0">Cepat</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Adu suit ✊ ✌️ 🖐️ lawan bot & bikin win streak!</p>
           </div>
         </div>
       </div>
     </aside>
 
-    <!-- RUANG KANAN (CHAT / MINI GAME) -->
+    <!-- RUANG KANAN (CHAT / 6 MINI GAME) -->
     <main id="chatPanel" class="hidden md:flex flex-1 flex-col h-full chat-grid-3d min-w-0">
 
       <!-- State Kosong -->
@@ -476,7 +520,7 @@
         <div class="avatar-3d w-20 h-20 rounded-3xl flex items-center justify-center mb-4 text-3xl shadow-xl">⚡</div>
         <h3 class="text-xl font-extrabold text-white">ArzChat</h3>
         <p class="text-xs sm:text-sm text-[#b8b2d8] max-w-sm mt-2 leading-relaxed">
-          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau main <span class="text-lime-300 font-semibold">Neon Snake & Mini Game</span>.
+          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau buka tab <span class="text-lime-300 font-semibold">Game (6)</span>.
         </p>
       </div>
 
@@ -506,6 +550,15 @@
 
         <!-- Pratinjau Foto -->
         <div id="imagePreviewBar" class="hidden panel-3d px-4 py-2.5 border-t flex items-center justify-between shrink-0">
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-rose-300">🏆 Top Streak Suit Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_rps" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+
           <div class="flex items-center gap-3">
             <img id="previewThumb" src="" alt="Thumb" class="w-12 h-12 rounded-xl object-cover border border-white/20" />
             <div>
@@ -556,16 +609,20 @@
         </div>
       </div>
 
-      <!-- AREA MINI GAME (SNAKE & REFLEX) -->
+      <!-- AREA MULTI MINI GAME (6 GAME) -->
       <div id="gameStageBox" class="hidden flex-1 flex flex-col h-full min-h-0 overflow-y-auto">
-        <div class="panel-3d px-4 py-2.5 border-b flex items-center justify-between shrink-0">
-          <div class="flex items-center gap-3">
+        <div class="panel-3d px-3 py-2 border-b flex items-center justify-between gap-2 shrink-0 overflow-x-auto">
+          <div class="flex items-center gap-2 shrink-0">
             <button onclick="backToSidebar()" class="btn-3d-soft md:hidden text-white w-9 h-9 rounded-xl flex items-center justify-center">←</button>
             <h3 id="gameStageTitle" class="text-sm font-bold text-white">🐍 Neon Snake</h3>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="openGameStage('snake')" class="btn-3d-soft text-xs px-3 py-1.5 rounded-xl text-lime-300 font-semibold cursor-pointer">🐍 Snake</button>
-            <button onclick="openGameStage('reflex')" class="btn-3d-soft text-xs px-3 py-1.5 rounded-xl text-cyan-300 font-semibold cursor-pointer">⚡ Reflex</button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="openGameStage('snake')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-lime-300 font-semibold cursor-pointer">🐍 Snake</button>
+            <button onclick="openGameStage('reflex')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-cyan-300 font-semibold cursor-pointer">⚡ Reflex</button>
+            <button onclick="openGameStage('tictactoe')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-purple-200 font-semibold cursor-pointer">❌ TTT</button>
+            <button onclick="openGameStage('2048')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-amber-300 font-semibold cursor-pointer">🔢 2048</button>
+            <button onclick="openGameStage('memory')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-emerald-300 font-semibold cursor-pointer">🃏 Flip</button>
+            <button onclick="openGameStage('rps')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-rose-300 font-semibold cursor-pointer">✊ Suit</button>
           </div>
         </div>
 
@@ -588,14 +645,22 @@
             </div>
           </div>
 
-          <!-- Kontrol D-Pad Layar untuk HP -->
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-lime-300">🏆 Top Skor Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_snake" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+
           <div class="grid grid-cols-3 gap-2 w-44 select-none pt-1">
             <div></div>
-            <button type="button" onclick="setSnakeDir(0, -1)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▲</button>
+            <button type="button" onclick="setSnakeDir(0, -1)" class="btn-3d-soft h-11 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▲</button>
             <div></div>
-            <button type="button" onclick="setSnakeDir(-1, 0)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">◀</button>
-            <button type="button" onclick="setSnakeDir(0, 1)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▼</button>
-            <button type="button" onclick="setSnakeDir(1, 0)" class="btn-3d-soft h-12 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▶</button>
+            <button type="button" onclick="setSnakeDir(-1, 0)" class="btn-3d-soft h-11 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">◀</button>
+            <button type="button" onclick="setSnakeDir(0, 1)" class="btn-3d-soft h-11 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▼</button>
+            <button type="button" onclick="setSnakeDir(1, 0)" class="btn-3d-soft h-11 rounded-2xl text-white font-bold text-lg flex items-center justify-center cursor-pointer">▶</button>
           </div>
         </div>
 
@@ -605,6 +670,15 @@
             <span>Skor: <strong id="reflexScore" class="text-cyan-300 text-sm">0</strong></span>
             <span>Waktu: <strong id="reflexTime" class="text-pink-300 text-sm">15s</strong></span>
             <span>Rekor: <strong id="reflexBest" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-cyan-300">🏆 Top Skor Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_reflex" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
           </div>
 
           <div id="reflexArena" class="relative w-80 h-80 rounded-3xl border-2 border-cyan-400/35 bg-[#090514] overflow-hidden shadow-2xl">
@@ -621,11 +695,131 @@
             </div>
           </div>
         </div>
+
+        <!-- GAME 3: TIC-TAC-TOE 3D -->
+        <div id="tttGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-4">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-5 text-xs font-bold">
+            <span>Kamu (X): <strong id="tttPlayerWins" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Bot (O): <strong id="tttBotWins" class="text-pink-300 text-sm">0</strong></span>
+            <span>Seri: <strong id="tttDraws" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <p id="tttStatusText" class="text-xs font-semibold text-cyan-200">Giliran kamu (X)</p>
+
+          <div id="tttBoard" class="grid grid-cols-3 gap-2.5 w-64 h-64 glass-3d p-3 rounded-3xl"></div>
+
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-purple-200">🏆 Top Menang Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_tictactoe" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+
+          <button onclick="resetTttRound()" class="btn-3d-primary px-5 py-2.5 rounded-2xl text-xs cursor-pointer">
+            Ronde Baru
+          </button>
+        </div>
+
+        <!-- GAME 4: NEON 2048 -->
+        <div id="g2048GameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-3">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-6 text-xs font-bold">
+            <span>Skor: <strong id="g2048Score" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Rekor: <strong id="g2048Best" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <div id="g2048Board" class="grid grid-cols-4 gap-2 w-72 h-72 glass-3d p-2.5 rounded-3xl"></div>
+
+          <div class="grid grid-cols-3 gap-2 w-44 select-none">
+            <div></div>
+            <button type="button" onclick="move2048('up')" class="btn-3d-soft h-10 rounded-xl text-white font-bold cursor-pointer">▲</button>
+            <div></div>
+            <button type="button" onclick="move2048('left')" class="btn-3d-soft h-10 rounded-xl text-white font-bold cursor-pointer">◀</button>
+            <button type="button" onclick="move2048('down')" class="btn-3d-soft h-10 rounded-xl text-white font-bold cursor-pointer">▼</button>
+            <button type="button" onclick="move2048('right')" class="btn-3d-soft h-10 rounded-xl text-white font-bold cursor-pointer">▶</button>
+          </div>
+
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-amber-300">🏆 Top Skor 2048 Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_2048" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+
+          <button onclick="init2048Game()" class="btn-3d-primary px-5 py-2 rounded-2xl text-xs cursor-pointer">
+            Mulai Ulang 2048
+          </button>
+        </div>
+
+        <!-- GAME 5: CYBER CARD FLIP -->
+        <div id="memoryGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-3">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-6 text-xs font-bold">
+            <span>Langkah: <strong id="memoryMoves" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Cocok: <strong id="memoryMatched" class="text-lime-300 text-sm">0/6</strong></span>
+          </div>
+
+          <div id="memoryBoard" class="grid grid-cols-4 gap-2 w-72 glass-3d p-3 rounded-3xl"></div>
+
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-emerald-300">🏆 Top Langkah Terbaik Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_memory" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+
+          <button onclick="initMemoryGame()" class="btn-3d-primary px-5 py-2 rounded-2xl text-xs cursor-pointer">
+            Acak Kartu Baru
+          </button>
+        </div>
+
+        <!-- GAME 6: SUIT BATU GUNTING KERTAS -->
+        <div id="rpsGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-4">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-5 text-xs font-bold">
+            <span>Menang: <strong id="rpsWins" class="text-lime-300 text-sm">0</strong></span>
+            <span>Streak: <strong id="rpsStreak" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Kalah: <strong id="rpsLosses" class="text-rose-300 text-sm">0</strong></span>
+          </div>
+
+          <div class="glass-3d w-full max-w-xs rounded-3xl p-5 text-center space-y-2">
+            <div class="flex items-center justify-around text-4xl py-2">
+              <div>
+                <span id="rpsPlayerPick">❔</span>
+                <p class="text-[11px] text-[#b8b2d8] mt-1 font-semibold">Kamu</p>
+              </div>
+              <span class="text-sm font-extrabold text-pink-300">VS</span>
+              <div>
+                <span id="rpsBotPick">🤖</span>
+                <p class="text-[11px] text-[#b8b2d8] mt-1 font-semibold">Bot</p>
+              </div>
+            </div>
+            <p id="rpsResultText" class="text-sm font-bold text-cyan-300">Pilih jurus suit kamu!</p>
+          </div>
+
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-rose-300">🏆 Top Streak Suit Pengguna ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_rps" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="playRps('rock')" class="btn-3d-soft px-4 py-3 rounded-2xl text-xl cursor-pointer" title="Batu">✊</button>
+            <button onclick="playRps('scissors')" class="btn-3d-soft px-4 py-3 rounded-2xl text-xl cursor-pointer" title="Gunting">✌️</button>
+            <button onclick="playRps('paper')" class="btn-3d-soft px-4 py-3 rounded-2xl text-xl cursor-pointer" title="Kertas">🖐️</button>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 
-  <!-- FIREBASE, PIN AUTH, WEBRTC & GAME SCRIPT -->
+  <!-- FIREBASE, PIN AUTH, WEBRTC & 6 MINI GAME SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -776,8 +970,8 @@
     let viewerStoryList = [];
     let viewerStoryIndex = 0;
     let activePeer = null;
-    let unreadByPeer = {}; // { [peerPhoneDigits]: jumlahPesanBelumDibaca }
-    let roomListeners = new Map(); // [roomId]: unsubscribeFn
+    let unreadByPeer = {};
+    let roomListeners = new Map();
     let seenMessageIds = new Set();
     let unsubscribeMessages = null;
     let unsubscribeUsers = null;
@@ -975,6 +1169,7 @@
       listenUsers();
       listenStories();
       listenIncomingCalls();
+      listenLeaderboard();
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -1516,6 +1711,7 @@
 
     function listenIncomingCalls() {
       if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
+      if (unsubscribeLeaderboard) unsubscribeLeaderboard();
       const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
 
       unsubscribeIncomingCalls = onSnapshot(collection(db, "calls"), (snap) => {
@@ -1656,6 +1852,8 @@
     }
 
     function openChatWith(peer) {
+      stopSnakeLoop();
+      stopReflexLoop();
       activePeer = peer;
       const peerDigits = normalizePhoneDigits(peer.phone || peer.uid);
       unreadByPeer[peerDigits] = 0;
@@ -1777,7 +1975,52 @@
       await addDoc(collection(db, "chats", roomId, "messages"), payload);
     };
 
-    // ================= MINI GAME 1: NEON SNAKE =================
+    // ================= MINI GAME STAGE CONTROLLER (6 GAME) =================
+    window.openGameStage = function (gameName) {
+      stopSnakeLoop();
+      stopReflexLoop();
+      activePeer = null;
+      renderUserList();
+
+      document.getElementById('emptyChatState').classList.add('hidden');
+      document.getElementById('activeChatBox').classList.add('hidden');
+      document.getElementById('gameStageBox').classList.remove('hidden');
+
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebarPanel').classList.add('hidden');
+        document.getElementById('chatPanel').classList.remove('hidden');
+        document.getElementById('chatPanel').classList.add('flex');
+      }
+
+      document.getElementById('snakeGameView').classList.toggle('hidden', gameName !== 'snake');
+      document.getElementById('reflexGameView').classList.toggle('hidden', gameName !== 'reflex');
+      document.getElementById('tttGameView').classList.toggle('hidden', gameName !== 'tictactoe');
+      document.getElementById('g2048GameView').classList.toggle('hidden', gameName !== '2048');
+      document.getElementById('memoryGameView').classList.toggle('hidden', gameName !== 'memory');
+      document.getElementById('rpsGameView').classList.toggle('hidden', gameName !== 'rps');
+
+      if (gameName === 'snake') {
+        document.getElementById('gameStageTitle').textContent = "🐍 Neon Snake";
+        document.getElementById('snakeHighScore').textContent = localStorage.getItem('arzchat_snake_best') || '0';
+        drawSnakeFrame();
+      } else if (gameName === 'reflex') {
+        document.getElementById('gameStageTitle').textContent = "⚡ Neon Tap Reflex";
+        document.getElementById('reflexBest').textContent = localStorage.getItem('arzchat_reflex_best') || '0';
+      } else if (gameName === 'tictactoe') {
+        document.getElementById('gameStageTitle').textContent = "❌ Tic-Tac-Toe 3D";
+        resetTttRound();
+      } else if (gameName === '2048') {
+        document.getElementById('gameStageTitle').textContent = "🔢 Neon 2048";
+        init2048Game();
+      } else if (gameName === 'memory') {
+        document.getElementById('gameStageTitle').textContent = "🃏 Cyber Card Flip";
+        initMemoryGame();
+      } else if (gameName === 'rps') {
+        document.getElementById('gameStageTitle').textContent = "✊ Suit Batu Gunting Kertas";
+      }
+    };
+
+    // ================= GAME 1: NEON SNAKE =================
     let snakeTimer = null;
     let snakeBody = [];
     let snakeDir = { x: 1, y: 0 };
@@ -1793,36 +2036,6 @@
         snakeTimer = null;
       }
     }
-
-    window.openGameStage = function (gameName) {
-      activePeer = null;
-      renderUserList();
-
-      document.getElementById('emptyChatState').classList.add('hidden');
-      document.getElementById('activeChatBox').classList.add('hidden');
-      document.getElementById('gameStageBox').classList.remove('hidden');
-
-      if (window.innerWidth < 768) {
-        document.getElementById('sidebarPanel').classList.add('hidden');
-        document.getElementById('chatPanel').classList.remove('hidden');
-        document.getElementById('chatPanel').classList.add('flex');
-      }
-
-      if (gameName === 'snake') {
-        stopReflexLoop();
-        document.getElementById('gameStageTitle').textContent = "🐍 Neon Snake";
-        document.getElementById('snakeGameView').classList.remove('hidden');
-        document.getElementById('reflexGameView').classList.add('hidden');
-        document.getElementById('snakeHighScore').textContent = localStorage.getItem('arzchat_snake_best') || '0';
-        drawSnakeFrame();
-      } else {
-        stopSnakeLoop();
-        document.getElementById('gameStageTitle').textContent = "⚡ Neon Tap Reflex";
-        document.getElementById('reflexGameView').classList.remove('hidden');
-        document.getElementById('snakeGameView').classList.add('hidden');
-        document.getElementById('reflexBest').textContent = localStorage.getItem('arzchat_reflex_best') || '0';
-      }
-    };
 
     function spawnSnakeFood() {
       while (true) {
@@ -1840,21 +2053,9 @@
       nextSnakeDir = { x: dx, y: dy };
     };
 
-    window.addEventListener('keydown', (e) => {
-      if (document.getElementById('snakeGameView').classList.contains('hidden')) return;
-      if (e.key === 'ArrowUp' || e.key === 'w') setSnakeDir(0, -1);
-      else if (e.key === 'ArrowDown' || e.key === 's') setSnakeDir(0, 1);
-      else if (e.key === 'ArrowLeft' || e.key === 'a') setSnakeDir(-1, 0);
-      else if (e.key === 'ArrowRight' || e.key === 'd') setSnakeDir(1, 0);
-    });
-
     window.startSnakeGame = function () {
       stopSnakeLoop();
-      snakeBody = [
-        { x: 6, y: 8 },
-        { x: 5, y: 8 },
-        { x: 4, y: 8 }
-      ];
+      snakeBody = [{ x: 6, y: 8 }, { x: 5, y: 8 }, { x: 4, y: 8 }];
       snakeDir = { x: 1, y: 0 };
       nextSnakeDir = { x: 1, y: 0 };
       snakeScoreVal = 0;
@@ -1863,7 +2064,6 @@
       document.getElementById('snakeOverlay').classList.add('hidden');
       spawnSnakeFood();
       drawSnakeFrame();
-
       snakeTimer = setInterval(stepSnakeGame, 145);
     };
 
@@ -1881,6 +2081,7 @@
           localStorage.setItem('arzchat_snake_best', String(snakeScoreVal));
           document.getElementById('snakeHighScore').textContent = String(snakeScoreVal);
         }
+        submitGameScoreToFirebase('snake', snakeScoreVal, 'desc');
         document.getElementById('snakeOverlayTitle').textContent = "💥 Game Over!";
         document.getElementById('snakeOverlaySub').textContent = `Skor akhir: ${snakeScoreVal} • Panjang ular: ${snakeBody.length}`;
         document.getElementById('snakeOverlay').classList.remove('hidden');
@@ -1888,7 +2089,6 @@
       }
 
       snakeBody.unshift(head);
-
       if (head.x === snakeFood.x && head.y === snakeFood.y) {
         snakeScoreVal += 10;
         document.getElementById('snakeScore').textContent = String(snakeScoreVal);
@@ -1897,7 +2097,6 @@
       } else {
         snakeBody.pop();
       }
-
       drawSnakeFrame();
     }
 
@@ -1922,13 +2121,7 @@
 
       ctx.fillStyle = '#a3e635';
       ctx.beginPath();
-      ctx.arc(
-        snakeFood.x * tileSize + tileSize / 2,
-        snakeFood.y * tileSize + tileSize / 2,
-        tileSize / 2.6,
-        0,
-        Math.PI * 2
-      );
+      ctx.arc(snakeFood.x * tileSize + tileSize / 2, snakeFood.y * tileSize + tileSize / 2, tileSize / 2.6, 0, Math.PI * 2);
       ctx.fill();
 
       snakeBody.forEach((seg, index) => {
@@ -1939,7 +2132,7 @@
       });
     }
 
-    // ================= MINI GAME 2: NEON TAP REFLEX =================
+    // ================= GAME 2: NEON TAP REFLEX =================
     let reflexTimer = null;
     let reflexScoreVal = 0;
     let reflexTimeLeft = 15;
@@ -1982,6 +2175,7 @@
             localStorage.setItem('arzchat_reflex_best', String(reflexScoreVal));
             document.getElementById('reflexBest').textContent = String(reflexScoreVal);
           }
+          submitGameScoreToFirebase('reflex', reflexScoreVal, 'desc');
           document.getElementById('reflexOverlay').classList.remove('hidden');
           showToast(`Waktu habis! Skor Reflex kamu: ${reflexScoreVal}`);
         }
@@ -1993,6 +2187,394 @@
       document.getElementById('reflexScore').textContent = String(reflexScoreVal);
       moveReflexTarget();
     };
+
+    // ================= GAME 3: TIC-TAC-TOE 3D =================
+    let tttBoardState = Array(9).fill(null);
+    let tttGameOver = false;
+    let tttPScore = 0;
+    let tttBScore = 0;
+    let tttDScore = 0;
+
+    const tttWins = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function checkTttWinner(b) {
+      for (const [a, c, d] of tttWins) {
+        if (b[a] && b[a] === b[c] && b[a] === b[d]) return b[a];
+      }
+      if (b.every(Boolean)) return 'draw';
+      return null;
+    }
+
+    function renderTttBoard() {
+      const boardEl = document.getElementById('tttBoard');
+      boardEl.innerHTML = '';
+      tttBoardState.forEach((cell, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = "btn-3d-soft rounded-2xl text-2xl font-extrabold flex items-center justify-center cursor-pointer";
+        btn.textContent = cell === 'X' ? '❌' : (cell === 'O' ? '⭕' : '');
+        btn.onclick = () => handleTttClick(idx);
+        boardEl.appendChild(btn);
+      });
+    }
+
+    function handleTttClick(idx) {
+      if (tttGameOver || tttBoardState[idx]) return;
+      tttBoardState[idx] = 'X';
+      renderTttBoard();
+
+      let res = checkTttWinner(tttBoardState);
+      if (res) return finishTttRound(res);
+
+      const emptyIndices = tttBoardState.map((v, i) => v ? null : i).filter(v => v !== null);
+      if (emptyIndices.length > 0) {
+        const pick = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        tttBoardState[pick] = 'O';
+        renderTttBoard();
+        res = checkTttWinner(tttBoardState);
+        if (res) return finishTttRound(res);
+      }
+      document.getElementById('tttStatusText').textContent = "Giliran kamu (X)";
+    }
+
+    function finishTttRound(res) {
+      tttGameOver = true;
+      if (res === 'X') {
+        tttPScore++;
+        document.getElementById('tttPlayerWins').textContent = String(tttPScore);
+        submitGameScoreToFirebase('tictactoe', tttPScore, 'desc');
+        document.getElementById('tttStatusText').textContent = "🎉 Kamu menang!";
+      } else if (res === 'O') {
+        tttBScore++;
+        document.getElementById('tttBotWins').textContent = String(tttBScore);
+        document.getElementById('tttStatusText').textContent = "🤖 Bot menang ronde ini!";
+      } else {
+        tttDScore++;
+        document.getElementById('tttDraws').textContent = String(tttDScore);
+        document.getElementById('tttStatusText').textContent = "🤝 Seri!";
+      }
+    }
+
+    window.resetTttRound = function () {
+      tttBoardState = Array(9).fill(null);
+      tttGameOver = false;
+      document.getElementById('tttStatusText').textContent = "Giliran kamu (X)";
+      renderTttBoard();
+    };
+
+    // ================= GAME 4: NEON 2048 =================
+    let g2048Grid = [];
+    let g2048ScoreVal = 0;
+
+    function addRandom2048Tile() {
+      const empty = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (g2048Grid[r][c] === 0) empty.push([r, c]);
+        }
+      }
+      if (empty.length === 0) return;
+      const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+      g2048Grid[r][c] = Math.random() < 0.9 ? 2 : 4;
+    }
+
+    function render2048Board() {
+      const el = document.getElementById('g2048Board');
+      el.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const val = g2048Grid[r][c];
+          const tile = document.createElement('div');
+          tile.className = `rounded-2xl flex items-center justify-center font-extrabold text-base select-none ${
+            val === 0 ? 'bg-white/5 text-transparent' :
+            val <= 8 ? 'bg-purple-600/80 text-white' :
+            val <= 64 ? 'bg-pink-500/85 text-white' :
+            'bg-cyan-400 text-[#090514]'
+          }`;
+          tile.textContent = val === 0 ? '' : String(val);
+          el.appendChild(tile);
+        }
+      }
+      document.getElementById('g2048Score').textContent = String(g2048ScoreVal);
+      const best = Number(localStorage.getItem('arzchat_2048_best') || '0');
+      if (g2048ScoreVal > best) {
+        localStorage.setItem('arzchat_2048_best', String(g2048ScoreVal));
+      }
+      submitGameScoreToFirebase('2048', g2048ScoreVal, 'desc');
+      document.getElementById('g2048Best').textContent = String(Math.max(best, g2048ScoreVal));
+    }
+
+    function slideRowLeft(row) {
+      let arr = row.filter(v => v !== 0);
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === arr[i + 1]) {
+          arr[i] *= 2;
+          g2048ScoreVal += arr[i];
+          arr[i + 1] = 0;
+          i++;
+        }
+      }
+      arr = arr.filter(v => v !== 0);
+      while (arr.length < 4) arr.push(0);
+      return arr;
+    }
+
+    window.move2048 = function (dir) {
+      const prev = JSON.stringify(g2048Grid);
+      if (dir === 'left') {
+        g2048Grid = g2048Grid.map(slideRowLeft);
+      } else if (dir === 'right') {
+        g2048Grid = g2048Grid.map(r => slideRowLeft([...r].reverse()).reverse());
+      } else if (dir === 'up') {
+        for (let c = 0; c < 4; c++) {
+          const col = [g2048Grid[0][c], g2048Grid[1][c], g2048Grid[2][c], g2048Grid[3][c]];
+          const slid = slideRowLeft(col);
+          for (let r = 0; r < 4; r++) g2048Grid[r][c] = slid[r];
+        }
+      } else if (dir === 'down') {
+        for (let c = 0; c < 4; c++) {
+          const col = [g2048Grid[3][c], g2048Grid[2][c], g2048Grid[1][c], g2048Grid[0][c]];
+          const slid = slideRowLeft(col);
+          for (let r = 0; r < 4; r++) g2048Grid[3 - r][c] = slid[r];
+        }
+      }
+      if (JSON.stringify(g2048Grid) !== prev) {
+        addRandom2048Tile();
+        render2048Board();
+      }
+    };
+
+    window.init2048Game = function () {
+      g2048Grid = Array.from({ length: 4 }, () => Array(4).fill(0));
+      g2048ScoreVal = 0;
+      addRandom2048Tile();
+      addRandom2048Tile();
+      render2048Board();
+    };
+
+    // ================= GAME 5: CYBER CARD FLIP =================
+    const cardEmojis = ['🚀', '🔥', '💎', '🎧', '👾', '🌈'];
+    let memoryDeck = [];
+    let flippedIndices = [];
+    let matchedIndices = new Set();
+    let memoryMovesCount = 0;
+    let memoryLock = false;
+
+    window.initMemoryGame = function () {
+      memoryDeck = [...cardEmojis, ...cardEmojis].sort(() => Math.random() - 0.5);
+      flippedIndices = [];
+      matchedIndices.clear();
+      memoryMovesCount = 0;
+      memoryLock = false;
+      document.getElementById('memoryMoves').textContent = '0';
+      document.getElementById('memoryMatched').textContent = '0/6';
+      renderMemoryBoard();
+    };
+
+    function renderMemoryBoard() {
+      const board = document.getElementById('memoryBoard');
+      board.innerHTML = '';
+      memoryDeck.forEach((sym, idx) => {
+        const isOpen = flippedIndices.includes(idx) || matchedIndices.has(idx);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `h-14 rounded-2xl text-xl font-bold flex items-center justify-center cursor-pointer transition ${
+          isOpen ? 'btn-3d-primary' : 'btn-3d-soft text-cyan-300'
+        }`;
+        btn.textContent = isOpen ? sym : '?';
+        btn.onclick = () => handleMemoryFlip(idx);
+        board.appendChild(btn);
+      });
+    }
+
+    function handleMemoryFlip(idx) {
+      if (memoryLock || flippedIndices.includes(idx) || matchedIndices.has(idx)) return;
+      flippedIndices.push(idx);
+      renderMemoryBoard();
+
+      if (flippedIndices.length === 2) {
+        memoryMovesCount++;
+        document.getElementById('memoryMoves').textContent = String(memoryMovesCount);
+        const [i1, i2] = flippedIndices;
+        if (memoryDeck[i1] === memoryDeck[i2]) {
+          matchedIndices.add(i1);
+          matchedIndices.add(i2);
+          flippedIndices = [];
+          document.getElementById('memoryMatched').textContent = `${matchedIndices.size / 2}/6`;
+          renderMemoryBoard();
+          if (matchedIndices.size === memoryDeck.length) {
+            showToast(`🎉 Semua kartu cocok dalam ${memoryMovesCount} langkah!`);
+            submitGameScoreToFirebase('memory', memoryMovesCount, 'asc');
+          }
+        } else {
+          memoryLock = true;
+          setTimeout(() => {
+            flippedIndices = [];
+            memoryLock = false;
+            renderMemoryBoard();
+          }, 650);
+        }
+      }
+    }
+
+    // ================= GAME 6: SUIT BATU GUNTING KERTAS =================
+    let rpsWinsVal = 0;
+    let rpsStreakVal = 0;
+    let rpsLossesVal = 0;
+
+    const rpsMap = {
+      rock: { icon: '✊', beats: 'scissors' },
+      scissors: { icon: '✌️', beats: 'paper' },
+      paper: { icon: '🖐️', beats: 'rock' }
+    };
+
+    window.playRps = function (playerChoice) {
+      const keys = Object.keys(rpsMap);
+      const botChoice = keys[Math.floor(Math.random() * keys.length)];
+
+      document.getElementById('rpsPlayerPick').textContent = rpsMap[playerChoice].icon;
+      document.getElementById('rpsBotPick').textContent = rpsMap[botChoice].icon;
+
+      const resEl = document.getElementById('rpsResultText');
+      if (playerChoice === botChoice) {
+        resEl.textContent = "🤝 Seri! Coba lagi.";
+        resEl.className = "text-sm font-bold text-amber-300";
+      } else if (rpsMap[playerChoice].beats === botChoice) {
+        rpsWinsVal++;
+        rpsStreakVal++;
+        document.getElementById('rpsWins').textContent = String(rpsWinsVal);
+        document.getElementById('rpsStreak').textContent = String(rpsStreakVal);
+        submitGameScoreToFirebase('rps', rpsStreakVal, 'desc');
+        resEl.textContent = "🎉 Kamu Menang!";
+        resEl.className = "text-sm font-bold text-lime-300";
+      } else {
+        rpsLossesVal++;
+        rpsStreakVal = 0;
+        document.getElementById('rpsLosses').textContent = String(rpsLossesVal);
+        document.getElementById('rpsStreak').textContent = "0";
+        resEl.textContent = "💀 Bot Menang!";
+        resEl.className = "text-sm font-bold text-rose-400";
+      }
+    };
+
+
+    // ================= TOP SKOR REAL-TIME ANTAR PENGGUNA ARZCHAT =================
+    let unsubscribeLeaderboard = null;
+    let leaderboardRows = [];
+    let bestScoresCache = {
+      snake: 0,
+      reflex: 0,
+      tictactoe: 0,
+      "2048": 0,
+      memory: null, // semakin kecil langkah semakin bagus
+      rps: 0
+    };
+
+    function listenLeaderboard() {
+      if (unsubscribeLeaderboard) unsubscribeLeaderboard();
+      unsubscribeLeaderboard = onSnapshot(collection(db, "game_scores"), (snap) => {
+        leaderboardRows = [];
+        snap.forEach((d) => {
+          leaderboardRows.push({ id: d.id, ...d.data() });
+        });
+        renderAllLeaderboards();
+      });
+    }
+
+    function renderLeaderboardForGame(gameKey, elementId, mode = 'desc', unitLabel = 'pts') {
+      const box = document.getElementById(elementId);
+      if (!box) return;
+
+      const entries = leaderboardRows
+        .filter((row) => row.scores && typeof row.scores[gameKey] === 'number' && !Number.isNaN(row.scores[gameKey]))
+        .map((row) => ({
+          uid: normalizePhoneDigits(row.uid || row.id),
+          name: row.name || ('+' + normalizePhoneDigits(row.uid || row.id)),
+          val: Number(row.scores[gameKey])
+        }))
+        .filter((item) => mode === 'asc' ? item.val > 0 : item.val >= 0);
+
+      entries.sort((a, b) => mode === 'asc' ? (a.val - b.val) : (b.val - a.val));
+      const top5 = entries.slice(0, 5);
+
+      if (top5.length === 0) {
+        box.innerHTML = `<div class="text-[11px] text-[#b8b2d8]/70 py-1">Belum ada skor tercatat. Mainkan gamenya!</div>`;
+        return;
+      }
+
+      const myDigits = currentUser ? normalizePhoneDigits(currentUser.phone || currentUser.uid) : "";
+      const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
+
+      box.innerHTML = top5.map((item, idx) => {
+        const isMe = myDigits && item.uid === myDigits;
+        return `
+          <div class="flex items-center justify-between px-2 py-1 rounded-xl ${isMe ? 'bg-cyan-400/15 text-white font-bold border border-cyan-400/30' : 'bg-white/[0.03]'}">
+            <span class="truncate mr-2">${medals[idx] || (idx + 1) + '.'} ${item.name} ${isMe ? '(Kamu)' : ''}</span>
+            <span class="text-cyan-300 font-extrabold shrink-0">${item.val} ${unitLabel}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAllLeaderboards() {
+      renderLeaderboardForGame('snake', 'lb_snake', 'desc', 'pts');
+      renderLeaderboardForGame('reflex', 'lb_reflex', 'desc', 'tap');
+      renderLeaderboardForGame('tictactoe', 'lb_tictactoe', 'desc', 'win');
+      renderLeaderboardForGame('2048', 'lb_2048', 'desc', 'pts');
+      renderLeaderboardForGame('memory', 'lb_memory', 'asc', 'gerak');
+      renderLeaderboardForGame('rps', 'lb_rps', 'desc', 'streak');
+    }
+
+    async function submitGameScoreToFirebase(gameKey, candidateValue, mode = 'desc') {
+      if (!currentUser) return;
+      const val = Number(candidateValue);
+      if (Number.isNaN(val)) return;
+      if (mode === 'desc' && val <= 0) return;
+      if (mode === 'asc' && val <= 0) return;
+
+      const currentBest = bestScoresCache[gameKey];
+      const isBetter =
+        currentBest === null ||
+        currentBest === undefined ||
+        (mode === 'desc' ? val > currentBest : val < currentBest);
+
+      if (!isBetter) return;
+      bestScoresCache[gameKey] = val;
+
+      const myDigits = normalizePhoneDigits(currentUser.phone || currentUser.uid);
+      try {
+        await setDoc(doc(db, "game_scores", myDigits), {
+          uid: myDigits,
+          name: currentUser.name,
+          phone: currentUser.phone,
+          scores: {
+            [gameKey]: val
+          },
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      } catch (e) {
+        console.error("Gagal simpan top skor:", e);
+      }
+    }
+
+    // ================= KEYBOARD CONTROLS FOR SNAKE & 2048 =================
+    window.addEventListener('keydown', (e) => {
+      if (!document.getElementById('snakeGameView').classList.contains('hidden')) {
+        if (e.key === 'ArrowUp' || e.key === 'w') setSnakeDir(0, -1);
+        else if (e.key === 'ArrowDown' || e.key === 's') setSnakeDir(0, 1);
+        else if (e.key === 'ArrowLeft' || e.key === 'a') setSnakeDir(-1, 0);
+        else if (e.key === 'ArrowRight' || e.key === 'd') setSnakeDir(1, 0);
+      } else if (!document.getElementById('g2048GameView').classList.contains('hidden')) {
+        if (e.key === 'ArrowUp') move2048('up');
+        else if (e.key === 'ArrowDown') move2048('down');
+        else if (e.key === 'ArrowLeft') move2048('left');
+        else if (e.key === 'ArrowRight') move2048('right');
+      }
+    });
 
     window.openLightbox = function (src) {
       document.getElementById('lightboxImg').src = src;
@@ -2011,6 +2593,7 @@
       if (unsubscribeStories) unsubscribeStories();
       if (unsubscribeMessages) unsubscribeMessages();
       if (unsubscribeIncomingCalls) unsubscribeIncomingCalls();
+      if (unsubscribeLeaderboard) unsubscribeLeaderboard();
       currentUser = null;
       await signOut(auth).catch(() => {});
       document.getElementById('appScreen').classList.add('hidden');
