@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    :root {
+:root {
       --bg-deep: #0b0718;
       --bg-mid: #160f2d;
       --card-3d: rgba(28, 20, 58, 0.78);
@@ -757,7 +757,7 @@
         </div>
       </div>
 
-      <!-- AREA SCROLLING FEED & TIKTOK (FOKUS BERANDA TIKTOK + AUTO SCROLL) -->
+      <!-- AREA SCROLLING FEED & TIKTOK (WAJIB LOGIN TIKTOK + ALGORITMA BERANDA + AUTO SCROLL) -->
       <div id="scrollStageBox" class="hidden flex-1 flex flex-col h-full min-h-0 overflow-hidden">
         <div class="panel-3d px-3 py-2 border-b flex items-center justify-between gap-2 shrink-0 flex-wrap">
           <div class="flex items-center gap-2">
@@ -765,19 +765,69 @@
             <h3 class="text-sm font-extrabold text-white">📱 TikTok Beranda</h3>
           </div>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <button id="btnAutoScrollToggle" type="button" onclick="toggleAutoScrollNext()"
               class="btn-3d-primary px-3 py-1.5 rounded-xl text-[11px] font-extrabold cursor-pointer">
               ⏭️ Auto Scroll: ON
             </button>
+            <button type="button" onclick="renderScrollStageFeed()"
+              class="btn-3d-soft px-3 py-1.5 rounded-xl text-[11px] font-extrabold text-lime-300 cursor-pointer">
+              🔀 Acak Feed
+            </button>
             <button type="button" onclick="openTikTokAccountLogin()"
               class="btn-3d-soft px-3 py-1.5 rounded-xl text-[11px] font-extrabold text-pink-300 cursor-pointer">
-              🔐 Login Akun TikTok
+              🔐 Login / Ganti Akun
             </button>
           </div>
         </div>
 
-        <div id="scrollFeedContainer" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-5 snap-y snap-mandatory"></div>
+        <!-- GATE LOGIN AKUN TIKTOK -->
+        <div id="tiktokLoginGate" class="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+          <div class="glass-3d max-w-md w-full rounded-3xl p-6 text-center space-y-4 border border-pink-400/35">
+            <div class="avatar-3d w-16 h-16 rounded-3xl mx-auto flex items-center justify-center text-2xl font-extrabold">🎵</div>
+            <div>
+              <h4 class="text-lg font-extrabold text-white">Login Akun TikTok Dulu</h4>
+              <p class="text-xs text-[#b8b2d8] mt-1">
+                Masuk dengan akun/handle TikTok kamu agar algoritma beranda & rekomendasi video menyesuaikan minatmu.
+              </p>
+            </div>
+
+            <div class="text-left space-y-2.5">
+              <input id="ttAccountHandleInput" type="text" placeholder="Username / @akun TikTok kamu (misal: @rizki_fyp)"
+                class="w-full bg-white/5 border border-white/15 rounded-2xl px-3.5 py-2.5 text-xs text-white placeholder-[#b8b2d8]/60 focus:outline-none focus:border-cyan-400" />
+              <select id="ttInterestTopicSelect" class="w-full bg-[#160f2d] border border-white/15 rounded-2xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-400">
+                <option value="all">✨ Algoritma Campuran (FYP Seimbang)</option>
+                <option value="tech">💻 Tech, Coding & Gadget</option>
+                <option value="gaming">🎮 Gaming & Esports</option>
+                <option value="music">🎧 Musik, Dance & Vibe</option>
+                <option value="travel">🌆 Street, Travel & Kuliner</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <button type="button" onclick="completeTikTokAccountLogin()" class="btn-3d-primary w-full py-3 rounded-2xl text-xs font-extrabold cursor-pointer">
+                ✅ Masuk & Aktifkan Beranda TikTok
+              </button>
+              <button type="button" onclick="openTikTokPopupWindow('https://www.tiktok.com/login')" class="btn-3d-soft w-full py-2.5 rounded-2xl text-[11px] font-bold text-cyan-300 cursor-pointer">
+                🌐 Buka Halaman Login Resmi TikTok.com
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAR ALGORITMA & FILTER KATEGORI SETELAH LOGIN -->
+        <div id="tiktokAlgoBar" class="hidden px-3 sm:px-4 pt-2.5 pb-1 flex items-center justify-between gap-2 flex-wrap shrink-0">
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <button type="button" onclick="setTikTokAlgoTopic('all')" data-tt-topic="all" class="tt-topic-btn btn-3d-primary px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 cursor-pointer">✨ FYP</button>
+            <button type="button" onclick="setTikTokAlgoTopic('tech')" data-tt-topic="tech" class="tt-topic-btn btn-3d-soft px-3 py-1 rounded-xl text-[11px] font-bold text-cyan-300 shrink-0 cursor-pointer">💻 Tech</button>
+            <button type="button" onclick="setTikTokAlgoTopic('gaming')" data-tt-topic="gaming" class="tt-topic-btn btn-3d-soft px-3 py-1 rounded-xl text-[11px] font-bold text-lime-300 shrink-0 cursor-pointer">🎮 Game</button>
+            <button type="button" onclick="setTikTokAlgoTopic('music')" data-tt-topic="music" class="tt-topic-btn btn-3d-soft px-3 py-1 rounded-xl text-[11px] font-bold text-pink-300 shrink-0 cursor-pointer">🎧 Musik</button>
+            <button type="button" onclick="setTikTokAlgoTopic('travel')" data-tt-topic="travel" class="tt-topic-btn btn-3d-soft px-3 py-1 rounded-xl text-[11px] font-bold text-amber-300 shrink-0 cursor-pointer">🌆 Travel</button>
+          </div>
+          <span id="ttActiveUserBadge" class="text-[11px] text-cyan-300 font-bold truncate"></span>
+        </div>
+
+        <div id="scrollFeedContainer" class="hidden flex-1 overflow-y-auto p-3 sm:p-4 space-y-5 snap-y snap-mandatory"></div>
       </div>
 
       <!-- AREA MULTI MINI GAME (9 GAME) -->
@@ -1216,9 +1266,8 @@
     </main>
   </div>
 
-  <!-- FIREBASE, PIN AUTH, WEBRTC & 6 MINI GAME SCRIPT -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, doc, setDoc, getDoc, updateDoc, collection, onSnapshot,
@@ -1588,29 +1637,196 @@
     });
 
     // ================= MENU SCROLLING & TIKTOK FEED =================
-    const defaultTiktokClips = [
-      {
-        id: "local-demo-1",
-        title: "Demo Feed #1 • Neon Vibe Loop (Langsung Putar)",
-        mp4: "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-        poster: "",
-        tag: "Live Feed"
-      },
-      {
-        id: "local-demo-2",
-        title: "Demo Feed #2 • Rabbit Short Clip (Langsung Putar)",
-        mp4: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        poster: "",
-        tag: "Live Feed"
-      },
-      {
-        id: "local-demo-3",
-        title: "Demo Feed #3 • Street Motion Clip (Langsung Putar)",
-        mp4: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-        poster: "",
-        tag: "Live Feed"
-      }
+    // Generator video animasi sendiri (Canvas -> MediaRecorder) supaya bisa scroll video tanpa link eksternal
+    const generatedVideoUrlCache = new Map();
+    const generatedVideoPromises = new Map();
+
+    const synthVideoTemplates = [
+      { key: "neon_wave", title: "Synth Wave #01 • Cyber Grid", topic: "tech", tag: "💻 Tech", style: "grid" },
+      { key: "pulse_ring", title: "Bass Pulse #02 • Neon Rings", topic: "music", tag: "🎧 Musik", style: "rings" },
+      { key: "star_warp", title: "Warp Speed #03 • Starfield", topic: "gaming", tag: "🎮 Game", style: "warp" },
+      { key: "sunset_horizon", title: "Horizon Glow #04 • Retro Vibe", topic: "travel", tag: "🌆 Travel", style: "horizon" },
+      { key: "matrix_rain", title: "Code Stream #05 • Matrix Flow", topic: "tech", tag: "💻 Tech", style: "matrix" },
+      { key: "eq_bars", title: "Beat Drop #06 • Audio Bars", topic: "music", tag: "🎧 Musik", style: "bars" }
     ];
+
+    function renderSynthFrame(ctx, w, h, style, t) {
+      ctx.clearRect(0, 0, w, h);
+      if (style === "grid") {
+        const g = ctx.createLinearGradient(0, 0, w, h);
+        g.addColorStop(0, "#090514");
+        g.addColorStop(1, "#24104a");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = "rgba(34, 211, 238, 0.45)";
+        ctx.lineWidth = 2;
+        const offset = (t * 80) % 44;
+        for (let x = -44; x <= w + 44; x += 44) {
+          ctx.beginPath();
+          ctx.moveTo(x + offset * 0.4, h * 0.45);
+          ctx.lineTo(w / 2 + (x - w / 2) * 2.2, h);
+          ctx.stroke();
+        }
+        for (let y = h * 0.45; y <= h; y += 26 + ((t * 20) % 26)) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "#f472b6";
+        ctx.beginPath();
+        ctx.arc(w / 2, h * 0.36 + Math.sin(t * 4) * 14, 54, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (style === "rings") {
+        ctx.fillStyle = "#0b0718";
+        ctx.fillRect(0, 0, w, h);
+        for (let i = 0; i < 6; i++) {
+          const r = ((t * 110 + i * 55) % 270) + 18;
+          ctx.strokeStyle = i % 2 === 0 ? "rgba(244, 114, 182, 0.75)" : "rgba(34, 211, 238, 0.75)";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(w / 2, h / 2, r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      } else if (style === "warp") {
+        ctx.fillStyle = "#070412";
+        ctx.fillRect(0, 0, w, h);
+        for (let i = 0; i < 36; i++) {
+          const angle = i * 0.65 + t * 0.6;
+          const dist = ((t * 180 + i * 29) % 260) + 10;
+          const x = w / 2 + Math.cos(angle) * dist;
+          const y = h / 2 + Math.sin(angle) * dist;
+          ctx.fillStyle = i % 3 === 0 ? "#a3e635" : (i % 3 === 1 ? "#22d3ee" : "#e879f9");
+          ctx.beginPath();
+          ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else if (style === "horizon") {
+        const sky = ctx.createLinearGradient(0, 0, 0, h * 0.62);
+        sky.addColorStop(0, "#1e1b4b");
+        sky.addColorStop(0.6, "#be185d");
+        sky.addColorStop(1, "#fb923c");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h * 0.62);
+
+        ctx.fillStyle = "#fde047";
+        ctx.beginPath();
+        ctx.arc(w / 2, h * 0.44 + Math.cos(t * 2) * 8, 62, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#090514";
+        ctx.fillRect(0, h * 0.62, w, h * 0.38);
+      } else if (style === "matrix") {
+        ctx.fillStyle = "#050b09";
+        ctx.fillRect(0, 0, w, h);
+        ctx.font = "bold 16px monospace";
+        const cols = 14;
+        for (let c = 0; c < cols; c++) {
+          const x = c * (w / cols) + 6;
+          const headY = ((t * 160 + c * 47) % (h + 80)) - 40;
+          for (let k = 0; k < 5; k++) {
+            ctx.fillStyle = k === 0 ? "#ecfccb" : "rgba(163, 230, 53, 0.65)";
+            ctx.fillText(String((c + k + Math.floor(t * 10)) % 2), x, headY - k * 18);
+          }
+        }
+      } else {
+        ctx.fillStyle = "#0d0720";
+        ctx.fillRect(0, 0, w, h);
+        const barCount = 12;
+        const bw = (w - 80) / barCount;
+        for (let b = 0; b < barCount; b++) {
+          const amp = 40 + Math.abs(Math.sin(t * 5 + b * 0.7)) * 180;
+          const bx = 40 + b * bw;
+          const by = h * 0.65 - amp;
+          ctx.fillStyle = b % 2 === 0 ? "#22d3ee" : "#f472b6";
+          ctx.beginPath();
+          ctx.roundRect(bx + 2, by, bw - 5, amp, 6);
+          ctx.fill();
+        }
+      }
+
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.font = "bold 15px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("ARZCHAT GENERATED REEL", w / 2, 44);
+    }
+
+    function createGeneratedVideoBlobUrl(style, durationMs = 2600) {
+      const cacheKey = `${style}_${durationMs}`;
+      if (generatedVideoUrlCache.has(cacheKey)) {
+        return Promise.resolve(generatedVideoUrlCache.get(cacheKey));
+      }
+      if (generatedVideoPromises.has(cacheKey)) {
+        return generatedVideoPromises.get(cacheKey);
+      }
+
+      const promise = new Promise((resolve) => {
+        try {
+          if (typeof MediaRecorder === "undefined" || typeof HTMLCanvasElement.prototype.captureStream !== "function") {
+            resolve(null);
+            return;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = 360;
+          canvas.height = 540;
+          const ctx = canvas.getContext("2d");
+          const stream = canvas.captureStream(24);
+
+          const mimeTypes = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
+          const chosenMime = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || "";
+          const recorder = chosenMime ? new MediaRecorder(stream, { mimeType: chosenMime }) : new MediaRecorder(stream);
+
+          const chunks = [];
+          recorder.ondataavailable = (ev) => {
+            if (ev.data && ev.data.size > 0) chunks.push(ev.data);
+          };
+
+          const startTime = performance.now();
+          let rafId = null;
+
+          function tick(now) {
+            const elapsed = now - startTime;
+            renderSynthFrame(ctx, canvas.width, canvas.height, style, elapsed / 1000);
+            if (elapsed < durationMs && recorder.state === "recording") {
+              rafId = requestAnimationFrame(tick);
+            } else if (recorder.state === "recording") {
+              recorder.stop();
+            }
+          }
+
+          recorder.onstop = () => {
+            if (rafId) cancelAnimationFrame(rafId);
+            stream.getTracks().forEach(tr => tr.stop());
+            if (chunks.length === 0) {
+              resolve(null);
+              return;
+            }
+            const blob = new Blob(chunks, { type: chosenMime || "video/webm" });
+            const url = URL.createObjectURL(blob);
+            generatedVideoUrlCache.set(cacheKey, url);
+            resolve(url);
+          };
+
+          recorder.start();
+          renderSynthFrame(ctx, canvas.width, canvas.height, style, 0);
+          rafId = requestAnimationFrame(tick);
+        } catch (e) {
+          resolve(null);
+        }
+      });
+
+      generatedVideoPromises.set(cacheKey, promise);
+      return promise;
+    }
+
+    const defaultTiktokClips = synthVideoTemplates.map((tpl, idx) => ({
+      id: `synth-feed-${idx + 1}`,
+      title: tpl.title,
+      topic: tpl.topic,
+      tag: tpl.tag,
+      synthStyle: tpl.style
+    }));
 
     function loadCustomTiktokClips() {
       try {
@@ -1622,8 +1838,105 @@
       }
     }
 
+    function loadTikTokSession() {
+      try {
+        const raw = localStorage.getItem('arzchat_tiktok_account');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function loadTikTokAffinityMap() {
+      try {
+        const raw = localStorage.getItem('arzchat_tiktok_affinity');
+        return raw ? JSON.parse(raw) : { tech: 1, gaming: 1, music: 1, travel: 1 };
+      } catch (e) {
+        return { tech: 1, gaming: 1, music: 1, travel: 1 };
+      }
+    }
+
+    function saveTikTokAffinityMap(map) {
+      localStorage.setItem('arzchat_tiktok_affinity', JSON.stringify(map));
+    }
+
+    let currentTikTokTopicFilter = 'all';
+
+    window.completeTikTokAccountLogin = function () {
+      const handleRaw = (document.getElementById('ttAccountHandleInput')?.value || '').trim();
+      const topicPref = document.getElementById('ttInterestTopicSelect')?.value || 'all';
+      const cleanHandle = handleRaw ? (handleRaw.startsWith('@') ? handleRaw : '@' + handleRaw) : '@user_fyp';
+      const session = { handle: cleanHandle, topicPref, loggedInAt: Date.now() };
+      localStorage.setItem('arzchat_tiktok_account', JSON.stringify(session));
+
+      const aff = loadTikTokAffinityMap();
+      if (topicPref && topicPref !== 'all') {
+        aff[topicPref] = (aff[topicPref] || 1) + 4;
+        saveTikTokAffinityMap(aff);
+      }
+
+      currentTikTokTopicFilter = topicPref || 'all';
+      syncTikTokGateAndFeed();
+      showToast(`Login akun TikTok ${cleanHandle} berhasil! Algoritma beranda aktif.`);
+    };
+
+    window.setTikTokAlgoTopic = function (topic) {
+      currentTikTokTopicFilter = topic;
+      const aff = loadTikTokAffinityMap();
+      if (topic !== 'all') {
+        aff[topic] = (aff[topic] || 1) + 1;
+        saveTikTokAffinityMap(aff);
+      }
+      document.querySelectorAll('.tt-topic-btn').forEach((btn) => {
+        const isAct = btn.getAttribute('data-tt-topic') === topic;
+        btn.className = isAct
+          ? "tt-topic-btn btn-3d-primary px-3 py-1 rounded-xl text-[11px] font-bold shrink-0 cursor-pointer"
+          : "tt-topic-btn btn-3d-soft px-3 py-1 rounded-xl text-[11px] font-bold text-cyan-300 shrink-0 cursor-pointer";
+      });
+      renderScrollStageFeed();
+    };
+
+    window.likeTikTokFeedClip = function (clipId, topic) {
+      const aff = loadTikTokAffinityMap();
+      aff[topic] = (aff[topic] || 1) + 3;
+      saveTikTokAffinityMap(aff);
+      showToast("❤️ Disukai! Algoritma akan lebih sering memunculkan topik serupa.");
+    };
+
     function getAllTiktokClips() {
-      return [...loadCustomTiktokClips(), ...defaultTiktokClips];
+      const combined = [...loadCustomTiktokClips(), ...defaultTiktokClips];
+      const aff = loadTikTokAffinityMap();
+      const filtered = currentTikTokTopicFilter === 'all'
+        ? combined
+        : combined.filter(c => (c.topic || 'music') === currentTikTokTopicFilter);
+
+      const pool = filtered.length > 0 ? filtered : combined;
+      return [...pool].sort((a, b) => {
+        const sa = (aff[a.topic || 'music'] || 1) + (Math.random() * 1.4);
+        const sb = (aff[b.topic || 'music'] || 1) + (Math.random() * 1.4);
+        return sb - sa;
+      });
+    }
+
+    function syncTikTokGateAndFeed() {
+      const sess = loadTikTokSession();
+      const gate = document.getElementById('tiktokLoginGate');
+      const algoBar = document.getElementById('tiktokAlgoBar');
+      const feed = document.getElementById('scrollFeedContainer');
+      const badge = document.getElementById('ttActiveUserBadge');
+
+      if (!sess) {
+        gate?.classList.remove('hidden');
+        algoBar?.classList.add('hidden');
+        feed?.classList.add('hidden');
+        return;
+      }
+
+      gate?.classList.add('hidden');
+      algoBar?.classList.remove('hidden');
+      feed?.classList.remove('hidden');
+      if (badge) badge.textContent = `Akun: ${sess.handle}`;
+      renderScrollStageFeed();
     }
 
     function extractTiktokVideoId(rawUrl) {
@@ -1708,7 +2021,7 @@
                 <span class="text-[10px] px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-200 font-bold">${clip.tag}</span>
                 <p class="text-xs font-bold text-white truncate">${clip.title}</p>
               </div>
-              <p class="text-[10px] text-[#b8b2d8] truncate mt-0.5">${clip.url}</p>
+              <p class="text-[10px] text-[#b8b2d8] truncate mt-0.5">${clip.url || clip.mp4 || 'Video Beranda TikTok'}</p>
             </div>
             ${isCustom ? `<button type="button" onclick="removeCustomTiktokClip('${clip.id}')" class="text-xs text-rose-300 px-2 py-1 rounded-lg bg-rose-500/15 cursor-pointer">✕</button>` : ''}
           </div>
@@ -1736,11 +2049,8 @@
     };
 
     window.openTikTokAccountLogin = function () {
-      window.open(
-        "https://www.tiktok.com/login",
-        "TikTokLoginWindow",
-        "width=460,height=780,menubar=no,toolbar=no,location=yes,status=no"
-      );
+      localStorage.removeItem('arzchat_tiktok_account');
+      syncTikTokGateAndFeed();
     };
 
     window.exitFocusTikTokMode = function () {
@@ -1772,21 +2082,23 @@
       const canIframeTikTok = isElectronOrCapacitorApp();
 
       feedEl.innerHTML = clips.map((clip, idx) => {
-        if (clip.mp4) {
+        if (clip.synthStyle) {
           return `
             <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
               <div class="flex items-center justify-between gap-2">
                 <span class="text-xs font-extrabold text-lime-300 truncate">#${idx + 1} • ${clip.title}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-lime-400/15 text-lime-300 font-bold shrink-0">Auto Next</span>
+                <button type="button" onclick="likeTikTokFeedClip('${clip.id}', '${clip.topic || 'music'}')" class="text-[10px] px-2.5 py-1 rounded-full bg-pink-500/20 hover:bg-pink-500/30 text-pink-200 font-bold shrink-0 cursor-pointer">❤️ Suka</button>
               </div>
-              <video
-                data-feed-idx="${idx}"
-                src="${clip.mp4}"
-                controls
-                playsinline
-                preload="metadata"
-                class="w-full h-[460px] sm:h-[520px] rounded-2xl bg-black object-cover border border-white/15"
-              ></video>
+              <div class="relative w-full h-[460px] sm:h-[520px] rounded-2xl bg-black overflow-hidden border border-white/15">
+                <canvas data-synth-style="${clip.synthStyle}" width="360" height="540" class="w-full h-full object-cover block"></canvas>
+                <video data-synth-video-idx="${idx}" controls playsinline loop class="hidden w-full h-full object-cover bg-black"></video>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[10px] text-[#b8b2d8]">Dibuat langsung oleh kode</span>
+                <button type="button" onclick="exportSynthClipAsVideo('${clip.synthStyle}', '${clip.title.replace(/'/g, '')}', ${idx})" class="text-[10px] px-2.5 py-1 rounded-lg bg-cyan-400/15 hover:bg-cyan-400/25 text-cyan-200 font-bold cursor-pointer">
+                  🎬 Render Video File
+                </button>
+              </div>
             </div>
           `;
         }
@@ -1850,16 +2162,94 @@
 
       feedEl.querySelectorAll('video[data-feed-idx]').forEach((vidEl) => {
         const idx = Number(vidEl.getAttribute('data-feed-idx') || '0');
+        vidEl.addEventListener('play', () => {
+          const clipObj = clips[idx];
+          if (clipObj && clipObj.topic) {
+            const aff = loadTikTokAffinityMap();
+            aff[clipObj.topic] = (aff[clipObj.topic] || 1) + 1;
+            saveTikTokAffinityMap(aff);
+          }
+        });
         vidEl.addEventListener('ended', () => {
           scrollToNextFeedCard(idx, clips.length);
         });
       });
+
+      startLiveSynthCanvases(clips);
 
       if (focusClipId) {
         const target = document.getElementById(`scroll-card-${focusClipId}`);
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
+
+    let synthCanvasRaf = null;
+    let synthObserver = null;
+    const visibleSynthCanvases = new Set();
+
+    function startLiveSynthCanvases(activeClips) {
+      if (synthCanvasRaf) cancelAnimationFrame(synthCanvasRaf);
+      if (synthObserver) synthObserver.disconnect();
+      visibleSynthCanvases.clear();
+
+      const canvases = Array.from(document.querySelectorAll('canvas[data-synth-style]'));
+      if (canvases.length === 0) return;
+
+      if (typeof IntersectionObserver !== "undefined") {
+        synthObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) visibleSynthCanvases.add(entry.target);
+            else visibleSynthCanvases.delete(entry.target);
+          });
+        }, { threshold: 0.1 });
+        canvases.forEach((cv) => synthObserver.observe(cv));
+      } else {
+        canvases.forEach((cv) => visibleSynthCanvases.add(cv));
+      }
+
+      const t0 = performance.now();
+      function frame(now) {
+        if (document.hidden) {
+          synthCanvasRaf = requestAnimationFrame(frame);
+          return;
+        }
+        const sec = (now - t0) / 1000;
+        const targets = visibleSynthCanvases.size > 0 ? Array.from(visibleSynthCanvases) : canvases.slice(0, 2);
+        targets.forEach((cv) => {
+          const st = cv.getAttribute('data-synth-style') || 'grid';
+          const ctx = cv.getContext('2d');
+          if (ctx) renderSynthFrame(ctx, cv.width, cv.height, st, sec);
+        });
+        synthCanvasRaf = requestAnimationFrame(frame);
+      }
+      synthCanvasRaf = requestAnimationFrame(frame);
+    }
+
+    window.exportSynthClipAsVideo = async function (style, title, idx) {
+      showToast("🎬 Sedang merender video buatan sendiri...");
+      const url = await createGeneratedVideoBlobUrl(style, 2600);
+      if (!url) {
+        showToast("Browser tidak mendukung perekaman video Canvas.");
+        return;
+      }
+      const card = document.getElementById(`scroll-card-synth-feed-${idx + 1}`);
+      if (card) {
+        const cv = card.querySelector('canvas[data-synth-style]');
+        const vid = card.querySelector('video[data-synth-video-idx]');
+        if (cv && vid) {
+          cv.classList.add('hidden');
+          vid.classList.remove('hidden');
+          vid.src = url;
+          vid.play().catch(() => {});
+          vid.onended = () => scrollToNextFeedCard(idx, getAllTiktokClips().length);
+        }
+      }
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.webm`;
+      a.click();
+      showToast("✅ Video berhasil dirender & diunduh!");
+    };
 
     window.openTikTokPopupWindow = function (url) {
       window.open(url, 'ArzChatTikTokClient', 'width=430,height=780,menubar=no,toolbar=no,location=yes,status=no');
@@ -1893,7 +2283,11 @@
       document.getElementById('chatPanel').classList.add('flex');
 
       renderTiktokSidebarList();
-      renderScrollStageFeed(focusClipId);
+      syncTikTokGateAndFeed();
+      if (focusClipId) {
+        const target = document.getElementById(`scroll-card-${focusClipId}`);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     };
 
     // ================= NAVIGASI SIDEBAR (CHATS / STORY / SCROLL / GAME) =================
