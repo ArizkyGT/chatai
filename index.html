@@ -1681,30 +1681,29 @@
 
       feedEl.innerHTML = clips.map((clip, idx) => {
         const vidId = extractTiktokVideoId(clip.url);
-        const embedSrc = vidId
+        const frameSrc = vidId
           ? `https://www.tiktok.com/embed/v2/${vidId}`
-          : null;
-
-        const mediaHtml = embedSrc
-          ? `<iframe src="${embedSrc}" class="w-full h-80 sm:h-96 rounded-2xl bg-black border border-white/15" allow="autoplay; encrypted-media" allowfullscreen></iframe>`
-          : `<div class="w-full h-64 rounded-2xl bg-gradient-to-br from-fuchsia-900/60 via-[#160f2d] to-cyan-900/60 border border-white/15 flex flex-col items-center justify-center p-5 text-center gap-3">
-               <div class="text-4xl">🎵</div>
-               <p class="text-sm font-extrabold text-white">${clip.title}</p>
-               <p class="text-[11px] text-[#b8b2d8] max-w-xs break-all">${clip.url}</p>
-               <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="btn-3d-primary px-4 py-2 rounded-2xl text-xs font-extrabold inline-block">
-                 Buka di TikTok ↗
-               </a>
-             </div>`;
+          : clip.url;
 
         return `
-          <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-4 space-y-3 border border-cyan-400/25">
+          <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-xs font-extrabold text-cyan-300">#${idx + 1} • ${clip.title}</span>
-              <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[11px] text-pink-300 font-bold hover:underline shrink-0">
-                Tab Baru ↗
-              </a>
+              <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
+              <button type="button" onclick="reloadScrollFrame('${clip.id}')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-lime-300 font-bold shrink-0 cursor-pointer">
+                ↻ Muat Ulang
+              </button>
             </div>
-            ${mediaHtml}
+            <iframe
+              id="tt-frame-${clip.id}"
+              src="${frameSrc}"
+              class="w-full h-[520px] sm:h-[580px] rounded-2xl bg-white border border-white/15"
+              allow="autoplay; encrypted-media; fullscreen; clipboard-write"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+              allowfullscreen
+            ></iframe>
+            <p class="text-[10px] text-[#b8b2d8] text-center">
+              Bisa di-scroll langsung di dalam ArzChat • Jika TikTok meminta login akun, silakan login langsung di frame di atas.
+            </p>
           </div>
         `;
       }).join('');
@@ -1714,6 +1713,17 @@
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
+
+
+    window.reloadScrollFrame = function (clipId) {
+      const iframe = document.getElementById(`tt-frame-${clipId}`);
+      if (!iframe) return;
+      const currentSrc = iframe.getAttribute('src');
+      iframe.setAttribute('src', '');
+      requestAnimationFrame(() => {
+        iframe.setAttribute('src', currentSrc);
+      });
+    };
 
     window.openScrollStage = function (focusClipId = null) {
       stopSnakeLoop();
