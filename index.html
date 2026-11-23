@@ -767,7 +767,21 @@
           <span class="text-[11px] text-cyan-300 font-semibold">Scroll ke bawah untuk ganti video</span>
         </div>
 
-        <div id="scrollFeedContainer" class="flex-1 overflow-y-auto p-4 space-y-4 snap-y snap-mandatory"></div>
+        <div class="px-4 pt-3 max-w-md mx-auto w-full">
+          <div class="glass-3d rounded-2xl p-3 flex flex-col sm:flex-row gap-2 border border-cyan-400/25">
+            <input id="stageQuickTiktokInput" type="text" placeholder="Tempel link video TikTok (contoh: https://www.tiktok.com/@user/video/7123456789012345678)"
+              onkeydown="if(event.key==='Enter') quickAddTiktokFromStage()"
+              class="flex-1 bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-[#b8b2d8]/60 focus:outline-none focus:border-cyan-400" />
+            <button type="button" onclick="quickAddTiktokFromStage()" class="btn-3d-primary px-3.5 py-2 rounded-xl text-xs font-extrabold shrink-0 cursor-pointer">
+              + Masuk Feed
+            </button>
+          </div>
+          <p class="text-[10px] text-[#b8b2d8] mt-1.5 text-center">
+            Tips: Gunakan link video satuan (<code class="text-cyan-300">.../video/ANGKA_ID</code>) agar bisa di-scroll & diputar langsung di dalam feed.
+          </p>
+        </div>
+
+        <div id="scrollFeedContainer" class="flex-1 overflow-y-auto p-4 space-y-5 snap-y snap-mandatory"></div>
       </div>
 
       <!-- AREA MULTI MINI GAME (9 GAME) -->
@@ -1580,22 +1594,22 @@
     // ================= MENU SCROLLING & TIKTOK FEED =================
     const defaultTiktokClips = [
       {
-        id: "tt-1",
-        title: "TikTok For You / Trending",
-        url: "https://www.tiktok.com/foryou",
-        tag: "For You"
+        id: "tt-sample-1",
+        title: "Contoh Video TikTok #1 (Bisa Di-Scroll)",
+        url: "https://www.tiktok.com/@scout2015/video/6718335390845095173",
+        tag: "Scroll"
       },
       {
-        id: "tt-2",
-        title: "TikTok Explore & Kreator",
-        url: "https://www.tiktok.com/explore",
-        tag: "Explore"
+        id: "tt-sample-2",
+        title: "Contoh Video TikTok #2 (Bisa Di-Scroll)",
+        url: "https://www.tiktok.com/@tiktok/video/7106603940595305774",
+        tag: "Scroll"
       },
       {
-        id: "tt-3",
-        title: "TikTok Live & Hiburan",
-        url: "https://www.tiktok.com/live",
-        tag: "Live"
+        id: "tt-sample-3",
+        title: "Contoh Video TikTok #3 (Bisa Di-Scroll)",
+        url: "https://www.tiktok.com/@tiktok/video/7201123404066901294",
+        tag: "Scroll"
       }
     ];
 
@@ -1614,9 +1628,38 @@
     }
 
     function extractTiktokVideoId(rawUrl) {
-      const match = String(rawUrl || '').match(/tiktok\.com\/@[^/]+\/video\/(\d+)/i);
-      return match ? match[1] : null;
+      const str = String(rawUrl || '').trim();
+      const m1 = str.match(/\/video\/(\d{10,25})/i);
+      if (m1) return m1[1];
+      const m2 = str.match(/\/v\/(\d{10,25})/i);
+      if (m2) return m2[1];
+      const m3 = str.match(/item_id=(\d{10,25})/i);
+      if (m3) return m3[1];
+      const m4 = str.match(/\b(\d{18,21})\b/);
+      return m4 ? m4[1] : null;
     }
+
+    window.quickAddTiktokFromStage = function () {
+      const inp = document.getElementById('stageQuickTiktokInput');
+      const raw = (inp?.value || '').trim();
+      if (!raw) {
+        showToast("Tempel dulu link video TikTok-nya.");
+        return;
+      }
+      const vidId = extractTiktokVideoId(raw);
+      const customClips = loadCustomTiktokClips();
+      customClips.unshift({
+        id: "tt-" + Date.now(),
+        title: vidId ? `Video TikTok #${vidId.slice(-6)}` : "Video TikTok",
+        url: vidId ? `https://www.tiktok.com/@creator/video/${vidId}` : raw,
+        tag: "Feed"
+      });
+      localStorage.setItem('arzchat_tiktok_clips', JSON.stringify(customClips.slice(0, 30)));
+      inp.value = '';
+      renderTiktokSidebarList();
+      renderScrollStageFeed(customClips[0].id);
+      showToast(vidId ? "✅ Video masuk ke feed & bisa langsung di-scroll!" : "Link ditambahkan.");
+    };
 
     window.addTiktokClipToFeed = function () {
       const urlInput = document.getElementById('tiktokUrlInput');
@@ -1674,36 +1717,88 @@
       }).join('');
     }
 
+    function isElectronOrCapacitorApp() {
+      return Boolean(
+        window.process?.versions?.electron ||
+        navigator.userAgent.includes("Electron") ||
+        window.Capacitor
+      );
+    }
+
     function renderScrollStageFeed(focusClipId = null) {
       const feedEl = document.getElementById('scrollFeedContainer');
       if (!feedEl) return;
       const clips = getAllTiktokClips();
+      const canIframeTikTok = isElectronOrCapacitorApp();
 
       feedEl.innerHTML = clips.map((clip, idx) => {
         const vidId = extractTiktokVideoId(clip.url);
-        const frameSrc = vidId
-          ? `https://www.tiktok.com/embed/v2/${vidId}`
-          : clip.url;
+        const embedSrc = vidId ? `https://www.tiktok.com/embed/v2/${vidId}` : null;
+
+        if (canIframeTikTok) {
+          const frameSrc = embedSrc || clip.url;
+          return `
+            <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
+                <button type="button" onclick="reloadScrollFrame('${clip.id}')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-lime-300 font-bold shrink-0 cursor-pointer">
+                  ↻ Muat Ulang
+                </button>
+              </div>
+              <iframe
+                id="tt-frame-${clip.id}"
+                src="${frameSrc}"
+                class="w-full h-[520px] sm:h-[580px] rounded-2xl bg-white border border-white/15"
+                allow="autoplay; encrypted-media; fullscreen; clipboard-write"
+                allowfullscreen
+              ></iframe>
+            </div>
+          `;
+        }
+
+        // Di browser web biasa, TikTok memblokir iframe penuh (X-Frame-Options: DENY / CSP frame-ancestors).
+        // Jika ada video ID, gunakan /embed/v2/{id} yang diizinkan untuk di-embed; jika halaman penuh/login, beri akses cepat.
+        if (embedSrc) {
+          return `
+            <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
+                <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="text-[10px] px-2.5 py-1 rounded-lg bg-pink-500/20 text-pink-200 font-bold shrink-0">
+                  Login / TikTok ↗
+                </a>
+              </div>
+              <iframe
+                id="tt-frame-${clip.id}"
+                src="${embedSrc}"
+                class="w-full h-[520px] sm:h-[580px] rounded-2xl bg-black border border-white/15"
+                allow="autoplay; encrypted-media; fullscreen; clipboard-write"
+                allowfullscreen
+              ></iframe>
+            </div>
+          `;
+        }
 
         return `
-          <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-3.5 space-y-2.5 border border-cyan-400/25">
+          <div id="scroll-card-${clip.id}" class="snap-start glass-3d max-w-md mx-auto w-full rounded-3xl p-4 space-y-3 border border-cyan-400/25">
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-extrabold text-cyan-300 truncate">#${idx + 1} • ${clip.title}</span>
-              <button type="button" onclick="reloadScrollFrame('${clip.id}')" class="text-[10px] px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-lime-300 font-bold shrink-0 cursor-pointer">
-                ↻ Muat Ulang
-              </button>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 font-bold shrink-0">Blokir Iframe TikTok</span>
             </div>
-            <iframe
-              id="tt-frame-${clip.id}"
-              src="${frameSrc}"
-              class="w-full h-[520px] sm:h-[580px] rounded-2xl bg-white border border-white/15"
-              allow="autoplay; encrypted-media; fullscreen; clipboard-write"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-              allowfullscreen
-            ></iframe>
-            <p class="text-[10px] text-[#b8b2d8] text-center">
-              Bisa di-scroll langsung di dalam ArzChat • Jika TikTok meminta login akun, silakan login langsung di frame di atas.
-            </p>
+            <div class="w-full min-h-[260px] rounded-2xl bg-gradient-to-br from-[#1f1342] via-[#120b29] to-[#0b2538] border border-white/15 p-5 flex flex-col items-center justify-center text-center gap-3">
+              <div class="text-3xl">🔒</div>
+              <p class="text-xs font-extrabold text-white">Server TikTok menolak halaman login/beranda di dalam iframe browser web</p>
+              <p class="text-[11px] text-[#b8b2d8] max-w-sm leading-relaxed">
+                Untuk login akun TikTok atau buka <strong class="text-cyan-300">${clip.title}</strong>, buka di jendela/tab baru atau bungkus aplikasi dengan Electron/WebView (<code class="text-lime-300">webSecurity: false</code> / native window).
+              </p>
+              <div class="flex items-center gap-2 flex-wrap justify-center pt-1">
+                <a href="${clip.url}" target="_blank" rel="noopener noreferrer" class="btn-3d-primary px-4 py-2 rounded-2xl text-xs font-extrabold">
+                  Buka & Login TikTok ↗
+                </a>
+                <button type="button" onclick="openTikTokPopupWindow('${clip.url}')" class="btn-3d-soft px-3.5 py-2 rounded-2xl text-xs font-bold text-cyan-300 cursor-pointer">
+                  Jendela Pop-up
+                </button>
+              </div>
+            </div>
           </div>
         `;
       }).join('');
@@ -1713,6 +1808,10 @@
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
+
+    window.openTikTokPopupWindow = function (url) {
+      window.open(url, 'ArzChatTikTokClient', 'width=430,height=780,menubar=no,toolbar=no,location=yes,status=no');
+    };
 
 
     window.reloadScrollFrame = function (clipId) {
