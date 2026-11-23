@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>ArzChat – Chat, Story, Voice Call & Multi-Game Arcade</title>
+  <title>ArzChat – Chat, Story, Voice & Video Call, Multi-Game Arcade</title>
 
   <!-- KONFIGURASI PWA -->
   <link rel="manifest" href="manifest.json" />
@@ -173,36 +173,47 @@
     <img id="lightboxImg" src="" alt="Preview" class="max-h-[90vh] max-w-[95vw] rounded-2xl object-contain shadow-2xl border border-white/15" />
   </div>
 
-  <!-- MODAL PANGGILAN SUARA (INCOMING & ACTIVE CALL) -->
-  <div id="callModal" class="hidden fixed inset-0 z-50 bg-[#090514]/90 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="glass-3d w-full max-w-sm rounded-3xl p-7 text-center flex flex-col items-center">
-      <div class="avatar-3d w-24 h-24 rounded-3xl flex items-center justify-center text-3xl font-extrabold text-white mb-4 animate-pulse">
+  <!-- MODAL PANGGILAN SUARA & VIDEO CALL (WEBRTC) -->
+  <div id="callModal" class="hidden fixed inset-0 z-50 bg-[#090514]/92 backdrop-blur-xl flex items-center justify-center p-4">
+    <div id="callCardContainer" class="glass-3d w-full max-w-sm rounded-3xl p-6 text-center flex flex-col items-center relative overflow-hidden">
+      <!-- Area Video Call (Muncul saat mode Video Call) -->
+      <div id="videoStageWrapper" class="hidden relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden bg-black border border-cyan-400/30 mb-4 shadow-xl">
+        <video id="remoteVideo" autoplay playsinline class="w-full h-full object-cover"></video>
+        <video id="localVideo" autoplay playsinline muted class="w-24 h-32 sm:w-28 sm:h-36 object-cover rounded-xl border-2 border-pink-400/80 shadow-lg absolute bottom-2.5 right-2.5 bg-[#160f2d] scale-x-[-1]"></video>
+      </div>
+
+      <!-- Avatar Mode Voice Call -->
+      <div id="voiceAvatarWrapper" class="avatar-3d w-24 h-24 rounded-3xl flex items-center justify-center text-3xl font-extrabold text-white mb-4 animate-pulse">
         <span id="callPeerAvatar">U</span>
       </div>
-      <span class="text-[11px] uppercase tracking-widest px-3 py-1 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-300/25 mb-2">
+
+      <span id="callModeBadge" class="text-[11px] uppercase tracking-widest px-3 py-1 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-300/25 mb-2">
         WebRTC Voice Call
       </span>
       <h3 id="callPeerName" class="text-xl font-bold text-white">Nama Kontak</h3>
       <p id="callStatusText" class="text-xs text-[#b8b2d8] mt-1">Menghubungkan...</p>
-      <p id="callTimerText" class="text-sm font-semibold text-cyan-300 mt-2 hidden">00:00</p>
+      <p id="callTimerText" class="text-sm font-semibold text-cyan-300 mt-1.5 hidden">00:00</p>
 
       <!-- Tombol Panggilan Masuk -->
-      <div id="incomingCallActions" class="hidden flex items-center justify-center gap-6 mt-7 w-full">
+      <div id="incomingCallActions" class="hidden flex items-center justify-center gap-6 mt-6 w-full">
         <button onclick="rejectIncomingCall()" class="w-14 h-14 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white font-bold shadow-lg shadow-rose-500/30 flex items-center justify-center text-xl transition cursor-pointer">
           ✕
         </button>
-        <button onclick="acceptIncomingCall()" class="w-14 h-14 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-[#090514] font-extrabold shadow-lg shadow-emerald-400/35 flex items-center justify-center text-xl transition cursor-pointer">
+        <button id="btnAcceptCall" onclick="acceptIncomingCall()" class="w-14 h-14 rounded-2xl bg-emerald-400 hover:bg-emerald-300 text-[#090514] font-extrabold shadow-lg shadow-emerald-400/35 flex items-center justify-center text-xl transition cursor-pointer">
           📞
         </button>
       </div>
 
       <!-- Tombol Saat Panggilan Aktif / Keluar -->
-      <div id="activeCallActions" class="flex items-center justify-center gap-4 mt-7 w-full">
-        <button id="btnToggleMute" onclick="toggleMuteCall()" class="btn-3d-soft px-4 py-3 rounded-2xl text-xs font-semibold text-white cursor-pointer">
+      <div id="activeCallActions" class="flex items-center justify-center flex-wrap gap-2.5 mt-6 w-full">
+        <button id="btnToggleMute" onclick="toggleMuteCall()" class="btn-3d-soft px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-white cursor-pointer">
           🎙️ Mic On
         </button>
-        <button onclick="hangupCall(true)" class="px-5 py-3 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold shadow-lg shadow-rose-500/30 cursor-pointer">
-          Tutup Telepon
+        <button id="btnToggleCamera" onclick="toggleCameraCall()" class="hidden btn-3d-soft px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-cyan-300 cursor-pointer">
+          📹 Cam On
+        </button>
+        <button onclick="hangupCall(true)" class="px-4 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold shadow-lg shadow-rose-500/30 cursor-pointer">
+          Tutup
         </button>
       </div>
     </div>
@@ -295,7 +306,7 @@
           </svg>
         </div>
         <h1 class="text-2xl font-extrabold tracking-tight text-white">ArzChat</h1>
-        <p class="text-xs text-[#b8b2d8] mt-1">Chatting, Story, Voice Call & Multi-Game Arcade</p>
+        <p class="text-xs text-[#b8b2d8] mt-1">Chatting, Story, Voice & Video Call, Multi-Game Arcade</p>
       </div>
 
       <!-- STEP 1: IDENTITAS & NOMOR HP -->
@@ -390,7 +401,7 @@
         </button>
         <button id="tabGamesBtn" onclick="switchSidebarTab('games')"
           class="btn-3d-soft py-2 rounded-xl text-xs font-semibold text-[#b8b2d8] hover:text-white flex items-center justify-center gap-1.5 cursor-pointer">
-          <span>🎮 Game (6)</span>
+          <span>🎮 Game (8)</span>
         </button>
       </div>
 
@@ -441,7 +452,29 @@
       <!-- TAB 3: PILIHAN 6 MINI GAME -->
       <div id="sidebarGamesView" class="hidden flex-1 flex flex-col min-h-0 overflow-y-auto p-3 space-y-2.5">
         <div class="px-1 text-[10px] font-bold uppercase tracking-widest text-lime-300">
-          Arcade Mini Games (6 Game)
+          Arcade Mini Games (8 Game)
+        </div>
+
+        <div onclick="openGameStage('shooter')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-cyan-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">🚀</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Neon Space Shooter</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-bold shrink-0">Baru</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Tembak meteor & UFO alien sebelum menabrak kapalmu!</p>
+          </div>
+        </div>
+
+        <div onclick="openGameStage('guess')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-amber-400/50 transition flex items-center gap-3">
+          <div class="avatar-3d w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0">🖼️</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="text-sm font-bold text-white truncate">Tebak Gambar & Rebus</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold shrink-0">Baru</span>
+            </div>
+            <p class="text-[11px] text-[#b8b2d8] truncate">Tebak gabungan gambar & petunjuk kata seru!</p>
+          </div>
         </div>
 
         <div onclick="openGameStage('snake')" class="glass-3d p-3.5 rounded-2xl cursor-pointer hover:border-cyan-400/50 transition flex items-center gap-3">
@@ -520,7 +553,7 @@
         <div class="avatar-3d w-20 h-20 rounded-3xl flex items-center justify-center mb-4 text-3xl shadow-xl">⚡</div>
         <h3 class="text-xl font-extrabold text-white">ArzChat</h3>
         <p class="text-xs sm:text-sm text-[#b8b2d8] max-w-sm mt-2 leading-relaxed">
-          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau buka tab <span class="text-lime-300 font-semibold">Game (6)</span>.
+          Pilih kontak di sebelah kiri untuk kirim pesan, foto, story, telepon suara, atau buka tab <span class="text-lime-300 font-semibold">Game (8)</span>.
         </p>
       </div>
 
@@ -538,11 +571,18 @@
             </div>
           </div>
 
-          <button onclick="startVoiceCall()" title="Telepon Suara"
-            class="btn-3d-primary px-3.5 py-2 rounded-2xl text-xs flex items-center gap-1.5 cursor-pointer shrink-0">
-            <span>📞</span>
-            <span class="hidden sm:inline">Telepon</span>
-          </button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="startCall('voice')" title="Telepon Suara"
+              class="btn-3d-soft px-3 py-2 rounded-2xl text-xs font-semibold text-cyan-300 flex items-center gap-1.5 cursor-pointer">
+              <span>📞</span>
+              <span class="hidden sm:inline">Suara</span>
+            </button>
+            <button onclick="startCall('video')" title="Video Call"
+              class="btn-3d-primary px-3 py-2 rounded-2xl text-xs flex items-center gap-1.5 cursor-pointer">
+              <span>📹</span>
+              <span class="hidden sm:inline">Video</span>
+            </button>
+          </div>
         </div>
 
         <!-- Daftar Pesan -->
@@ -550,14 +590,6 @@
 
         <!-- Pratinjau Foto -->
         <div id="imagePreviewBar" class="hidden panel-3d px-4 py-2.5 border-t flex items-center justify-between shrink-0">
-
-          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="font-bold text-rose-300">🏆 Top Streak Suit Pengguna ArzChat</span>
-              <span class="text-[10px] text-[#b8b2d8]">Live</span>
-            </div>
-            <div id="lb_rps" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
-          </div>
 
           <div class="flex items-center gap-3">
             <img id="previewThumb" src="" alt="Thumb" class="w-12 h-12 rounded-xl object-cover border border-white/20" />
@@ -617,12 +649,96 @@
             <h3 id="gameStageTitle" class="text-sm font-bold text-white">🐍 Neon Snake</h3>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="openGameStage('shooter')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-cyan-300 font-semibold cursor-pointer">🚀 Tembak</button>
+            <button onclick="openGameStage('guess')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-amber-300 font-semibold cursor-pointer">🖼️ Tebak</button>
             <button onclick="openGameStage('snake')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-lime-300 font-semibold cursor-pointer">🐍 Snake</button>
-            <button onclick="openGameStage('reflex')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-cyan-300 font-semibold cursor-pointer">⚡ Reflex</button>
+            <button onclick="openGameStage('reflex')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-cyan-200 font-semibold cursor-pointer">⚡ Reflex</button>
             <button onclick="openGameStage('tictactoe')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-purple-200 font-semibold cursor-pointer">❌ TTT</button>
-            <button onclick="openGameStage('2048')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-amber-300 font-semibold cursor-pointer">🔢 2048</button>
+            <button onclick="openGameStage('2048')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-orange-300 font-semibold cursor-pointer">🔢 2048</button>
             <button onclick="openGameStage('memory')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-emerald-300 font-semibold cursor-pointer">🃏 Flip</button>
             <button onclick="openGameStage('rps')" class="btn-3d-soft text-[11px] px-2.5 py-1.5 rounded-xl text-rose-300 font-semibold cursor-pointer">✊ Suit</button>
+          </div>
+        </div>
+
+        <!-- GAME 7: NEON SPACE SHOOTER (TEMBAK-TEMBAKAN) -->
+        <div id="shooterGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-3">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-5 text-xs font-bold">
+            <span>Skor: <strong id="shooterScore" class="text-cyan-300 text-sm">0</strong></span>
+            <span>Nyawa: <strong id="shooterLives" class="text-rose-300 text-sm">❤️❤️❤️</strong></span>
+            <span>Rekor: <strong id="shooterBest" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <div class="relative rounded-3xl overflow-hidden border-2 border-cyan-400/40 shadow-2xl bg-[#090514]">
+            <canvas id="shooterCanvas" width="320" height="360" class="block touch-none"></canvas>
+            <div id="shooterOverlay" class="absolute inset-0 bg-[#090514]/85 backdrop-blur-sm flex flex-col items-center justify-center p-4 text-center">
+              <p id="shooterOverlayTitle" class="text-lg font-extrabold text-white mb-1">🚀 Neon Space Shooter</p>
+              <p id="shooterOverlaySub" class="text-xs text-[#b8b2d8] mb-4">Geser pesawat & tembak jatuh UFO / meteor sebelum lolos!</p>
+              <button onclick="startShooterGame()" class="btn-3d-primary px-6 py-2.5 rounded-2xl text-xs cursor-pointer">
+                Mulai Tempur
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 w-full max-w-xs justify-center select-none">
+            <button type="button" onpointerdown="setShooterMove(-1)" onpointerup="setShooterMove(0)" onpointerleave="setShooterMove(0)"
+              class="btn-3d-soft flex-1 h-11 rounded-2xl text-white font-bold text-base cursor-pointer">◀ Kiri</button>
+            <button type="button" onclick="fireShooterLaser()"
+              class="btn-3d-primary flex-1 h-11 rounded-2xl text-xs font-extrabold cursor-pointer">🔥 TEMBAK</button>
+            <button type="button" onpointerdown="setShooterMove(1)" onpointerup="setShooterMove(0)" onpointerleave="setShooterMove(0)"
+              class="btn-3d-soft flex-1 h-11 rounded-2xl text-white font-bold text-base cursor-pointer">Kanan ▶</button>
+          </div>
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-cyan-300">🏆 Top Skor Space Shooter ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_shooter" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
+          </div>
+        </div>
+
+        <!-- GAME 8: TEBAK GAMBAR & REBUS INDONESIA -->
+        <div id="guessGameView" class="hidden flex-1 flex flex-col items-center justify-center p-4 gap-3">
+          <div class="glass-3d px-5 py-2.5 rounded-2xl flex items-center gap-5 text-xs font-bold">
+            <span>Skor: <strong id="guessScore" class="text-amber-300 text-sm">0</strong></span>
+            <span>Soal: <strong id="guessProgress" class="text-cyan-300 text-sm">1/15</strong></span>
+            <span>Streak: <strong id="guessStreak" class="text-lime-300 text-sm">0</strong></span>
+          </div>
+
+          <div class="glass-3d w-full max-w-xs rounded-3xl p-5 text-center space-y-3 border border-amber-400/30">
+            <span id="guessCategoryBadge" class="inline-block text-[10px] uppercase tracking-widest px-3 py-1 rounded-full bg-amber-400/15 text-amber-300 font-bold">
+              Tebak Gabungan Gambar
+            </span>
+            <div id="guessVisualBox" class="bg-[#090514]/80 border border-white/10 rounded-2xl py-5 px-3 flex flex-col items-center justify-center min-h-[116px]">
+              <div id="guessEmojiArt" class="text-4xl sm:text-5xl tracking-wider select-none">👑 + 🦁</div>
+              <p id="guessHintText" class="text-[11px] text-[#b8b2d8] mt-2">Clue: Julukan penguasa hutan rimba</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <input id="guessAnswerInput" type="text" placeholder="Ketik jawabanmu..."
+                onkeydown="if(event.key==='Enter') checkGuessAnswer()"
+                class="flex-1 bg-white/5 border border-white/15 rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-[#b8b2d8]/50 focus:outline-none focus:border-amber-400 uppercase" />
+              <button onclick="checkGuessAnswer()" class="btn-3d-primary px-4 py-2.5 rounded-2xl text-xs cursor-pointer shrink-0">
+                Cek
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1">
+              <button type="button" onclick="revealGuessHint()" class="btn-3d-soft flex-1 py-2 rounded-xl text-[11px] text-cyan-300 font-semibold cursor-pointer">
+                💡 Bantuan Huruf
+              </button>
+              <button type="button" onclick="skipGuessQuestion()" class="btn-3d-soft flex-1 py-2 rounded-xl text-[11px] text-pink-300 font-semibold cursor-pointer">
+                ⏭️ Lewati Soal
+              </button>
+            </div>
+          </div>
+
+          <div class="glass-3d w-full max-w-xs rounded-2xl p-3 text-xs">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="font-bold text-amber-300">🏆 Top Skor Tebak Gambar ArzChat</span>
+              <span class="text-[10px] text-[#b8b2d8]">Live</span>
+            </div>
+            <div id="lb_guess" class="space-y-1 text-[11px] text-[#b8b2d8]">Memuat top skor...</div>
           </div>
         </div>
 
@@ -984,13 +1100,15 @@
     let pendingStoryImage = null;
     let selectedStoryBg = "linear-gradient(135deg, #9333ea 0%, #06b6d4 100%)";
 
-    // State Telepon WebRTC
+    // State Telepon Suara & Video Call WebRTC
     let peerConnection = null;
     let localStream = null;
     let activeCallId = null;
+    let activeCallType = 'voice';
     let incomingCallData = null;
     let pendingIceCandidates = [];
     let isMicMuted = false;
+    let isCameraOff = false;
     let callTimerInterval = null;
     let callSeconds = 0;
 
@@ -1569,23 +1687,61 @@
       }
     }
 
-    async function setupLocalAudioAndPeer(callId) {
+    function applyCallModalModeUI(callType) {
+      const isVideo = callType === 'video';
+      const card = document.getElementById('callCardContainer');
+      const videoWrap = document.getElementById('videoStageWrapper');
+      const avatarWrap = document.getElementById('voiceAvatarWrapper');
+      const badge = document.getElementById('callModeBadge');
+      const camBtn = document.getElementById('btnToggleCamera');
+      const acceptBtn = document.getElementById('btnAcceptCall');
+
+      if (card) {
+        card.className = isVideo
+          ? "glass-3d w-full max-w-md rounded-3xl p-5 text-center flex flex-col items-center relative overflow-hidden"
+          : "glass-3d w-full max-w-sm rounded-3xl p-6 text-center flex flex-col items-center relative overflow-hidden";
+      }
+      if (videoWrap) videoWrap.classList.toggle('hidden', !isVideo);
+      if (avatarWrap) avatarWrap.classList.toggle('hidden', isVideo);
+      if (badge) badge.textContent = isVideo ? "WebRTC Video Call" : "WebRTC Voice Call";
+      if (camBtn) camBtn.classList.toggle('hidden', !isVideo);
+      if (acceptBtn) acceptBtn.textContent = isVideo ? "📹" : "📞";
+    }
+
+    async function setupLocalMediaAndPeer(callId, callType = 'voice') {
       pendingIceCandidates = [];
+      const isVideo = callType === 'video';
       localStream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
         },
-        video: false
+        video: isVideo ? { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } : false
       });
-      peerConnection = new RTCPeerConnection(rtcConfig);
 
+      if (isVideo) {
+        const localVidEl = document.getElementById('localVideo');
+        if (localVidEl) {
+          localVidEl.srcObject = localStream;
+          localVidEl.play().catch(() => {});
+        }
+      }
+
+      peerConnection = new RTCPeerConnection(rtcConfig);
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
       peerConnection.ontrack = (event) => {
         if (event.streams && event.streams[0]) {
-          boostRemoteStreamAudio(event.streams[0]);
+          const remoteStream = event.streams[0];
+          boostRemoteStreamAudio(remoteStream);
+          if (isVideo) {
+            const remoteVidEl = document.getElementById('remoteVideo');
+            if (remoteVidEl) {
+              remoteVidEl.srcObject = remoteStream;
+              remoteVidEl.play().catch(() => {});
+            }
+          }
         }
       };
 
@@ -1655,22 +1811,25 @@
       document.getElementById('callTimerText').classList.add('hidden');
     }
 
-    window.startVoiceCall = async function () {
+    window.startCall = async function (callType = 'voice') {
       if (!activePeer || !currentUser) return;
       try {
         ensureAudioContext();
+        activeCallType = callType === 'video' ? 'video' : 'voice';
+        applyCallModalModeUI(activeCallType);
+
         const callDocRef = doc(collection(db, "calls"));
         activeCallId = callDocRef.id;
 
         document.getElementById('callPeerAvatar').textContent = (activePeer.name || 'U').charAt(0).toUpperCase();
         document.getElementById('callPeerName').textContent = activePeer.name;
-        document.getElementById('callStatusText').textContent = "Memanggil...";
+        document.getElementById('callStatusText').textContent = activeCallType === 'video' ? "Memanggil Video..." : "Memanggil...";
         document.getElementById('incomingCallActions').classList.add('hidden');
         document.getElementById('activeCallActions').classList.remove('hidden');
         document.getElementById('callModal').classList.remove('hidden');
         startRingSound('outgoing');
 
-        await setupLocalAudioAndPeer(activeCallId);
+        await setupLocalMediaAndPeer(activeCallId, activeCallType);
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
 
@@ -1679,6 +1838,7 @@
           callerName: currentUser.name,
           calleeId: normalizePhoneDigits(activePeer.phone || activePeer.uid),
           calleeName: activePeer.name,
+          callType: activeCallType,
           status: "ringing",
           offer: { type: offer.type, sdp: offer.sdp },
           createdAt: serverTimestamp()
@@ -1704,7 +1864,7 @@
         });
       } catch (err) {
         stopRingSound();
-        showToast("Izinkan akses mikrofon terlebih dahulu untuk telepon suara.");
+        showToast(activeCallType === "video" ? "Izinkan akses kamera & mikrofon untuk Video Call." : "Izinkan akses mikrofon untuk telepon suara.");
         cleanupCallUI();
       }
     };
@@ -1722,10 +1882,13 @@
             const calleeDigits = normalizePhoneDigits(data.calleeId);
 
             if (calleeDigits === myDigits && data.status === "ringing" && !activeCallId) {
+              const incomingType = data.callType === 'video' ? 'video' : 'voice';
+              activeCallType = incomingType;
+              applyCallModalModeUI(incomingType);
               incomingCallData = { id: callId, ...data };
               document.getElementById('callPeerAvatar').textContent = (data.callerName || 'U').charAt(0).toUpperCase();
               document.getElementById('callPeerName').textContent = data.callerName || "Pengguna";
-              document.getElementById('callStatusText').textContent = "Panggilan suara masuk...";
+              document.getElementById('callStatusText').textContent = incomingType === 'video' ? "Video Call masuk..." : "Panggilan suara masuk...";
               document.getElementById('incomingCallActions').classList.remove('hidden');
               document.getElementById('activeCallActions').classList.add('hidden');
               document.getElementById('callModal').classList.remove('hidden');
@@ -1755,13 +1918,15 @@
       try {
         ensureAudioContext();
         activeCallId = incomingCallData.id;
+        activeCallType = incomingCallData.callType === 'video' ? 'video' : 'voice';
+        applyCallModalModeUI(activeCallType);
         const callDocRef = doc(db, "calls", activeCallId);
 
         document.getElementById('incomingCallActions').classList.add('hidden');
         document.getElementById('activeCallActions').classList.remove('hidden');
-        document.getElementById('callStatusText').textContent = "Menghubungkan suara...";
+        document.getElementById('callStatusText').textContent = activeCallType === 'video' ? "Menghubungkan video..." : "Menghubungkan suara...";
 
-        await setupLocalAudioAndPeer(activeCallId);
+        await setupLocalMediaAndPeer(activeCallId, activeCallType);
         await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
         await flushPendingIceCandidates();
 
@@ -1810,6 +1975,13 @@
       document.getElementById('btnToggleMute').textContent = isMicMuted ? "🔇 Mic Off" : "🎙️ Mic On";
     };
 
+    window.toggleCameraCall = function () {
+      if (!localStream) return;
+      isCameraOff = !isCameraOff;
+      localStream.getVideoTracks().forEach(t => { t.enabled = !isCameraOff; });
+      document.getElementById('btnToggleCamera').textContent = isCameraOff ? "🚫 Cam Off" : "📹 Cam On";
+    };
+
     window.hangupCall = async function (notifyRemote = true) {
       stopRingSound();
       if (notifyRemote && activeCallId) {
@@ -1824,8 +1996,16 @@
       stopRingSound();
       stopCallTimer();
       isMicMuted = false;
+      isCameraOff = false;
+      activeCallType = 'voice';
       pendingIceCandidates = [];
       document.getElementById('btnToggleMute').textContent = "🎙️ Mic On";
+      document.getElementById('btnToggleCamera').textContent = "📹 Cam On";
+      document.getElementById('btnToggleCamera').classList.add('hidden');
+      const localVidEl = document.getElementById('localVideo');
+      const remoteVidEl = document.getElementById('remoteVideo');
+      if (localVidEl) localVidEl.srcObject = null;
+      if (remoteVidEl) remoteVidEl.srcObject = null;
       document.getElementById('callModal').classList.add('hidden');
 
       if (unsubscribeIncomingCallStatus) { unsubscribeIncomingCallStatus(); unsubscribeIncomingCallStatus = null; }
@@ -1854,6 +2034,7 @@
     function openChatWith(peer) {
       stopSnakeLoop();
       stopReflexLoop();
+      stopShooterLoop();
       activePeer = peer;
       const peerDigits = normalizePhoneDigits(peer.phone || peer.uid);
       unreadByPeer[peerDigits] = 0;
@@ -1915,6 +2096,7 @@
     window.backToSidebar = function () {
       stopSnakeLoop();
       stopReflexLoop();
+      stopShooterLoop();
       activePeer = null;
       renderUserList();
       document.getElementById('chatPanel').classList.add('hidden');
@@ -1979,6 +2161,7 @@
     window.openGameStage = function (gameName) {
       stopSnakeLoop();
       stopReflexLoop();
+      stopShooterLoop();
       activePeer = null;
       renderUserList();
 
@@ -1992,6 +2175,8 @@
         document.getElementById('chatPanel').classList.add('flex');
       }
 
+      document.getElementById('shooterGameView').classList.toggle('hidden', gameName !== 'shooter');
+      document.getElementById('guessGameView').classList.toggle('hidden', gameName !== 'guess');
       document.getElementById('snakeGameView').classList.toggle('hidden', gameName !== 'snake');
       document.getElementById('reflexGameView').classList.toggle('hidden', gameName !== 'reflex');
       document.getElementById('tttGameView').classList.toggle('hidden', gameName !== 'tictactoe');
@@ -1999,7 +2184,14 @@
       document.getElementById('memoryGameView').classList.toggle('hidden', gameName !== 'memory');
       document.getElementById('rpsGameView').classList.toggle('hidden', gameName !== 'rps');
 
-      if (gameName === 'snake') {
+      if (gameName === 'shooter') {
+        document.getElementById('gameStageTitle').textContent = "🚀 Neon Space Shooter";
+        document.getElementById('shooterBest').textContent = localStorage.getItem('arzchat_shooter_best') || '0';
+        drawShooterIdle();
+      } else if (gameName === 'guess') {
+        document.getElementById('gameStageTitle').textContent = "🖼️ Tebak Gambar & Rebus";
+        initGuessGame();
+      } else if (gameName === 'snake') {
         document.getElementById('gameStageTitle').textContent = "🐍 Neon Snake";
         document.getElementById('snakeHighScore').textContent = localStorage.getItem('arzchat_snake_best') || '0';
         drawSnakeFrame();
@@ -2462,10 +2654,309 @@
     };
 
 
+    // ================= GAME 7: NEON SPACE SHOOTER (TEMBAK-TEMBAKAN) =================
+    let shooterRaf = null;
+    let shooterRunning = false;
+    let shooterShipX = 160;
+    let shooterMoveDir = 0;
+    let shooterBullets = [];
+    let shooterEnemies = [];
+    let shooterScoreVal = 0;
+    let shooterLivesVal = 3;
+    let shooterFrameTick = 0;
+    let shooterAutoFireTick = 0;
+
+    function stopShooterLoop() {
+      shooterRunning = false;
+      if (shooterRaf) {
+        cancelAnimationFrame(shooterRaf);
+        shooterRaf = null;
+      }
+    }
+
+    window.setShooterMove = function (dir) {
+      shooterMoveDir = dir;
+    };
+
+    window.fireShooterLaser = function () {
+      if (!shooterRunning) return;
+      shooterBullets.push({ x: shooterShipX, y: 312, vy: -7 });
+    };
+
+    function drawShooterIdle() {
+      const canvas = document.getElementById('shooterCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#090514';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath();
+      ctx.moveTo(160, 305);
+      ctx.lineTo(142, 338);
+      ctx.lineTo(178, 338);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    window.startShooterGame = function () {
+      stopShooterLoop();
+      shooterShipX = 160;
+      shooterMoveDir = 0;
+      shooterBullets = [];
+      shooterEnemies = [];
+      shooterScoreVal = 0;
+      shooterLivesVal = 3;
+      shooterFrameTick = 0;
+      shooterAutoFireTick = 0;
+      shooterRunning = true;
+
+      document.getElementById('shooterScore').textContent = '0';
+      document.getElementById('shooterLives').textContent = '❤️❤️❤️';
+      document.getElementById('shooterOverlay').classList.add('hidden');
+      shooterLoop();
+    };
+
+    function shooterLoop() {
+      if (!shooterRunning) return;
+      const canvas = document.getElementById('shooterCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      shooterFrameTick++;
+      shooterAutoFireTick++;
+
+      // Gerak kapal
+      shooterShipX += shooterMoveDir * 4.5;
+      shooterShipX = Math.max(22, Math.min(canvas.width - 22, shooterShipX));
+
+      // Auto-fire lembut setiap 16 frame agar nyaman dimainkan di HP maupun PC
+      if (shooterAutoFireTick >= 16) {
+        shooterAutoFireTick = 0;
+        shooterBullets.push({ x: shooterShipX, y: 310, vy: -7.5 });
+      }
+
+      // Spawn musuh UFO / Meteor
+      const spawnRate = Math.max(24, 56 - Math.floor(shooterScoreVal / 40));
+      if (shooterFrameTick % spawnRate === 0) {
+        const isUfo = Math.random() < 0.45;
+        shooterEnemies.push({
+          x: 24 + Math.random() * (canvas.width - 48),
+          y: -20,
+          r: isUfo ? 16 : 14,
+          vy: (isUfo ? 2.1 : 1.7) + Math.min(2.6, shooterScoreVal / 250),
+          type: isUfo ? '🛸' : '☄️',
+          pts: isUfo ? 20 : 10
+        });
+      }
+
+      // Update peluru
+      shooterBullets.forEach(b => { b.y += b.vy; });
+      shooterBullets = shooterBullets.filter(b => b.y > -12);
+
+      // Update musuh & cek tabrakan
+      for (let i = shooterEnemies.length - 1; i >= 0; i--) {
+        const en = shooterEnemies[i];
+        en.y += en.vy;
+
+        // Cek kena peluru
+        let hit = false;
+        for (let j = shooterBullets.length - 1; j >= 0; j--) {
+          const b = shooterBullets[j];
+          if (Math.hypot(b.x - en.x, b.y - en.y) < en.r + 6) {
+            shooterBullets.splice(j, 1);
+            shooterEnemies.splice(i, 1);
+            shooterScoreVal += en.pts;
+            document.getElementById('shooterScore').textContent = String(shooterScoreVal);
+            hit = true;
+            break;
+          }
+        }
+        if (hit) continue;
+
+        // Cek lolos ke bawah atau tabrak kapal
+        const hitShip = Math.hypot(en.x - shooterShipX, en.y - 325) < en.r + 14;
+        if (hitShip || en.y > canvas.height + 10) {
+          shooterEnemies.splice(i, 1);
+          shooterLivesVal--;
+          document.getElementById('shooterLives').textContent = shooterLivesVal > 0 ? '❤️'.repeat(shooterLivesVal) : '💀';
+          if (shooterLivesVal <= 0) {
+            stopShooterLoop();
+            const best = Number(localStorage.getItem('arzchat_shooter_best') || '0');
+            if (shooterScoreVal > best) {
+              localStorage.setItem('arzchat_shooter_best', String(shooterScoreVal));
+              document.getElementById('shooterBest').textContent = String(shooterScoreVal);
+            }
+            submitGameScoreToFirebase('shooter', shooterScoreVal, 'desc');
+            document.getElementById('shooterOverlayTitle').textContent = "💥 Kapal Hancur!";
+            document.getElementById('shooterOverlaySub').textContent = `Skor akhir: ${shooterScoreVal} poin`;
+            document.getElementById('shooterOverlay').classList.remove('hidden');
+            return;
+          }
+        }
+      }
+
+      // Render Canvas
+      ctx.fillStyle = '#090514';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Bintang latar
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      for (let s = 0; s < 18; s++) {
+        const sx = (s * 53 + shooterFrameTick) % canvas.width;
+        const sy = (s * 71 + shooterFrameTick * 2) % canvas.height;
+        ctx.fillRect(sx, sy, 2, 2);
+      }
+
+      // Peluru laser neon
+      shooterBullets.forEach(b => {
+        ctx.fillStyle = '#a3e635';
+        ctx.shadowColor = '#a3e635';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(b.x - 2, b.y - 8, 4, 14);
+        ctx.shadowBlur = 0;
+      });
+
+      // Musuh UFO / Meteor
+      ctx.font = '24px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      shooterEnemies.forEach(en => {
+        ctx.fillText(en.type, en.x, en.y);
+      });
+
+      // Pesawat Pemain
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath();
+      ctx.moveTo(shooterShipX, 305);
+      ctx.lineTo(shooterShipX - 18, 338);
+      ctx.lineTo(shooterShipX, 331);
+      ctx.lineTo(shooterShipX + 18, 338);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(shooterShipX, 323, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      shooterRaf = requestAnimationFrame(shooterLoop);
+    }
+
+    // Touch / Mouse drag di canvas shooter
+    const shooterCanvasEl = document.getElementById('shooterCanvas');
+    if (shooterCanvasEl) {
+      const moveShipFromClientX = (clientX) => {
+        if (!shooterRunning) return;
+        const rect = shooterCanvasEl.getBoundingClientRect();
+        const relX = ((clientX - rect.left) / rect.width) * shooterCanvasEl.width;
+        shooterShipX = Math.max(22, Math.min(shooterCanvasEl.width - 22, relX));
+      };
+      shooterCanvasEl.addEventListener('pointermove', (e) => {
+        if (e.buttons > 0 || e.pointerType === 'touch') moveShipFromClientX(e.clientX);
+      });
+      shooterCanvasEl.addEventListener('pointerdown', (e) => {
+        moveShipFromClientX(e.clientX);
+        fireShooterLaser();
+      });
+    }
+
+    // ================= GAME 8: TEBAK GAMBAR & REBUS INDONESIA =================
+    const guessBank = [
+      { art: "👑 + 🦁", cat: "Tebak Tokoh / Julukan", hint: "Julukan penguasa hutan rimba", answer: "RAJA HUTAN" },
+      { art: "👀 + 🐄", cat: "Tebak Benda", hint: "Telur goreng yang kuningnya utuh di tengah", answer: "MATA SAPI" },
+      { art: "🍎 + 🍍 + 🖊️", cat: "Tebak Lagu Viral", hint: "Lagu komedi Jepang yang sempat viral", answer: "PPAP" },
+      { art: "🏠 + 🤒", cat: "Tebak Tempat", hint: "Tempat berobat dan rawat inap", answer: "RUMAH SAKIT" },
+      { art: "🐴 + 🦓", cat: "Tebak Lalu Lintas", hint: "Garis putih tempat pejalan kaki menyeberang", answer: "ZEBRA CROSS" },
+      { art: "🌙 + 🍯", cat: "Tebak Momen", hint: "Liburan pasangan pengantin baru", answer: "BULAN MADU" },
+      { art: "🐍 + 🪜", cat: "Tebak Permainan", hint: "Permainan papan klasik pakai dadu", answer: "ULAR TANGGA" },
+      { art: "🔥 + ❄️", cat: "Tebak Sifat", hint: "Suhu bertolak belakang", answer: "PANAS DINGIN" },
+      { art: "🦷 + 🐰", cat: "Tebak Ciri Fisik", hint: "Dua gigi depan yang menonjol lucu", answer: "GIGI KELINCI" },
+      { art: "🐭 + 💻", cat: "Tebak Perangkat PC", hint: "Alat klik kursor di komputer", answer: "MOUSE KOMPUTER" },
+      { art: "👣 + 5️⃣", cat: "Tebak Tempat", hint: "Pedagang gerobak di pinggir trotoar", answer: "KAKI LIMA" },
+      { art: "🍌 + 🍫 + 🧀", cat: "Tebak Jajanan", hint: "Jajanan pisang bakar/goreng lumer", answer: "PISANG COKLAT KEJU" },
+      { art: "🌊 + 🌪️", cat: "Tebak Fenomena", hint: "Pusaran air raksasa di laut", answer: "BADAI LAUT" },
+      { art: "❤️ + 🪨", cat: "Tebak Ungkapan", hint: "Orang yang sangat keras kepala / tidak berperasaan", answer: "HATI BATU" },
+      { art: "🧠 + 💧", cat: "Tebak Ungkapan", hint: "Sangat cerdas dan jernih berpikir", answer: "OTAK ENCER" }
+    ];
+
+    let guessQueue = [];
+    let guessIndex = 0;
+    let guessScoreVal = 0;
+    let guessStreakVal = 0;
+    let guessHintUsed = false;
+
+    window.initGuessGame = function () {
+      guessQueue = [...guessBank].sort(() => Math.random() - 0.5);
+      guessIndex = 0;
+      guessScoreVal = 0;
+      guessStreakVal = 0;
+      document.getElementById('guessScore').textContent = '0';
+      document.getElementById('guessStreak').textContent = '0';
+      renderGuessQuestion();
+    };
+
+    function renderGuessQuestion() {
+      if (guessIndex >= guessQueue.length) {
+        showToast(`🎉 Selesai semua soal! Skor akhir Tebak Gambar: ${guessScoreVal}`);
+        submitGameScoreToFirebase('guess', guessScoreVal, 'desc');
+        guessIndex = 0;
+        guessQueue = [...guessBank].sort(() => Math.random() - 0.5);
+      }
+      const q = guessQueue[guessIndex];
+      guessHintUsed = false;
+      document.getElementById('guessProgress').textContent = `${guessIndex + 1}/${guessQueue.length}`;
+      document.getElementById('guessCategoryBadge').textContent = q.cat;
+      document.getElementById('guessEmojiArt').textContent = q.art;
+      document.getElementById('guessHintText').textContent = `Clue: ${q.hint}`;
+      document.getElementById('guessAnswerInput').value = '';
+    }
+
+    window.revealGuessHint = function () {
+      const q = guessQueue[guessIndex];
+      if (!q) return;
+      guessHintUsed = true;
+      const masked = q.answer.split(' ').map(w => w[0] + '_'.repeat(Math.max(1, w.length - 1))).join(' ');
+      document.getElementById('guessHintText').textContent = `Clue: ${q.hint} • Pola: ${masked}`;
+    };
+
+    window.skipGuessQuestion = function () {
+      const q = guessQueue[guessIndex];
+      guessStreakVal = 0;
+      document.getElementById('guessStreak').textContent = '0';
+      showToast(`Jawaban soal tadi: ${q.answer}`);
+      guessIndex++;
+      renderGuessQuestion();
+    };
+
+    window.checkGuessAnswer = function () {
+      const q = guessQueue[guessIndex];
+      if (!q) return;
+      const userAns = (document.getElementById('guessAnswerInput').value || '').trim().toUpperCase().replace(/\s+/g, ' ');
+      if (!userAns) return;
+
+      if (userAns === q.answer) {
+        const gained = guessHintUsed ? 10 : 20;
+        guessScoreVal += gained;
+        guessStreakVal++;
+        document.getElementById('guessScore').textContent = String(guessScoreVal);
+        document.getElementById('guessStreak').textContent = String(guessStreakVal);
+        submitGameScoreToFirebase('guess', guessScoreVal, 'desc');
+        showToast(`✅ Benar! +${gained} poin`);
+        guessIndex++;
+        renderGuessQuestion();
+      } else {
+        guessStreakVal = 0;
+        document.getElementById('guessStreak').textContent = '0';
+        showToast("❌ Belum tepat, coba tebak lagi!");
+      }
+    };
+
     // ================= TOP SKOR REAL-TIME ANTAR PENGGUNA ARZCHAT =================
     let unsubscribeLeaderboard = null;
     let leaderboardRows = [];
     let bestScoresCache = {
+      shooter: 0,
+      guess: 0,
       snake: 0,
       reflex: 0,
       tictactoe: 0,
@@ -2521,6 +3012,8 @@
     }
 
     function renderAllLeaderboards() {
+      renderLeaderboardForGame('shooter', 'lb_shooter', 'desc', 'pts');
+      renderLeaderboardForGame('guess', 'lb_guess', 'desc', 'pts');
       renderLeaderboardForGame('snake', 'lb_snake', 'desc', 'pts');
       renderLeaderboardForGame('reflex', 'lb_reflex', 'desc', 'tap');
       renderLeaderboardForGame('tictactoe', 'lb_tictactoe', 'desc', 'win');
@@ -2563,7 +3056,11 @@
 
     // ================= KEYBOARD CONTROLS FOR SNAKE & 2048 =================
     window.addEventListener('keydown', (e) => {
-      if (!document.getElementById('snakeGameView').classList.contains('hidden')) {
+      if (!document.getElementById('shooterGameView').classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft' || e.key === 'a') setShooterMove(-1);
+        else if (e.key === 'ArrowRight' || e.key === 'd') setShooterMove(1);
+        else if (e.key === ' ') { e.preventDefault(); fireShooterLaser(); }
+      } else if (!document.getElementById('snakeGameView').classList.contains('hidden')) {
         if (e.key === 'ArrowUp' || e.key === 'w') setSnakeDir(0, -1);
         else if (e.key === 'ArrowDown' || e.key === 's') setSnakeDir(0, 1);
         else if (e.key === 'ArrowLeft' || e.key === 'a') setSnakeDir(-1, 0);
@@ -2586,6 +3083,7 @@
     window.logoutUser = async function () {
       stopSnakeLoop();
       stopReflexLoop();
+      stopShooterLoop();
       clearRoomListeners();
       await hangupCall(false);
       localStorage.removeItem('arzchat_session');
